@@ -222,9 +222,9 @@ def delete_paragraph(paragraph):
 
 def updateDOC(reqs,resps,details,file,name):
     templates = {
-    "RFA":"Response to RFA.docx",
-    "RFP":"Response to RFP.docx",
-    "SPROG":"Response to SROG.docx"
+    "RFA":"assets/Response to RFA.docx",
+    "RFP":"assets/Response to RFP.docx",
+    "SPROG":"assets/Response to SROG.docx"
     }
     #Loading template file
     file=templates[file]
@@ -251,6 +251,7 @@ def updateDOC(reqs,resps,details,file,name):
         text=text.replace("PLAINTIFFX",details["plaintiff"])
         text=text.replace("DEFENDANTX",details["defendant"])
         p.text = text
+
     for p in table[1].paragraphs:
         text = str(p.text)
         if "CASE NUMBERX" in text:
@@ -260,7 +261,7 @@ def updateDOC(reqs,resps,details,file,name):
             run.bold=True
         elif "DOCUMENTX" in text:
             p.text=""
-            run = p.add_run(str(details["document"]))
+            run = p.add_run("PLAINTIFF’S RESPONSES TO "+str(details["document"]))
             run.bold=True
         #text=text.replace("DOCUMENTX",details["document"])
         #p.text = text 
@@ -306,24 +307,3 @@ def updateDOC(reqs,resps,details,file,name):
 
     doc.save(str(name)+".docx")
 
-
-
-
-
-file="REQ FOR ADM (Set One) v.1.pdf"
-file = "SI#1 TO LINDA.pdf"
-
-if __name__ == "__main__":
-    data = readPDF3(file)
-
-    requests,req_type = filterPDF(data)
-
-    #updateDOC(requests,requests,req_type,"new")
-
-
-#Identify:
-
-#Name Of County
-#Defendant
-#Plaintiff
-#Document

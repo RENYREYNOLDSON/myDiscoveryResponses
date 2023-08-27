@@ -1,58 +1,9 @@
-import customtkinter as tk
 
 
-# CUSTOM TKINTER FRAME CLASSES
-############################################################################################################
-
-# Contains details data
-class Detail(tk.CTk):
-    def __init__(self,master):
-        #CREATING THE CUSTOM TKINTER WINDOW
-        super().__init__()
-        self.master=master
-        self.geometry("400x500")
-        self.title("Document Details")
-        self.resizable(False,False)
-        self.grid_columnconfigure((0,1),weight=1)
-        #County
-        county = tk.CTkLabel(master=self,text="County")
-        county.grid(row=0,column=0,padx=20,sticky="w")
-        self.county = tk.CTkTextbox(master=self,height=60,wrap="word")
-        self.county.grid(row=1,column=0,padx=30,columnspan=2,sticky="ew")
-        self.county.insert("0.0",self.master.doc_details["county"])
-        #Case Number
-        case = tk.CTkLabel(master=self,text="Case Number")
-        case.grid(row=2,column=0,padx=20,sticky="w")
-        self.case = tk.CTkTextbox(master=self,height=60,wrap="word")
-        self.case.grid(row=3,column=0,padx=30,columnspan=2,sticky="ew")
-        self.case.insert("0.0",self.master.doc_details["case_number"])
-        #Document
-        document = tk.CTkLabel(master=self,text="Document Name")
-        document.grid(row=4,column=0,padx=20,sticky="w")
-        self.document = tk.CTkTextbox(master=self,height=60,wrap="word")
-        self.document.grid(row=5,column=0,padx=30,columnspan=2,sticky="ew")
-        self.document.insert("0.0",self.master.doc_details["document"])
-        #Plaintiff
-        plaintiff = tk.CTkLabel(master=self,text="Plaintiff")
-        plaintiff.grid(row=6,column=0,padx=20,sticky="w")
-        self.plaintiff = tk.CTkTextbox(master=self,height=60,wrap="word")
-        self.plaintiff.grid(row=7,column=0,padx=30,columnspan=2,sticky="ew")
-        self.plaintiff.insert("0.0",self.master.doc_details["plaintiff"])
-        #Defendant
-        defendant = tk.CTkLabel(master=self,text="Defendant")
-        defendant.grid(row=8,column=0,padx=20,sticky="w")
-        self.defendant = tk.CTkTextbox(master=self,height=60,wrap="word")
-        self.defendant.grid(row=9,column=0,padx=30,columnspan=2,sticky="ew")
-        self.defendant.insert("0.0",self.master.doc_details["defendant"])
-
-        #Cancel Button
-        self.cancel_button = tk.CTkButton(master=self,text="Cancel",command=self.master.cancel_win)#Just simply close
-        self.cancel_button.grid(row=10,column=0,pady=20)
-
-        #Submit Button
-        self.submit_button = tk.CTkButton(master=self,text="Save",command=self.master.save_win)#Save and close
-        self.submit_button.grid(row=10,column=1,pady=20)
-
+RFP_responses={"Available":"Responding Party will comply with this demand. Please see “[VAR]” produced concurrently herewith.",
+                    "Not Exist":"After a diligent search and reasonable inquiry, Responding Party finds no responsive documents in their possession, custody, or control, because no such documents are known to exist.",
+                    "Not Possessed":"After a diligent search and reasonable inquiry, Responding Party finds no responsive documents in their possession, custody, or control, because no such documents have ever been in the possession, custody, or control of Responding Party.",
+                    "Lost":"After a diligent search and reasonable inquiry, Responding Party finds no responsive documents in their possession, custody, or control, any such documents have been destroyed, lost, misplaced or stolen."}
 
 # NORMAL CLASSES
 ############################################################################################################
@@ -66,6 +17,8 @@ class File:
         self.reqs = reqs
         self.current_req = reqs[0]
         self.master=master
+        self.color=("black","white")
+        self.save=""
     def set(self):
         self.master.set_file(self)
     def set_master(self,val):#Remove master from all of the sub objects etc
@@ -78,7 +31,7 @@ class File:
 
 # Class for each request/response
 class Request:
-    def __init__(self,req,resp,no,master):
+    def __init__(self,req,resp,no,master,req_type,custom_key=""):
         self.req=req
         self.resp=resp
         self.no=no
@@ -87,12 +40,60 @@ class Request:
         self.master=master
         for i in self.master.objections_frame.options:
             self.opts.append(Objection(i,master))
-        self.color="white"
+        self.color=("black","white")
         self.RFP_option="Available"
         self.RFP_text=""
-
+        self.auto_obj()
+        self.req_type=req_type
+        self.custom_key = custom_key
+    #Fill objections automatically using saved answers
+    def auto_obj(self):
+        for obj in self.master.auto_objections:
+            added=0
+            for word in self.master.auto_objections[obj]:
+                if word in self.req:
+                    self.add_param(obj,word)#Add param to the params
+                    added+=1
+            if added>1:#Set final , to and
+                for i in self.opts:
+                    if i.key==obj:
+                        i.param = ", and ".join(i.param.rsplit(", ", 1))#Add the AND
+    #Add a parameter to the string
+    def add_param(self,obj,param):
+        for i in self.opts:
+            if i.key==obj:
+                if i.param=="":
+                    self.check_off(obj)
+                    i.param = "as to ‘"+param+"’"
+                    return
+                i.param=i.param+", ‘"+param+"’"
+                return
+    #Set self as the current request
     def set(self):
         self.master.set_request(self)
+    #Check off an objection
+    def check_off(self,obj):
+        for i in self.opts:
+            if i.key==obj:
+                i.selected=1
+                return
+    #Get full response text
+    def get_full_resp(self):
+        full_text = self.master.get_objections(self.opts,False)
+        #Add response to the end
+        if self.req_type == "RFP":
+            option = self.RFP_option
+            txt = self.RFP_text
+            extra = " Any responsive documents are believed to be in the possession, custody, or control of [VAR]."
+            end = RFP_responses[option].replace("[VAR]",self.RFP_text)
+            if option!="Available" and self.RFP_text!="":
+                end = (end+extra).replace("[VAR]",self.RFP_text)
+        else:
+            end = self.master.response_frame.response_text.get("0.0","end")
+            print("ye")
+        full_text = full_text+end
+        return full_text
+
 
 # Class for each objection for each response
 class Objection:
@@ -104,4 +105,12 @@ class Objection:
             self.text=key
         self.selected=0
         self.param=""
+
+class Save:
+    def __init__(self,files):
+        self.files = files
+
+
+
+    
 

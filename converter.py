@@ -1,3 +1,14 @@
+###### CONVERTER
+###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023
+######
+###### Code for reading/saving the 'Discovery Responses'
+######
+
+
+### FUNCTIONS
+########################################################################################################
+
+from functions import *
 import PyPDF2 as pdf
 import re
 from docx import Document
@@ -11,13 +22,9 @@ from boxdetect import config
 from boxdetect.pipelines import get_boxes
 import cv2
 
-#CONVERTER PROGRAM FOR THE DISCOVERY REQUESTS PROGRAM
 
-#Types of discovery requests
-#SPECIAL INTERROGATORY
-#REQUEST FOR ADMISSIONS
-#REQUEST FOR PRODUCTION OF DOCUMENTS / DEMAND FOR PRODUCTION OF DOCUMENTS
-#FORM INTERROGATORIES
+### CONSTANTS
+########################################################################################################
 
 FORM_VALUES = ["(1)","(2)",'1.1', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.9', '2.10', '2.11', '2.12', '2.13', '3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7', '4.1', '4.2', '6.1', '6.2', '6.3', '6.4', '6.5', '6.6', '6.7', '7.1', '7.2', '7.3', '8.1', '8.2', '8.3', '8.4', '8.5', '8.6', '8.7', '8.8', '9.1', '9.2', '10.1', '10.2', '10.3', '11.1', '11.2', '12.1', '12.2', '12.3', '12.4', '12.5', '12.6', '12.7', '13.1', '13.2', '14.1', '14.2', '15.1', '16.1', '16.2', '16.3', '16.4', '16.5', '16.6', '16.7', '16.8', '16.9','16.10', '17.1', '20.1', '20.2', '20.3', '20.4', '20.5', '20.6', '20.7', '20.8', '20.9','20.10', '20.11', '50.1', '50.2', '50.3', '50.4', '50.5', '50.6']
 
@@ -40,19 +47,14 @@ def insert_paragraph_after(paragraph, text=None, style=None):
 # Deletes a paragraph
 def delete_paragraph(paragraph):
     p = paragraph._element
-    p.getparent().remove(p)
-    paragraph._p = paragraph._element = None
+    if p!=None:
+        p.getparent().remove(p)
+        paragraph._p = paragraph._element = None
 
 
 
-
-
-
-
-
-
-
-
+### READ THE PDF
+########################################################################################################
 
 #Reads a pdf use pdfreader
 def readPDF(file):
@@ -83,15 +85,74 @@ def readPDF3(file):
 
 
 
+### READ FROGs FORM
+########################################################################################################
+def readForm(file):
+    cfg = config.PipelinesConfig()
+    # important to adjust these values to match the size of boxes on your image
+    cfg.width_range = (10,30)
+    cfg.height_range = (10,30)
+    # the more scaling factors the more accurate the results but also it takes more time to processing
+    # too small scaling factor may cause false positives
+    # too big scaling factor will take a lot of processing time
+    cfg.scaling_factors = [1.3]
+    # w/h ratio range for boxes/rectangles filtering
+    cfg.wh_ratio_range = (0.3, 2)
+    # group_size_range starting from 2 will skip all the groups
+    # with a single box detected inside (like checkboxes)
+    cfg.group_size_range = (1, 1)
+    # num of iterations when running dilation tranformation (to engance the image)
+    cfg.dilation_iterations = 0
+
+    results=[]
+    vals=[]
+    f = fitz.open(file)
+    for page in f:
+        img = page.get_pixmap()
+        img.save("out.png")
+        #SPLIT INTO COLUMNS
+        img = cv2.imread("out.png")
+        height = img.shape[0]
+        width = img.shape[1]
+
+        # Cut the image in half
+        width_cutoff = width // 2
+        s1 = img[:, :width_cutoff]
+        s2 = img[:, width_cutoff:]
+
+        cv2.imwrite("assets/s1.png", s1)
+        cv2.imwrite("assets/s2.png", s2)
+
+        checkboxes1 = get_checkboxes("assets/s1.png", cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+        checkboxes2 = get_checkboxes("assets/s2.png", cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+        for checkboxes in [checkboxes1,checkboxes2]:
+            #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
+            for check in checkboxes:
+                #Get array
+                array = check[2]
+                total=0
+                for row in array[1:-1]:
+                    total+=sum(row[1:-1])/len(row[1:-1])
+                total = total/len(array[1:-1])
+                vals.append(total)
+                if total>=20:
+                    results.append(True)
+                else:
+                    results.append(False)
+    output=[]
+    print(len(results))
+    print(len(FORM_VALUES))
+    for i in range(len(FORM_VALUES)):
+        if results[i]==True:
+            output.append(FORM_VALUES[i])
+    return output
 
 
 
 
 
-
-
-
-
+### FILTER THROUGH THE PDF
+########################################################################################################
 # Get requests and details from a pdf text string
 def filterPDF(data):
     #Search Terms
@@ -155,7 +216,6 @@ def filterPDF(data):
                         defendant = defendant + split[i+c]
                     c+=1
 
-
         #Clean Plaintiff and defendant
         plaintiff = plaintiff.upper().replace("DEFENDANT","").replace("(S)","")
         done = False
@@ -178,12 +238,7 @@ def filterPDF(data):
         plaintiff = defendant
         defendant = temp
 
-
-
         #GET REQUESTS!!!!!!!!!!!!!!!!!!!!
-            
-        # Get main data here
-
 
         if any(t in split[i].replace(" ","") for t in terms):# If request term used
             adding=True
@@ -237,32 +292,21 @@ def filterPDF(data):
     return reqs,req_type,details
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+### COMBINE ALL INTO GETREQUESTS
+########################################################################################################
 # Get the requests and filter
 def getRequests(file):
     #If a form interrogatory
     data = readPDF3(file)
     backup_data = readPDF(file)
-    if "FORMINTERROGATORIES" in data.replace(" ","")[:5000]:
+    if "DISC-001" in data.replace(" ","")[:5000]:
         reqs = readForm(file)
         reqs_type = "FROG"
-        details = None
+        details = {"case_number":"",
+                    "document":"",
+                    "county":"",
+                    "plaintiff":"",
+                    "defendant":""}
     else:
         reqs,reqs_type,details = filterPDF(data)
         breqs,breqs_type,bdetails = filterPDF(backup_data)
@@ -272,20 +316,29 @@ def getRequests(file):
     return reqs,reqs_type,details
 
 
+### UPLOAD THE DOCS
+########################################################################################################
 # Save requests, responses and details to a word DOCX
-def updateDOC(reqs,resps,details,file,name):
+def updateDOC(reqs,resps,details,file,name,numbers):
     templates = {
     "RFA":"assets/Response to RFA.docx",
     "RFP":"assets/Response to RFP.docx",
-    "SPROG":"assets/Response to SROG.docx"
+    "SPROG":"assets/Response to SROG.docx",
+    "FROG":"assets/Response to FROG2.docx"
     }
     #Loading template file
     file=templates[file]
     doc = Document(file)
     #Normal Style
-    style = doc.styles['Normal']
-    font = style.font
-    font.size = Pt(12)
+    if "FROG" in file:
+        style = doc.styles["Normal"]
+        font = style.font
+        font.name = "Times New Roman"
+        font.size = Pt(12)
+    else:
+        style = doc.styles['Normal']
+        font = style.font
+        font.size = Pt(12)
     # 1. ADD THE DETAILS
 
     #FOOTER
@@ -325,87 +378,48 @@ def updateDOC(reqs,resps,details,file,name):
             run = p.add_run(text.replace("NAME OF COUNTYX",details["county"]))
             run.bold=True
 
+
     # 2. ADD THE REQUEST RESPONSES
-    counter=0
-    for p in doc.paragraphs:
-        if "NO. " in p.text:
-            if counter<len(reqs):
-                if "RESPONSE" not in p.text:
-                    insert_paragraph_after(p,"           "+reqs[counter],"Normal")
-                else:
-                    insert_paragraph_after(p,"           "+resps[counter],"Normal")
+    if "FROG" in file:# Use the 'numbers' list for this
+        add_next = False
+        counter=0
+        for p in doc.paragraphs:
+            if "NO. " in p.text:
+                if counter<len(numbers):#If still valid
+                    if str(numbers[counter]) in p.text:
+                        insert_paragraph_after(p,"           "+reqs[counter],"Normal")#Add req
+                        add_next = True
+                    else:
+                        delete_paragraph(p)
+                else:#If finished
+                    delete_paragraph(p)
+            elif "RESPONSE:" in p.text:
+                if add_next:#Add new para
+                    insert_paragraph_after(p,"           "+resps[counter],"Normal")#Add req
                     counter+=1
-            else:
-                #Destroy para
-                if "RESPONSE" not in p.text:
-                    delete_paragraph(prev_p)
-                delete_paragraph(p)
-        prev_p = p
+                    add_next = False
+                else:#Delete this
+                    delete_paragraph(p)
+    else:
+        counter=0
+        for p in doc.paragraphs:
+            if "NO. " in p.text:
+                if counter<len(reqs):
+                    if "RESPONSE" not in p.text:
+                        insert_paragraph_after(p,"           "+reqs[counter],"Normal")
+                    else:
+                        insert_paragraph_after(p,"           "+resps[counter],"Normal")
+                        counter+=1
+                else:
+                    #Destroy para
+                    if "RESPONSE" not in p.text:
+                        delete_paragraph(prev_p)
+                    delete_paragraph(p)
+            prev_p = p
     doc.save(str(name)+".docx")
 
 
 
 
-def readForm(file):
-    cfg = config.PipelinesConfig()
-    # important to adjust these values to match the size of boxes on your image
-    cfg.width_range = (10,30)
-    cfg.height_range = (10,30)
-    # the more scaling factors the more accurate the results but also it takes more time to processing
-    # too small scaling factor may cause false positives
-    # too big scaling factor will take a lot of processing time
-    cfg.scaling_factors = [1.3]
-    # w/h ratio range for boxes/rectangles filtering
-    cfg.wh_ratio_range = (0.3, 2)
-    # group_size_range starting from 2 will skip all the groups
-    # with a single box detected inside (like checkboxes)
-    cfg.group_size_range = (1, 1)
-    # num of iterations when running dilation tranformation (to engance the image)
-    cfg.dilation_iterations = 0
-
-    results=[]
-    vals=[]
-    f = fitz.open(file)
-    for page in f:
-        img = page.get_pixmap()
-        img.save("out.png")
-        #SPLIT INTO COLUMNS
-        img = cv2.imread("out.png")
-        height = img.shape[0]
-        width = img.shape[1]
-
-        # Cut the image in half
-        width_cutoff = width // 2
-        s1 = img[:, :width_cutoff]
-        s2 = img[:, width_cutoff:]
-
-        cv2.imwrite("assets/s1.png", s1)
-        cv2.imwrite("assets/s2.png", s2)
-
-        checkboxes1 = get_checkboxes("assets/s1.png", cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-        checkboxes2 = get_checkboxes("assets/s2.png", cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-        for checkboxes in [checkboxes1,checkboxes2]:
-            #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
-            for check in checkboxes:
-                #Get array
-                array = check[2]
-                total=0
-                for row in array[1:-1]:
-                    total+=sum(row[1:-1])/len(row[1:-1])
-                total = total/len(array[1:-1])
-                vals.append(total)
-                if total>=20:
-                    results.append(True)
-                else:
-                    results.append(False)
-    output=[]
-    for i in range(len(FORM_VALUES)):
-        if results[i]==True:
-            output.append(FORM_VALUES[i])
-    return output
 
 
-
-## ADD THE FORM RESPONSES
-## MAKE THE FORM EXPORTS WORK
-## CHECK ALL FORMS ON OTHER FILES AND TWEAK!

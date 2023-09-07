@@ -1,12 +1,23 @@
+###### FUNCTIONS
+###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023
+######
+###### General functions usable by any program
+######
+
+
+# IMPORTS
+############################################################################################################
+
 import customtkinter as tk
 import json,os
 
+# CONSTANTS 
+############################################################################################################
 
 HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage","lost wages","injury","injuries"]
 
 # FUNCTIONS 
 ############################################################################################################
-
 
 #Get the JSON dict of auto objections
 def get_auto_objections_JSON():
@@ -29,6 +40,20 @@ def open_objections():# Return API key from file if possible
             data = json.load(file)
         return data
     return None
+
+# Opens the objections file
+def open_objections_backup():# Return API key from file if possible
+    if os.path.exists("assets/objections_backup.json"):
+        with open('assets/objections_backup.json', 'r') as file:
+            data = json.load(file)
+        return data
+    return None
+
+# Save the new objections file
+def save_objections(data):
+    if os.path.exists("assets/objections.json"):
+        with open('assets/objections.json', 'w') as file:
+            json.dump(data,file)
 
 # Find all instances of keywords [start,end]
 def find_all(string,sub):
@@ -59,9 +84,7 @@ def bold_keywords(obj,text):
     for i in indices:
         obj.tag_add("red", "0.0 + "+str(i[0])+" chars","0.0 + "+str(i[1])+" chars",)
 
-
-
-
+# Set the initial tkinter theme
 def initial_theme():
     if os.path.exists("assets/theme.json"):
         with open('assets/theme.json', 'r') as file:

@@ -1,3 +1,20 @@
+###### APP
+###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023
+###### Uses converter.py to open discovery request PDF's in order to respond
+###### Provides a Windows GUI tool for opening files and saving as DOCX
+###### Version 4.0 | 05/09/2023
+
+# Rules for clean code space
+# 1. Use snake_case unless a class name (then camel case)
+# 2. Comment everything!
+# 3. If possible make something a simple & standard function
+# 4. Break everything down into small components and files
+# 5. ROOT->Main Windows->Each can have 1 sub window
+
+
+# IMPORTS
+############################################################################################################
+
 import converter as cnv
 from windows import *
 from frames import *
@@ -10,22 +27,8 @@ import pickle
 from threading import Thread
 import re
 
-########## PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023
-########## Uses converter.py to open discovery request PDF's in order to respond
-########## Provides a Windows GUI tool for opening files and saving as DOCX
-########## Version 3.0 | 23/08/2023
-
-# Rules for clean code space
-# 1. Use snake_case unless a class name (then camel case)
-# 2. Comment everything!
-# 3. If possible make something a simple & standard function
-# 4. Break everything down into small components and files
-# 5. ROOT->Main Windows->Each can have 1 sub window
-
-
 # MAIN WINDOW CLASS
 ############################################################################################################
-
 
 # MAIN WINDOW CLASS
 class App(tk.CTkToplevel):
@@ -36,8 +39,10 @@ class App(tk.CTkToplevel):
         self.master=master#Master is root of the program (Top level tk)
         master.call()
         self.files=[]#Holds all open files
+        self.clients=[]
         self.reqs=[]#Holds all requests in the selected file
 
+        self.current_client = ""
         self.current_file = ""#Current selected file
         self.quick_save_file=""#Current quick save option
         self.req_type=""#Type of the current request
@@ -53,7 +58,7 @@ class App(tk.CTkToplevel):
         self.wm_iconbitmap("assets/icon.ico")#Icon
         self.minsize(1050,720)#Min Size
         self.geometry("1050x720")#Start size
-        self.title("Discovery Responses")#Window title
+        self.title("myDiscoveryResponses")#Window title
         self.after(100, self.refresher)
 
         # KEY BINDINGSS
@@ -71,22 +76,27 @@ class App(tk.CTkToplevel):
     ### WINDOW UTILITY
     ########################################################################################################
 
+    #Add Frames to the window
     def populate_window(self):
         # Navigation Bar Frame
         self.bar_frame = Bar_Frame(master=self,corner_radius=0,fg_color="#161616")
         self.bar_frame.pack(padx=0,pady=0,fill="both")
         # Requests Frame
-        self.requests_frame = Requests_Frame(master=self,corner_radius=0)
-        self.requests_frame.pack(padx=0,pady=0,expand=True,side="left",fill="both")
+        self.requests_frame = Requests_Frame(master=self,corner_radius=0,width=100)
+        self.requests_frame.pack(padx=0,pady=0,expand=False,side="left",fill="both")
+
+
         # Objections Frame
-        self.objections_frame = Objections_Frame(master=self,corner_radius=0)
-        self.objections_frame.pack(padx=0,pady=0,expand=True,side="right",fill="both")
+        self.objections_frame = Objections_Frame2(master=self,corner_radius=0,width=250)
+        self.objections_frame.pack(padx=0,pady=0,expand=False,side="right",fill="both")
+
         # Response Frame
         self.response_frame = Response_Frame(master=self)
-        self.response_frame.pack(ipadx=200,padx=20,pady=20,expand=True,side="left",fill="both")
-        self.set_theme("text")#Set theme just for text, as main theme loaded at start
+        self.response_frame.pack(padx=20,pady=20,expand=True,side="left",fill="both")
 
-    # Create a new window
+        self.set_theme("text")#Set theme just for text, as main theme loaded at start
+        
+    # Create a new MAIN window
     def create_window(self):
         create_window(self.master)
 
@@ -94,7 +104,11 @@ class App(tk.CTkToplevel):
     def refresher(self):
         if self.current_req!=0:
             # 1. UPDATE OBJECTION TEXTBOX
-            self.set_req_obj(self.current_req)#Get selected objections & params
+            #Set the current objection parameters
+            if self.current_req.current_objection!="":
+                self.current_req.current_objection.param = self.objections_frame.objection_input.get()
+                self.current_req.current_objection.additional_param = self.objections_frame.additional_input.get()
+
             temp = self.response_frame.objection_text.get("0.0","end")#Get prev text from box
             remove_end=False
             if not ((self.req_type!="RFP" and len(self.response_frame.response_text.get("0.0","end").replace("\n",""))>0) or (self.req_type=="RFP" and len(self.response_frame.resp_text.get())>0)):
@@ -107,9 +121,14 @@ class App(tk.CTkToplevel):
                 self.response_frame.objection_text.configure(state="disabled")
 
             # 2. UPDATE RESPONSE TEXTBOX
-            if self.req_type=="RFP":#If RFP
-                temp = self.response_frame.response_text.get("0.0","end")#Get prev text from box
+            if self.req_type=="RFA":
+                option = self.response_frame.resp_optionRFA.get()
+            else:
                 option = self.response_frame.resp_option.get()
+            
+            # RFP
+            if self.req_type=="RFP" and option!="Custom":
+                temp = self.response_frame.response_text.get("0.0","end")#Get prev text from box
                 resp = self.response_frame.resp_text.get()
                 text = RFP_responses[option].replace("[VAR]",resp)
                 if option!="Available" and resp!="":
@@ -122,8 +141,25 @@ class App(tk.CTkToplevel):
                     self.response_frame.response_text.configure(state="disabled")
                     #Change color of request
                     self.current_req.color="grey"
-                    self.current_file.color=("black","white")
-                    self.requests_frame.update_files(self.files)
+                    self.current_client.current_file.color=("black","white")
+                    self.requests_frame.update_files(self.current_client.files)
+            # RFA
+            elif self.req_type=="RFA" and option!="Custom":
+                temp = self.response_frame.response_text.get("0.0","end")#Get prev text from box
+                text = RFA_responses[option]
+                if text!=temp.replace("\n",""):#If the text has changed REDRAW
+                    #Change response text
+                    self.response_frame.response_text.configure(state="normal")
+                    self.response_frame.response_text.delete("0.0","end")
+                    self.response_frame.response_text.insert("0.0",text)
+                    self.response_frame.response_text.configure(state="disabled")
+                    #Change color of request
+                    self.current_req.color="grey"
+                    self.current_client.current_file.color=("black","white")
+                    self.requests_frame.update_files(self.current_client.files)
+
+
+            # NORMAL
             else:#If NOT RFP
                 #Do AUTOFILLS HERE
                 insert_index = self.response_frame.response_text.index(tk.INSERT)#Current index
@@ -154,16 +190,17 @@ class App(tk.CTkToplevel):
                     self.response_frame.response_text.mark_set("insert",insert_index)
                 if resp[1:]!=self.current_req.resp.replace("\n",""):# Change colour back if edited
                     self.current_req.color="grey"
-                    self.current_file.color=("black","white")
-                    self.requests_frame.update_files(self.files)
+                    self.current_client.current_file.color=("black","white")
+                    self.requests_frame.update_files(self.current_client.files)
         self.after(100, self.refresher)#REFRESH AGAIN
 
-    #Destroy sub window
+    #Destroy this windows sub window
     def cancel_win(self):
-        self.win.destroy()
-        self.win=None
+        if self.win!=None:
+            self.win.destroy()
+            self.win=None
 
-    # Save details window
+    # Save details from the details window
     def save_win(self):
         self.doc_details["county"] = self.win.county.get("0.0","end").replace("\n","")
         self.doc_details["case_number"] = self.win.case.get("0.0","end").replace("\n","")
@@ -174,54 +211,52 @@ class App(tk.CTkToplevel):
 
     # View and edit the details of the document
     def view_details(self):
-        if self.current_file!="":
-            if self.win!=None:
-                self.win.destroy()
-                self.win=None
+        if self.current_client!="":
+            self.cancel_win()
             self.win = Detail(self)
             self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
             self.win.mainloop()
 
-    def view_autofill(self):
-        if self.current_file!="":
-            if self.win!=None:
-                self.win.destroy()
-                self.win=None
-            self.win = Autofill(self)
-            self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
-            self.win.mainloop()
+    # View and edit the OBJECTIONS JSON
+    def view_objections(self):
+        self.cancel_win()
+        self.win = EditObjections(self)
+        self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
+        self.win.mainloop()
+
+    # View and edit the theme of the software
+    def view_hotkeys(self):
+        self.cancel_win()
+        self.win = Hotkeys(self)
+        self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
+        self.win.mainloop()
 
     # View and edit the theme of the software
     def view_theme(self):
-        if self.win!=None:
-            self.win.destroy()
-            self.win=None
+        self.cancel_win()
         self.win = Theme(self)
         self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
         self.win.mainloop()
 
+    # View a text preview of the objections+response
     def view_preview(self):
-        if self.current_file!="":
-            if self.win!=None:
-                self.win.destroy()
-                self.win=None
+        if self.current_client!="":
+            self.cancel_win()
             # Create a temporary docx
-            self.export(self.current_file,"assets/temp")
+            self.export(self.current_client.current_file,"assets/temp")
             self.win = Preview(self)
             self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
             self.win.mainloop()
 
+    # View a DOCX preview of the output file
     def preview_text(self):
-        if self.current_file!="":
-            if self.win!=None:
-                self.win.destroy()
-                self.win=None
-            # Create a temporary docx
+        if self.current_client!="":
+            self.cancel_win()
             self.win = PreviewText(self)
             self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
             self.win.mainloop()
 
-    #EXIT THE CURRENT WINDOW
+    # Exit this window and delete
     def exit_window(self):
         self.destroy()
         c=0
@@ -290,10 +325,12 @@ class App(tk.CTkToplevel):
                         self.open_file(filename+"/"+f)
                         added=True
         if added:# Set the file if been added!
-            self.title("Discovery Responses   |   "+str(self.files[-1].name.split("/")[-1]))
-            self.current_file=self.files[-1]
+            self.title("myDiscoveryResponses   |   "+str(self.current_client.files[-1].name.split("/")[-1]))
+            self.current_client.current_file=self.current_client.files[-1]
             # Add file
-            self.requests_frame.show_files(self.files)
+            self.requests_frame.show_clients(self.clients)
+            if self.current_client!="":
+                self.requests_frame.show_files(self.current_client.files)
             self.requests_frame.show_list(self.reqs)
             self.set_request(self.reqs[0])
             self.requests_frame.scroll_to(True)
@@ -312,12 +349,14 @@ class App(tk.CTkToplevel):
         for filename in filenames:
             if os.path.exists(filename):
                 if filename[-4:].lower()==".pdf":#PDF
-                    self.title("Discovery Responses   |   "+str(filename.split("/")[-1]))
+                    self.title("myDiscoveryResponses   |   "+str(filename.split("/")[-1]))
                     self.open_file(filename)
                     #Else if a obj
-                    self.current_file=self.files[-1]
+                    self.current_client.current_file =self.current_client.files[-1]
                     # Add file
-                    self.requests_frame.show_files(self.files)
+                    self.requests_frame.show_clients(self.clients)
+                    if self.current_client!="":
+                        self.requests_frame.show_files(self.current_client.files)
                     self.requests_frame.show_list(self.reqs)
                     self.set_request(self.reqs[0])
                     self.requests_frame.scroll_to(True)
@@ -346,7 +385,17 @@ class App(tk.CTkToplevel):
                 for i in reqs:
                     self.reqs.append(Request(i,"",c,self,req_type,""))
                     c+=1
-            self.files.append(File(filename,doc_details,self.req_type,self.reqs,self))
+
+            ### ADD NEW FILE TO CLIENT, IF NONE THEN CREATE NEW CLIENT!
+            new_file = File(filename,doc_details,self.req_type,self.reqs,self)
+            for c in self.clients:
+                if c.name.replace(" ","").upper() == doc_details["defendant"].replace(" ","").upper():
+                    # Add to a current client
+                    c.files.append(new_file)
+                    self.set_client(c)
+                    return
+            self.clients.append(Client(doc_details["defendant"],[new_file],self))
+            self.set_client(self.clients[-1])
 
 
     #SAVING AND LOADING WITH PICKLE
@@ -358,15 +407,15 @@ class App(tk.CTkToplevel):
             return
         file = open(filename+".discovery","wb")
         # Set this for quicksave
-        self.current_file.save = filename
+        self.current_client.current_file.save = filename
         # Remove master from the save
-        self.current_file.set_master(None)
+        self.current_client.current_file.set_master(None)
         # Create save object
         save_obj = Save([self.current_file])
         # Pickle the current File
         pickle.dump(save_obj,file)#Need to fix saving with the name
         # Add the master back
-        self.current_file.set_master(self)
+        self.current_client.current_file.set_master(self)
 
     # Load a single obj file
     def load_file(self,filename):
@@ -380,30 +429,36 @@ class App(tk.CTkToplevel):
             # Set this for quicksave
             files[0].save = filename
             files[0].set_master(self)
-            self.files.append(files[0])
+            self.current_client.files.append(files[0])
             # Add file
-            self.requests_frame.show_files(self.files)
+            self.requests_frame.show_clients(self.clients)
+            if self.current_client != "":
+                self.requests_frame.show_files(self.current_client.files)
             self.set_file(files[0])
             self.requests_frame.show_list(self.reqs)
             self.requests_frame.scroll_to(True)
+            self.requests_frame.scroll_to_file()
             self.update()
         else:
-            if len(self.files)==0:#Use this window!
+            if len(self.current_client.files)==0:#Use this window!
                 # Set this for quicksave
                 self.quick_save_file = filename.replace(".discovery","")
                 for f in files:
                     # Set the new master to this window
                     f.set_master(self)
                     # Add the object to the list of open files
-                    self.files.append(f)
+                    self.current_client.files.append(f)
 
                 #Else if a obj
                 # Add file
-                self.requests_frame.show_files(self.files)
+                self.requests_frame.show_clients(self.clients)
+                if self.current_client != "":
+                    self.requests_frame.show_files(self.current_client.files)
                 #Set current file as this object
-                self.set_file(self.files[0])
+                self.set_file(self.current_client.files[0])
                 self.requests_frame.show_list(self.reqs)
                 self.requests_frame.scroll_to(True)
+                self.requests_frame.scroll_to_file()
                 self.update()
             else:#New Window!
                 load_window(self.master,files,filename)
@@ -412,7 +467,7 @@ class App(tk.CTkToplevel):
     # Save all open files together
     def save_workspace(self):
         # Select a folder and save name
-        filename=tk.filedialog.asksaveasfilename(title="Save Full Workspace",filetypes=(("Discovery Save File","*.discovery"),('All files', '*.*'))).replace(".discovery","")
+        filename=tk.filedialog.asksaveasfilename(title="Save Full Set",filetypes=(("Discovery Save File","*.discovery"),('All files', '*.*'))).replace(".discovery","")
         print(filename)
         if filename=="":
             return
@@ -420,65 +475,68 @@ class App(tk.CTkToplevel):
         # Set this for quicksave
         self.quick_save_file = filename
         # Remove master from the save
-        for i in self.files:
+        for i in self.current_client.files:
             i.set_master(None)
         # Create save object
-        save_obj = Save(self.files)
+        save_obj = Save(self.current_client.files)
         # Pickle the current File
         pickle.dump(save_obj,file)#Need to fix saving with the name
         # Add the master back
-        for i in self.files:
+        for i in self.current_client.files:
             i.set_master(self)
 
     #Save the file/folder quickly using the last operation
     def quick_save(self):
-        if self.current_file=="":#Exit if no valid file
+        if self.current_client=="":#Exit if no valid file
             return
         filename = self.quick_save_file
-        if filename=="" and self.current_file.save=="":
+        if filename=="" and self.current_client.current_file.save=="":
             self.save_file()
-        elif self.current_file.save!="":#single or multi
+        elif self.current_client.current_file.save!="":#single or multi
             #Save the single file
-            file = open(self.current_file.save+".discovery","wb")
+            file = open(self.current_client.current_file.save+".discovery","wb")
             # Remove master from the save
-            self.current_file.set_master(None)
+            self.current_client.current_file.set_master(None)
             # Create save object
-            save_obj = Save([self.current_file])
+            save_obj = Save([self.current_client.current_file])
             # Pickle the current File
             pickle.dump(save_obj,file)#Need to fix saving with the name
             # Add the master back
-            self.current_file.set_master(self)
+            self.current_client.current_file.set_master(self)
         else:#If multi file
             file = open(filename+".discovery","wb")
             # Remove master from the save
-            for i in self.files:
+            for i in self.current_client.files:
                 i.set_master(None)
             # Create save object
-            save_obj = Save(self.files)
+            save_obj = Save(self.current_client.files)
             # Pickle the current File
             pickle.dump(save_obj,file)#Need to fix saving with the name
             # Add the master back
-            for i in self.files:
+            for i in self.current_client.files:
                 i.set_master(self)
 
 
     #Close the current file
     def close_file(self):
         #Try go to previous file, else close all
-        if len(self.files)>1:
+        if len(self.current_client.files)>1:
             # Set to different request
             # Remove this request
-            index = self.files.index(self.current_file)
+            index = self.current_client.files.index(self.current_client.current_file)
             if index==0:
                 new_req_index=1
             else:
                 new_req_index = index-1
-            self.set_file(self.files[new_req_index])
+            self.set_file(self.current_client.files[new_req_index])
             #Remove prev and update files
-            self.files.pop(index)
-            self.requests_frame.show_files(self.files)
+            self.current_client.files.pop(index)
+            self.requests_frame.show_clients(self.clients)
+            if self.current_client != "":
+                self.requests_frame.show_files(self.current_client.files)
             self.requests_frame.show_list(self.reqs)
             self.requests_frame.scroll_to(True)
+            self.requests_frame.scroll_to_file()
         else:
             self.close_all()
 
@@ -493,6 +551,10 @@ class App(tk.CTkToplevel):
         self.current_req=0
         self.doc_details=None
         self.quick_save_file=""
+        self.clients=[]
+        self.current_client=""
+        # Reset Clients
+        self.requests_frame.show_clients([])
         # Reset Files
         self.requests_frame.show_files([])
         # Reset Requests
@@ -514,34 +576,67 @@ class App(tk.CTkToplevel):
     def export(self,file,filename):
         reqs=[]
         resps=[]
+        numbers=[]
         for r in file.reqs:#Get responses and requests
             #1. ADD REQUESTS
             reqs.append(r.req)
             #2. ADD RESPONSES
             full_text = r.get_full_resp()
             resps.append(full_text)
-        cnv.updateDOC(reqs,resps,file.details,self.req_type,str(filename))
+            #3. ADD NUMBER POINTERS
+            numbers.append(r.custom_key)
+        cnv.updateDOC(reqs,resps,file.details,self.req_type,str(filename),numbers)
 
     # Export all as folder of DOCX's
     def export_all(self):
-        if len(self.files)>0:
+        if len(self.current_client.files)>0:
             # Select Folder
             filename = tk.filedialog.askdirectory(title='Select Export Folder')
             # For each file
-            for file in self.files:
+            for file in self.current_client.files:
                 self.export(file,filename+"/"+str(file.name.split("/")[-1].split(".")[0]))
 
     # Select a save from files
     def export_current(self):
         #Need to get the correct file location and then save
-        if self.current_file!="":
+        if self.current_client!="":
             filename=tk.filedialog.asksaveasfilename(filetypes=(("DOCX","*.docx"),('All files', '*.*')))
-            self.export(self.current_file,filename)
+            self.export(self.current_client.current_file,filename)
 
 
 
     ### SETTING AND GETTING OBJECTS
     ########################################################################################################
+
+    #Change an objection buttons state, and if request then update this
+    def toggle_objection(self,obj):
+        if self.current_req!=0:
+            # Update current request objection
+            for o in self.current_req.opts:
+                if o.key == obj:
+                    o.toggle()
+                    self.current_req.current_objection = o
+                    self.objections_frame.update_current(o)
+                    #Set the objection input area to this objection
+
+            # Update buttons
+            self.objections_frame.toggle_button(obj)#TOGGLE THE COLOUR OF THIS BUTTON!
+            # Update objection special menu
+
+
+
+
+
+    #Allow for custom response when buttons used
+    def setRFP(self,value):
+        if value=="Custom":
+            self.response_frame.response_text.configure(state="normal")
+            self.response_frame.response_text.delete("0.0","end")
+
+    def setRFA(self,value):
+        if value=="Custom":
+            self.response_frame.response_text.configure(state="normal")
+            self.response_frame.response_text.delete("0.0","end")
 
     #Get objections
     def get_auto_objections(self):#Get and set the current objection file
@@ -568,57 +663,68 @@ class App(tk.CTkToplevel):
             self.prev_type = self.req_type
         self.req_type = req_type 
 
+
+    # Set the current client
+    def set_client(self,client):
+        self.current_client = client
+        self.requests_frame.show_clients(self.clients)
+        self.set_type(self.current_client.current_file.req_type)
+        self.doc_details = self.current_client.current_file.details
+        self.reqs = self.current_client.current_file.reqs
+
+        self.requests_frame.show_files(self.current_client.files)
+        self.requests_frame.show_list(self.current_client.current_file.reqs)
+        self.set_request(self.current_client.current_file.current_req)
+        #self.requests_frame.scroll_to(True)
+        self.response_frame.redraw(self.current_client.current_file.req_type)
+        self.title("myDiscoveryResponses   |   "+str(self.current_client.current_file.name.split("/")[-1]))
+
     # Set the current file
     def set_file(self,file):
         #NEED TO CHANGE THINGS HERE TOO!!!
-        self.current_file = file
+        self.current_client.current_file = file
         self.doc_details = file.details
         self.reqs = file.reqs
         # Set is built for a single request type, need to change for files
         self.set_type(file.req_type)# Set first so refresher doesn't overwrite
-        self.requests_frame.update_files(self.files)
-        self.requests_frame.show_list(self.current_file.reqs)
+        self.requests_frame.update_files(self.current_client.files)
+        self.requests_frame.show_list(self.current_client.current_file.reqs)
         self.set_request(file.current_req)
-        self.requests_frame.scroll_to(True)
+        #self.requests_frame.scroll_to(True)
         self.response_frame.redraw(file.req_type)
-        self.title("Discovery Responses   |   "+str(file.name.split("/")[-1]))
+        self.title("myDiscoveryResponses   |   "+str(file.name.split("/")[-1]))
 
     # Set the request to a different one
     def set_request(self,req):
         # 1. SAVING PREVIOUS RESPONSE
         if self.current_req!=0:
             # Saving
-            self.current_req.resp = self.get_objections(self.current_req.opts,False)
+            self.current_req.resp = self.response_frame.response_text.get("0.0","end-1c")#self.get_objections(self.current_req.opts,False)
             #GET RFP data
             if self.prev_type=="RFP":
                 self.current_req.RFP_option=self.response_frame.resp_option.get()
                 self.current_req.RFP_text=self.response_frame.resp_text.get()
+            elif self.prev_type=="RFA":
+                self.current_req.RFA_option=self.response_frame.resp_optionRFA.get()
             #COLOR#########################################
             grey=False
             if self.current_req.resp.replace("\n","")!="" and self.req_type!="RFP":
                 grey=True
             elif (self.current_req.RFP_option!="Available" or len(self.current_req.RFP_text)>0):
                 grey=True
-            for i in range(len(req.opts)):
-                #Set Check
-                self.current_req.opts[i].selected=self.objections_frame.opts[i].get()
-                if self.objections_frame.opts[i].get()!=0:
-                    grey=True
-                #Set Param
-                self.current_req.opts[i].param=self.objections_frame.params[i].get()
-                if self.objections_frame.params[i].get()!="":
-                    grey=True
+
             if self.current_req.color!="#FF0000" and self.current_req.color!="#50C878":
                 if grey:
                     self.current_req.color="grey" 
                 else:
                     self.current_req.color=("black","white")
             ################################################
+            
         # 2. ENTERING NEW RESPONSE INTO FRAME
         if self.current_req==req:#For when I set to itself
             return
         self.current_req=req
-        self.current_file.current_req=req# Set the current req of the file
+        self.current_client.current_file.current_req=req# Set the current req of the file
         #Save,Reset and add text
         self.response_frame.request_text.configure(state="normal")
         self.response_frame.request_text.delete("0.0","end")
@@ -640,6 +746,8 @@ class App(tk.CTkToplevel):
             self.response_frame.resp_option.set(req.RFP_option)
             self.response_frame.resp_text.delete(0,"end")
             self.response_frame.resp_text.insert(0,req.RFP_text)
+        elif self.req_type=="RFA":
+            self.response_frame.resp_optionRFA.set(req.RFA_option)
         #Change the objections list!
         self.objections_frame.redraw(req)
         self.requests_frame.update_list(self.reqs)#Redraw the buttons
@@ -654,6 +762,16 @@ class App(tk.CTkToplevel):
             #Set Param
             self.current_req.opts[i].param=self.objections_frame.params[i].get() 
 
+
+
+
+
+
+
+
+
+
+
     # CREATE THE OBJECTION TEXT
     def get_objections(self,opts,remove_end=False):
         full_text = "Objection. "
@@ -661,20 +779,22 @@ class App(tk.CTkToplevel):
         objs=[]
         for obj in opts:
             if obj.selected==1:
-                objs.append([obj.key,obj.param])
+                objs.append(obj)
+
         # 2. ADD ALL SELECTED OBJECTIONS TO THE TEXT
         if len(objs)>0:
             for key in list(self.objections.keys()):# Put in order given
                 for obj in objs:# For each objection
-                    if key==obj[0]:
-                        text=self.objections[key]
+                    if key==obj.key:
+                        text=self.objections[key][0]
                         if text=="":
                             text=key
-                        if obj[1]=="":
+                        if obj.param=="":
                             text = text.replace("[VAR]","")# Replace [VAR]
                         else:
-                            text = text.replace("[VAR]"," "+obj[1])# Replace [VAR]
+                            text = text.replace("[VAR]"," "+obj.param)# Replace [VAR]
                         full_text = full_text+str(text)+". "#Add new text!
+
             # 3. ADD FINAL OBJECTION IF REQUESTED AND VALID
             if full_text!="" and remove_end==False:#Response and not RFP. Resp and RFP
                 #Default values here
@@ -682,13 +802,37 @@ class App(tk.CTkToplevel):
                 extra = ""
                 #Change these values if certain objections selected
                 for obj in objs:
-                    if obj[0] in alter_scope:
+                    #Change Scope
+                    if obj.alter_scope:
                         final_text = "Notwithstanding the foregoing objections and subject thereto, and as Responding Party understands the proper scope and/or meaning of this request, Responding Party responds as follows: "
-                    elif obj[0]=="Compilation":
-                        extra = "Responding Party exercises their right to produce writings in response to this interrogatory, pursuant to California Code of Civil Procedure section 2030.230. Please see [VAR] produced concurrently herewith. ".replace("[VAR]",obj[1])
+                    
+                    #Add Extra Text
+                    text=obj.additional_text
+                    if text!="":
+                        if obj.additional_param=="":
+                            text = text.replace("[VAR]","")# Replace [VAR]
+                        else:
+                            text = text.replace("[VAR]"," "+obj.additional_param)# Replace [VAR]
+                        extra = extra+str(text)+". "#Add new text!
+                
+                
                 full_text = full_text + final_text + extra
             return full_text
         return ""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # Update the theme JSON and set the new theme
     def update_theme(self):
@@ -728,7 +872,9 @@ class App(tk.CTkToplevel):
                 self.response_frame.resp_text.configure(font=font,text_color=self.theme["text_color"],fg_color=self.theme["text_bg"])
                 #Bold tag for request
                 self.response_frame.request_text.tag_config("red",font=(self.theme["text_font"],1+int(self.theme["text_size"]), 'bold'))
-                self.requests_frame.show_files(self.files)
+                self.requests_frame.show_clients(self.clients)
+                if self.current_client != "":
+                    self.requests_frame.show_files(self.current_client.files)
                 self.requests_frame.show_list(self.reqs)
     ### USER ACTIVITY
     ########################################################################################################
@@ -757,8 +903,8 @@ class App(tk.CTkToplevel):
             for req in self.reqs:
                 if req.color!="#50C878":
                     return
-            self.current_file.color="#50C878"
-            self.requests_frame.update_files(self.files)
+            self.current_client.current_file.color="#50C878"
+            self.requests_frame.update_files(self.current_client.files)
 
 
     # Copy objections from the previous request
@@ -783,8 +929,8 @@ class App(tk.CTkToplevel):
         if self.current_req!=0:
             #Reset Color
             self.current_req.color=("black","white")
-            self.current_file.color=("black","white")
-            self.requests_frame.update_files(self.files)
+            self.current_client.current_file.color=("black","white")
+            self.requests_frame.update_files(self.current_client.files)
             #Reset Response
             self.current_req.resp=""
             #Reset Checkboxes & Params
@@ -799,6 +945,8 @@ class App(tk.CTkToplevel):
             if self.req_type=="RFP":
                 self.response_frame.resp_option.set("Available")
                 self.response_frame.resp_text.delete(0,"end")
+            elif self.req_type=="RFA":
+                self.response_frame.resp_optionRFA.set("Admit")
             self.update()
 
     # Set as Check with client
@@ -809,8 +957,8 @@ class App(tk.CTkToplevel):
             else:
                 self.current_req.color="#FF0000"# Set red
             self.requests_frame.update_list(self.reqs)# Update request colours
-            self.current_file.color=("black","white")
-            self.requests_frame.update_files(self.files)# Turn file white if green
+            self.current_client.current_file.color=("black","white")
+            self.requests_frame.update_files(self.current_client.files)# Turn file white if green
             #Go to next request
             index = self.reqs.index(self.current_req)
             if index<len(self.reqs)-1:
@@ -835,10 +983,13 @@ def load_window(root,files,filename):
         f.set_master(master)
         # Add the object to the list of open files
         master.files.append(f)
-    master.requests_frame.show_files(master.files)# Show files
+    master.requests_frame.show_clients(master.clients)
+    if master.current_client != "":
+        master.requests_frame.show_files(master.current_client.files)# Show files
     master.set_file(master.files[0])# Set first files request
     master.requests_frame.show_list(master.reqs)# Show requests
     master.requests_frame.scroll_to()
+    master.requests_frame.scroll_to_file()
     master.quick_save_file = filename.replace(".discovery","")
 
 
@@ -846,16 +997,16 @@ def load_window(root,files,filename):
 ############################################################################################################
 
 if __name__ == "__main__":
-    #CONSTANTS
-    COMPILATION = "Responding Party exercises their right to produce writings in response to this interrogatory, pursuant to California Code of Civil Procedure section 2030.230. Please see [VAR] produced concurrently herewith"
-    
-    alter_scope=["Unintelligible as written","Not limited in time and scope","Vague and ambiguous","Speculation","Overbroad"]
-    
+    #CONSTANTS    
     RFP_responses={"Available":"Responding Party will comply with this demand. Please see “[VAR]” produced concurrently herewith.",
                     "Not Exist":"After a diligent search and reasonable inquiry, Responding Party finds no responsive documents in their possession, custody, or control, because no such documents are known to exist.",
                     "Not Possessed":"After a diligent search and reasonable inquiry, Responding Party finds no responsive documents in their possession, custody, or control, because no such documents have ever been in the possession, custody, or control of Responding Party.",
                     "Lost":"After a diligent search and reasonable inquiry, Responding Party finds no responsive documents in their possession, custody, or control, any such documents have been destroyed, lost, misplaced or stolen."}
     
+    RFA_responses={"Admit":"Admit. ",
+                    "Deny":"Deny. ",
+                    "Lack Info":"A reasonable inquiry concerning the matter in this particular request has been made, and the information known or readily obtainable is insufficient to enable Responding Party to admit the matter."}
+
     AUTOFILLS={" rp ":" Responding Party ",
                 " rpib ":" Responding Party is informed and believes ",
                 " dic ":" Discovery continues and Responding Party reserves the right to supplement this response with later acquired information. "}
@@ -952,4 +1103,10 @@ if __name__ == "__main__":
 ############################################################################################################
 
 
-# 4:00 - 
+
+
+#Make autofill system work
+
+#Check all works
+#Handle error of objection being removed!
+#Remove scroll to file

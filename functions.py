@@ -19,18 +19,19 @@ HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage
 # FUNCTIONS 
 ############################################################################################################
 
-#Get the JSON dict of auto objections
-def get_auto_objections_JSON():
-    if os.path.exists("assets/auto_objections.json"):
-        with open('assets/auto_objections.json', 'r') as file:
+# Open the hotkeys
+def open_hotkeys():
+    if os.path.exists("assets/hotkeys.json"):
+        with open("assets/hotkeys.json","r") as file:
             data = json.load(file)
         return data
     return None
 
-#Set the JSON dict of auto objections
-def set_auto_objections_JSON(dic):
-    with open("assets/auto_objections.json", "w") as outfile:#Save the new theme JSON
-        json.dump(dic, outfile)
+# Save the new hotkeys file
+def save_hotkeys(data):
+    if os.path.exists("assets/hotkeys.json"):
+        with open('assets/hotkeys.json', 'w') as file:
+            json.dump(data,file)
 
 
 # Opens the objections file
@@ -91,3 +92,52 @@ def initial_theme():
             data= json.load(file)
         # Set relevant things here
         tk.set_appearance_mode(data["theme"])
+
+
+# Form the objection text using the selected objections
+def get_objection_text(opts,objections,remove_end=False):
+    full_text = "Objection. "
+    # 1. GET ALL SELECTED OBJECTIONS
+    objs=[]
+    for obj in opts:
+        if obj.selected==1:
+            objs.append(obj)
+
+    # 2. ADD ALL SELECTED OBJECTIONS TO THE TEXT
+    if len(objs)>0:
+        for key in list(objections.keys()):# Put in order given
+            for obj in objs:# For each objection
+                if key==obj.key:
+                    text=objections[key][0]
+                    if text=="":
+                        text=key
+                    if obj.param=="":
+                        text = text.replace("[VAR]","")# Replace [VAR]
+                    else:
+                        text = text.replace("[VAR]"," "+obj.param)# Replace [VAR]
+                    full_text = full_text+str(text)+". "#Add new text!
+
+        # 3. ADD FINAL OBJECTION IF REQUESTED AND VALID
+        if full_text!="" and remove_end==False:#Response and not RFP. Resp and RFP
+            #Default values here
+            final_text = "Notwithstanding the foregoing objections and subject thereto, Responding Party responds as follows: "
+            extra = ""
+            #Change these values if certain objections selected
+            for obj in objs:
+                #Change Scope
+                if obj.alter_scope:
+                    final_text = "Notwithstanding the foregoing objections and subject thereto, and as Responding Party understands the proper scope and/or meaning of this request, Responding Party responds as follows: "
+                
+                #Add Extra Text
+                text=obj.additional_text
+                if text!="":
+                    if obj.additional_param=="":
+                        text = text.replace("[VAR]","")# Replace [VAR]
+                    else:
+                        text = text.replace("[VAR]"," "+obj.additional_param)# Replace [VAR]
+                    extra = extra+str(text)+". "#Add new text!
+            
+            
+            full_text = full_text + final_text + extra
+        return full_text
+    return ""

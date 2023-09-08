@@ -82,18 +82,21 @@ class Request:
         self.req_type=req_type
         self.custom_key = custom_key
         self.current_objection = ""
+
     #Fill objections automatically using saved answers
     def auto_obj(self):
-        for obj in self.master.auto_objections:
+        for obj in self.master.objections:
             added=0
-            for word in self.master.auto_objections[obj]:
-                if word in self.req:
-                    self.add_param(obj,word)#Add param to the params
-                    added+=1
-            if added>1:#Set final , to and
-                for i in self.opts:
-                    if i.key==obj:
-                        i.param = ", and ".join(i.param.rsplit(", ", 1))#Add the AND
+            if self.master.objections[obj][3]:
+                for word in self.master.objections[obj][4]:
+                    if word in self.req:
+                        self.add_param(obj,word)#Add param to the params
+                        added+=1
+                if added>1:#Set final , to and
+                    for i in self.opts:
+                        if i.key==obj:
+                            i.param = ", and ".join(i.param.rsplit(", ", 1))#Add the AND
+
     #Add a parameter from autofill list to the string
     def add_param(self,obj,param):
         for i in self.opts:
@@ -115,12 +118,11 @@ class Request:
                 return
     #Get the full response text
     def get_full_resp(self):
-        full_text = self.master.get_objections(self.opts,False)
+        full_text = get_objection_text(self.opts,self.master.objections,False)
         #Add response to the end
         if self.req_type == "RFP":
             option = self.RFP_option
             if option!="Custom":
-                txt = self.RFP_text
                 extra = " Any responsive documents are believed to be in the possession, custody, or control of [VAR]."
                 end = RFP_responses[option].replace("[VAR]",self.RFP_text)
                 if option!="Available" and self.RFP_text!="":
@@ -142,6 +144,9 @@ class Objection:
         self.selected=False
         self.param=""
         self.additional_param=""
+
+        self.need_param = ("[VAR]" in self.master.objections[key][0])
+        self.need_additional_param = ("[VAR]" in self.master.objections[key][1])
 
         #Store this for writing objections
         self.additional_text=self.master.objections[key][1]

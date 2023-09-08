@@ -16,6 +16,7 @@ from PIL import Image
 import io
 from docx2pdf import convert
 from functools import partial
+import json
 
 # PREVIEW DOCX WINDOW
 ############################################################################################################
@@ -123,6 +124,37 @@ class Hotkeys(tk.CTk):
         #CREATING THE CUSTOM TKINTER WINDOW
         super().__init__()
         self.master=master
+        self.title("Hotkey Editor")
+        self.minsize(600,400)
+        self.resizable(False,False)
+        self.grid_columnconfigure((0,1),weight=1)
+        self.grid_rowconfigure((0,1,2,3,4,5),weight=1)
+        font = (master.theme["text_font"],int(master.theme["text_size"]))
+
+        #Edit Hotkeys
+        self.edit_text = tk.CTkTextbox(master=self,font=font,text_color=master.theme["text_color"],fg_color=master.theme["text_bg"])
+        self.edit_text.grid(row=0,column=0,columnspan=2,rowspan=5,sticky="nsew",padx=10,pady=(10,0))
+        hotkey_text=str(self.master.HOTKEYS).replace(",",",\n").replace("'","\"")
+        self.edit_text.insert("0.0",hotkey_text)
+
+        #Cancel
+        cancel_button = tk.CTkButton(master=self,text="Cancel",command=self.master.cancel_win)
+        cancel_button.grid(row=5,column=0)
+
+        #Save
+        save_button = tk.CTkButton(master=self,text="Save",command=self.save)
+        save_button.grid(row=5,column=1)
+
+    def save(self):
+        # Save the updated hotkeys as a json if valid else stay open
+        try:
+            save_text = self.edit_text.get("0.0","end-1c").replace("\n","")
+            save_json = json.loads(save_text)
+            save_hotkeys(save_json)
+            self.master.HOTKEYS=save_json
+            self.master.cancel_win()
+        except:
+            pass
 
 # EDIT OBJECTIONS WINDOW
 ############################################################################################################
@@ -136,6 +168,15 @@ class EditObjections(tk.CTkToplevel):
         self.master=master
         self.minsize(1100,700)
         self.objections = open_objections()
+        # Turn list of autofills into string
+        for i in self.objections:
+            auto_fill_text = ""
+            for auto in self.objections[i][4]:
+                auto_fill_text = auto_fill_text + auto + ","
+            auto_fill_text=auto_fill_text[:-1]#Remove final comma
+            self.objections[i][4] = auto_fill_text
+
+
         self.current_objection=""
         font = (master.theme["text_font"],int(master.theme["text_size"]))
         label_font = tk.CTkFont("Arial",16,underline=True,weight="bold")
@@ -210,7 +251,7 @@ class EditObjections(tk.CTkToplevel):
             w.destroy()
         #Add each objection as a button
         for obj in self.objections:
-            self.objection_buttons.append(tk.CTkButton(master=self.list_frame,fg_color="transparent",text=obj,anchor="w",command=partial(self.load_objection,obj)))
+            self.objection_buttons.append(tk.CTkButton(master=self.list_frame,text_color=("black","white"),fg_color="transparent",text=obj,anchor="w",command=partial(self.load_objection,obj)))
             self.objection_buttons[-1].pack(anchor="w",fill="x",padx=10)
 
     #Update the text of the previous button
@@ -233,6 +274,9 @@ class EditObjections(tk.CTkToplevel):
             self.objections = {key if key != self.current_objection else name: value for key, value in self.objections.items()}
             #Remove prev and add new
             self.objections[name] = update_array
+
+        for i in self.objections:
+            self.objections[i][4]=self.objections[i][4].split(",")
         #Save json
         save_objections(self.objections)
         #Update main window objections
@@ -246,7 +290,7 @@ class EditObjections(tk.CTkToplevel):
     #Create a blank new objection
     def new(self):
         # Add a new black objection below the current one!
-        self.objections["New"] = ["","",False,False,[]]
+        self.objections["New"] = ["","",False,False,""]
         self.redraw_buttons()
 
     #Delete the current objection and deselect

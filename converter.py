@@ -109,9 +109,9 @@ def readForm(file):
     f = fitz.open(file)
     for page in f:
         img = page.get_pixmap()
-        img.save("out.png")
+        img.save("assets/out.png")
         #SPLIT INTO COLUMNS
-        img = cv2.imread("out.png")
+        img = cv2.imread("assets/out.png")
         height = img.shape[0]
         width = img.shape[1]
 

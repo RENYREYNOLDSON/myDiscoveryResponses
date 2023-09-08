@@ -296,10 +296,10 @@ class Objections_Frame2(tk.CTkFrame):
         self.current_objection_label = tk.CTkLabel(master=self.info_frame,text="OBJECTION NAME")
         self.current_objection_label.pack(padx=5)
         #Objection Input
-        self.objection_input = tk.CTkEntry(master=self.info_frame,placeholder_text="Objection Input")
+        self.objection_input = tk.CTkEntry(master=self.info_frame,placeholder_text="Objection Input",text_color="black")
         self.objection_input.pack(padx=15,fill="x")
         #Additional Text Input
-        self.additional_input = tk.CTkEntry(master=self.info_frame,placeholder_text="Additional Input")
+        self.additional_input = tk.CTkEntry(master=self.info_frame,placeholder_text="Additional Input",text_color="black")
         self.additional_input.pack(padx=15,fill="x",pady=(5,0))
 
         self.redraw_all()#Draw all of the objection buttons
@@ -333,8 +333,10 @@ class Objections_Frame2(tk.CTkFrame):
         self.opts=[]
         self.params=[]
         for opt in self.options:
-            optbox = tk.CTkButton(master=self.list_frame,text=opt,corner_radius=0,anchor="w",fg_color="transparent",hover=False,command=partial(self.master.toggle_objection,str(opt)))
+            optbox = tk.CTkButton(master=self.list_frame,text_color=("black","white"),text=opt,corner_radius=0,anchor="w",fg_color="transparent",hover=False,command=partial(self.master.toggle_objection,str(opt)))
             optbox.grid(row=c,column=0,sticky="ew",padx=(10,10),pady=2,columnspan=2)
+            #Set Right Click Command
+            optbox.bind("<Button-3>",partial(self.master.toggle_selected_objection,str(opt)))
             self.opts.append(optbox)
             c+=1
         
@@ -364,14 +366,38 @@ class Objections_Frame2(tk.CTkFrame):
 
     #Set the info box to the currently selected objection
     def update_current(self,obj):
-        #Set name
-        self.current_objection_label.configure(text=obj.key.upper())
-        #Set Objection Param
-        self.objection_input.delete(0,"end")
-        self.objection_input.insert(0,obj.param)
-        #Set additional Param
-        self.additional_input.delete(0,"end")
-        self.additional_input.insert(0,obj.additional_param)
+        if obj!="":
+            #Set name
+            self.current_objection_label.configure(text=obj.key.upper())
+            #Set Objection Param
+            self.objection_input.delete(0,"end")
+            if obj.need_param:
+                self.objection_input.configure(state="normal",fg_color="white")
+                self.objection_input.insert(0,obj.param)
+                self.objection_input._activate_placeholder()
+            else:
+                self.objection_input._activate_placeholder()
+                self.objection_input.configure(state="disabled",fg_color=self.info_frame._fg_color)
+            
+
+            #Set additional Param
+            self.additional_input.delete(0,"end")
+            if obj.need_additional_param:
+                self.additional_input.configure(state="normal",fg_color="white")
+                self.additional_input.insert(0,obj.additional_param)
+                self.additional_input._activate_placeholder()
+            else:
+                self.additional_input._activate_placeholder()
+                self.additional_input.configure(state="disabled",fg_color=self.info_frame._fg_color)
+
+        else:
+            self.current_objection_label.configure(text="OBJECTION NAME")
+            #Set Objection Param
+            self.objection_input.delete(0,"end")
+            self.objection_input._activate_placeholder()
+            #Set additional Param
+            self.additional_input.delete(0,"end")
+            self.additional_input._activate_placeholder()
 
 # BAR FRAME 
 ############################################################################################################
@@ -383,9 +409,13 @@ class Bar_Frame(tk.CTkFrame):
 
         # File
         var = tk.StringVar(value="File")
-        self.file=tk.CTkOptionMenu(master=self,anchor="center",variable=var,values=["New Window","Open Recent","Open File","Open Folder","Save File As","Save Client As","Export File as DOCX","Export Client as DOCX","Preview DOCX","Close File","Close Client","Exit"],width=100,corner_radius=0,bg_color="transparent",command=self.call_file)
+        self.file=tk.CTkOptionMenu(master=self,anchor="center",variable=var,values=["New Window","Open Recent","Open File","Open Folder","Save File As","Save Client As","Export File as DOCX","Export Client as DOCX","Export Check With Clients","Preview DOCX","Close File","Close Client","Exit"],width=100,corner_radius=0,bg_color="transparent",command=self.call_file)
         self.file.configure(button_color="#161616",fg_color="#161616")
         self.file.pack(side="left")
+        self.file._dropdown_menu.insert_separator(1)
+        self.file._dropdown_menu.insert_separator(5)
+        self.file._dropdown_menu.insert_separator(8)
+        self.file._dropdown_menu.insert_separator(12)
 
         # View
         var = tk.StringVar(value="Options")
@@ -430,6 +460,8 @@ class Bar_Frame(tk.CTkFrame):
             self.master.export_current()
         elif val=="Export Set as DOCX":
             self.master.export_all()
+        elif val=="Export Check With Clients":
+            self.master.export_check_with_clients()
         elif val=="Preview DOCX":
             self.master.view_preview()
         elif val=="Close File":

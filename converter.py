@@ -287,7 +287,8 @@ def filterPDF(data):
                 "document":document,
                 "county":county,
                 "plaintiff":plaintiff,
-                "defendant":defendant}
+                "defendant":defendant,
+                "date":""}
 
     return reqs,req_type,details
 

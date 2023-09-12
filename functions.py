@@ -19,6 +19,28 @@ HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage
 # FUNCTIONS 
 ############################################################################################################
 
+
+
+
+
+# Open the user guide pdf
+def open_user_guide():
+    script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+    file = "assets/user_guide.pdf"
+    file = os.path.join(script_dir, file)
+    os.startfile(file)
+
+
+
+
+# Get a name with ... if needed
+def get_name(name,length):
+    text = name[:length]#Only get first n-3 chars
+    if len(name)>length:
+        text = text[:-3] +"..."
+    return text
+
+
 # Open the hotkeys
 def open_hotkeys():
     if os.path.exists("assets/hotkeys.json"):

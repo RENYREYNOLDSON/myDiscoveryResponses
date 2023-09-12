@@ -27,7 +27,11 @@ class Client:
         self.master=master
         self.files=files
         self.color=("black","white")
-        self.current_file = files[0]
+        if len(files)>0:
+            self.current_file = files[0]
+        else:
+            self.current_file=""
+        self.save=""
     # Set the current client to self
     def set(self):
         self.master.set_client(self)
@@ -42,7 +46,7 @@ class Client:
 # Each file is stored as one of these
 class File:
     def __init__(self,name,details,req_type,reqs,master):
-        self.name = name
+        self.name = name.split("/")[-1][:-4]
         self.details = details
         self.req_type = req_type
         self.reqs = reqs
@@ -60,6 +64,17 @@ class File:
             i.master=val#Remove master from all of the sub objects etc
             for i2 in i.opts:
                 i2.master=val
+    def on_drop(self,event):
+        x,y = event.widget.winfo_pointerxy()
+        try:
+            target = event.widget.winfo_containing(x,y).master
+            client_name = target.cget("text")
+            self.master.move_file(self,client_name)
+        except:
+            return
+        #If a button see if the name is in clients
+
+
 
 # REQUEST CLASS
 ############################################################################################################
@@ -75,9 +90,12 @@ class Request:
         for i in self.master.objections_frame.options:
             self.opts.append(Objection(i,master))
         self.color=("black","white")
+
         self.RFP_option="Available"
         self.RFP_text=""
         self.RFA_option="Admit"
+        self.RFA_text="(a)\n(b)\n(c)\n(d)"
+
         self.auto_obj()
         self.req_type=req_type
         self.custom_key = custom_key
@@ -128,9 +146,9 @@ class Request:
                 if option!="Available" and self.RFP_text!="":
                     end = (end+extra).replace("[VAR]",self.RFP_text)
             else:
-                end = self.master.response_frame.response_text.get("0.0","end")
+                end = self.master.response_frame.get_response()
         else:
-            end = self.master.response_frame.response_text.get("0.0","end")
+            end = self.master.response_frame.get_response()
         full_text = full_text+"\n"+end
         return full_text
 
@@ -152,17 +170,31 @@ class Objection:
         self.additional_text=self.master.objections[key][1]
         self.alter_scope=self.master.objections[key][2]
         self.autofill=self.master.objections[key][3]
+
     #Toggle if this objection is selected
     def toggle(self):
         self.selected = not self.selected
+
+class RFARequest(Request):
+    def __init__(self,req,resp,no,master,req_type,custom_key=""):
+        super().__init__(req,resp,no,master,req_type,custom_key="")
+        self.RFA_option="Admit"
+
+class RFPRequest(Request):
+    def __init__(self,req,resp,no,master,req_type,custom_key=""):
+        super().__init__(req,resp,no,master,req_type,custom_key="")
+        self.RFP_option="Available"
+        self.RFP_text=""
+
+
 
 # SAVE CLASS (minor)
 ############################################################################################################
 # Just holds all of the files for saving
 class Save:
-    def __init__(self,files):
+    def __init__(self,files,save_type):
         self.files = files
-
+        self.save_type=save_type
 
 
     

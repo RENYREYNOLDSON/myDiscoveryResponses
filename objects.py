@@ -75,7 +75,6 @@ class File:
         #If a button see if the name is in clients
 
 
-
 # REQUEST CLASS
 ############################################################################################################
 # Class for each request/response

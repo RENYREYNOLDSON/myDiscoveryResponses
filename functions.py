@@ -9,7 +9,7 @@
 ############################################################################################################
 
 import customtkinter as tk
-import json,os
+import json,os,pickle
 
 # CONSTANTS 
 ############################################################################################################
@@ -21,7 +21,12 @@ HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage
 
 
 
-
+def valid_file_path(filename):
+    if filename=="":
+        return False
+    if os.path.exists(filename):
+        return True
+    return False
 
 # Open the user guide pdf
 def open_user_guide():
@@ -40,6 +45,19 @@ def get_name(name,length):
         text = text[:-3] +"..."
     return text
 
+def get_recents():
+    #Open the recent files list
+    with open("assets/recents", "rb") as fp:   # Unpickling
+        lst = pickle.load(fp)
+    new=[]
+    for file in lst:
+        if valid_file_path(file):
+            new.append(file)
+    return new
+def set_recents(lst):
+    with open("assets/recents", "wb") as fp:   #Pickling
+        pickle.dump(lst, fp)
+    
 
 # Open the hotkeys
 def open_hotkeys():

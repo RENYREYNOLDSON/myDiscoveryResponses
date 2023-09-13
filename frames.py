@@ -12,6 +12,8 @@ from functions import *
 import customtkinter as tk
 from PIL import Image
 from functools import partial
+import tkinter
+from customtkinter.windows.widgets.core_widget_classes.dropdown_menu import DropdownMenu
 
 # CONSTANTS 
 ############################################################################################################
@@ -286,6 +288,7 @@ class Requests_Frame(tk.CTkFrame):
             button = tk.CTkButton(master=self.file_frame,image=PDF_ICON,anchor="w",text=get_name(i.name,22),hover=False,corner_radius=0,fg_color=fg_color,command=i.set,text_color=i.color)
             button.pack(fill="x",side="top")
             button.bind("<ButtonRelease-1>", i.on_drop)
+            #button.bind("<B1-Motion>",i.on_drag)
             self.file_buttons.append(button)
             c+=1
 
@@ -505,13 +508,16 @@ class Landing_Frame(tk.CTkFrame):
         title_frame = tk.CTkFrame(master=self,fg_color="transparent")
         title_frame.place(relx=0.05,rely=0.05,anchor="nw")
         # Title
-        font = ("Times",50,"bold")
+        font = ("Segoe UI",50,"bold")
         title = tk.CTkLabel(master=title_frame,text="myDiscoveryResponses",font=font,anchor="w")
         title.pack(fill="x")
         # Sub Title
-        font = ("Times",20,"bold")
+        font = ("Segoe UI",20,"bold")
         title = tk.CTkLabel(master=title_frame,text="  Software for the creation of Discovery Responses",font=font,anchor="w")
         title.pack(fill="x")
+
+        footer = tk.CTkLabel(master=self,text="Version "+str(master.version))
+        footer.place(relx=0.5,rely=0.99,anchor="s")
 
         font=("Segoe UI",20)
 
@@ -535,11 +541,13 @@ class Landing_Frame(tk.CTkFrame):
         recent_frame.place(relx=0.65,rely=0.3,anchor="n",relwidth=0.3)
         #Recent List
         #Recent Label
-        self.new_client_button = tk.CTkButton(master=recent_frame,font=font,text="Recent File 1",anchor="w",fg_color="transparent",text_color=("black","white"))
-        self.new_client_button.pack(pady=2,fill="x")
+        i=0
+        while i<min(8,len(master.RECENTS)):
+            self.new_client_button = tk.CTkButton(master=recent_frame,font=font,text=master.RECENTS[i].split("/")[-1],anchor="w",fg_color="transparent",text_color=("black","white"),command=partial(master.load,master.RECENTS[i]))
+            self.new_client_button.pack(pady=2,fill="x")
+            i+=1
 
-        self.new_client_button = tk.CTkButton(master=recent_frame,font=font,text="Recent File 2",anchor="w",fg_color="transparent",text_color=("black","white"))
-        self.new_client_button.pack(pady=2,fill="x")
+
 
 # BAR FRAME 
 ############################################################################################################
@@ -551,13 +559,21 @@ class Bar_Frame(tk.CTkFrame):
 
         # File
         var = tk.StringVar(value="File")
-        self.file=tk.CTkOptionMenu(master=self,anchor="center",variable=var,values=["New Window","New Client","Open Recent","Open File","Open Folder","Save File As","Save Client As","Export File as DOCX","Export Client as DOCX","Export Check With Clients","Preview DOCX","Close File","Close Client","Exit"],width=100,corner_radius=0,bg_color="transparent",command=self.call_file)
+        self.file=tk.CTkOptionMenu(master=self,anchor="center",variable=var,values=["New Window","New Client","Open File","Open Folder","Save File As","Save Client As","Export File as DOCX","Export Client as DOCX","Export Check With Clients","Preview DOCX","Close File","Close Client","Exit"],width=100,corner_radius=0,bg_color="transparent",command=self.call_file)
         self.file.configure(button_color="#161616",fg_color="#161616")
         self.file.pack(side="left")
         self.file._dropdown_menu.insert_separator(1)
-        self.file._dropdown_menu.insert_separator(6)
-        self.file._dropdown_menu.insert_separator(9)
-        self.file._dropdown_menu.insert_separator(14)
+        self.file._dropdown_menu.insert_separator(5)
+        self.file._dropdown_menu.insert_separator(8)
+        self.file._dropdown_menu.insert_separator(13)
+        #Add the open recent menu
+        values=[]
+        for f in master.RECENTS:
+            values.append(f)
+        menu_recent = DropdownMenu(self.file,values=values,command=self.call_recent)
+        self.file._dropdown_menu.insert_cascade(3,menu=menu_recent, label='Open Recent')
+
+
 
         # View
         var = tk.StringVar(value="Options")
@@ -586,6 +602,11 @@ class Bar_Frame(tk.CTkFrame):
         self.copy = tk.CTkButton(master=self,text="Save",fg_color="transparent",width=100,corner_radius=0,command=self.master.quick_save)
         self.copy.pack(side="right")
 
+    #Trigger a file load when a 'recent' clicked
+    def call_recent(self,val):
+        if valid_file_path(val):
+            self.master.load(val)
+
     #Trigger a command when a 'File' button clicked
     def call_file(self,val):# All of file manu options
         self.file.set("File")
@@ -598,12 +619,12 @@ class Bar_Frame(tk.CTkFrame):
         elif val=="Open Folder":
             self.master.select_folder()
         elif val=="Save File As":
-            self.master.save_file()
+            self.master.select_save_file()
         elif val=="Save Client As":
-            self.master.save_client()
+            self.master.select_save_client()
         elif val=="Export File as DOCX":
             self.master.export_current()
-        elif val=="Export Set as DOCX":
+        elif val=="Export Client as DOCX":
             self.master.export_all()
         elif val=="Export Check With Clients":
             self.master.export_check_with_clients()
@@ -615,7 +636,6 @@ class Bar_Frame(tk.CTkFrame):
             self.master.close_client()
         elif val=="Exit":
             self.master.exit_window()
-
     #Trigger a command when an 'Options' button clicked
     def call_options(self,val):
         self.options.set("Options")

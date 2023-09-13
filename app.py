@@ -125,6 +125,12 @@ class App(tk.CTkToplevel):
     #CONSTRUCTOR 
     def __init__(self,master, **kwargs):
         super().__init__(master, **kwargs)
+        ##### VERSION AND USER STUFF
+        self.version=0.6
+
+
+        #####
+
         # CLASS ATTRIBUTES
         self.master=master#Master is root of the program (Top level tk)
         master.call()
@@ -137,6 +143,7 @@ class App(tk.CTkToplevel):
         self.prev_type=""#Type of the previous request
         self.current_req=0#Currently selected request
         self.HOTKEYS=open_hotkeys()
+        self.RECENTS=get_recents()
 
         self.objections = open_objections()#Get the list of objections
         self.win=None#Container for the pop out window
@@ -159,6 +166,8 @@ class App(tk.CTkToplevel):
 
         # POPULATE WINDOW WITH OBJECTS
         self.populate_window()
+
+
         
 
     ### WINDOW UTILITY
@@ -516,10 +525,12 @@ class App(tk.CTkToplevel):
         if save_obj.save_type == "file":
             self.load_file(save_obj.files[0])
         else:
-            self.load_client(save_obj.files[0])
+            self.load_client(save_obj.files[0],filename)
     
     #Load a single file into the current client
     def load_file(self,new_file):
+        if self.current_client=="":
+            return
         #Set new master
         new_file.set_master(self)
         # Add file
@@ -529,7 +540,7 @@ class App(tk.CTkToplevel):
         self.requests_frame.show_clients(self.clients)
         
     #Load Client
-    def load_client(self,new_client):
+    def load_client(self,new_client,filename):
         #Set new master
         new_client.set_master(self)
         # Add file
@@ -537,14 +548,21 @@ class App(tk.CTkToplevel):
         self.set_client(self.clients[-1])
         self.requests_frame.show_clients(self.clients)
         self.close_landing_frame()
+        #SET THE QUICKSAVE!
+        self.current_client.save=filename
+        self.set_recents(filename)
 
 
-    #Save File
-    def save_file(self):
+    #Select the save file
+    def select_save_file(self):
         # Select a folder and save name
         filename=tk.filedialog.asksaveasfilename(title="Save Current File",filetypes=(("Discovery Save File","*.discovery"),('All files', '*.*'))).replace(".discovery","")
         if filename=="":
             return
+        self.save_file(filename)
+
+    #Actually do the file saving
+    def save_file(self,filename):
         file = open(filename+".discovery","wb")
         # Remove master from the save
         self.current_client.current_file.set_master(None)
@@ -555,12 +573,16 @@ class App(tk.CTkToplevel):
         # Add the master back
         self.current_client.current_file.set_master(self)
 
-    #Save Client
-    def save_client(self):
+    #Select a save to save the client file as
+    def select_save_client(self):
         # Select a folder and save name
         filename=tk.filedialog.asksaveasfilename(title="Save Current Client",filetypes=(("Discovery Save File","*.discovery"),('All files', '*.*'))).replace(".discovery","")
         if filename=="":
             return
+        self.save_client(filename)
+
+    #Actually save the client file
+    def save_client(self,filename):
         file = open(filename+".discovery","wb")
         # Remove master from the save
         self.current_client.set_master(None)
@@ -570,18 +592,25 @@ class App(tk.CTkToplevel):
         pickle.dump(save_obj,file)#Need to fix saving with the name
         # Add the master back
         self.current_client.set_master(self)
+        # Set the quicksave
+        self.current_client.save = filename
+        self.set_recents(filename)
 
-
-
-
-    #Quicksave, if file saved do that. else save client. WHEN SAVED AS CLIENT RESET
+    #QUICKSAVE: Only saves CLIENT!
     def quick_save(self):
-        #If file has unique save
-        #Else save client
-        pass
-    
+        if self.current_client!="":
+            if valid_file_path(self.current_client.save):#If client has a save
+                self.save_client(self.current_client.save.replace(".discovery",""))#Remove file type
+                return
+            else:
+                self.select_save_client()#Save client if nothing else!
 
-
+        """ REMOVED AS I ONLY WANT TO QUICKSAVE CLIENT
+        if self.file_open():
+        #If the file has a unique save, save this
+        if valid_file_path(self.current_client.current_file.save):
+            self.save_file(self.current_client.current_file.save)
+            return"""
 
 
 
@@ -674,9 +703,6 @@ class App(tk.CTkToplevel):
             numbers.append(r.custom_key)
         cnv.updateDOC(reqs,resps,file.details,self.req_type,str(filename),numbers)
 
-    #Export the current Check with Clients from the file!
-
-    #REMOVE THIS FOR SOMETHING ELSE
     # Export all as a folder of DOCX's
     def export_all(self):
         if len(self.current_client.files)>0:
@@ -693,9 +719,6 @@ class App(tk.CTkToplevel):
             filename=tk.filedialog.asksaveasfilename(filetypes=(("DOCX","*.docx"),('All files', '*.*')))
             self.export(self.current_client.current_file,filename)
 
-    def export_client(self):
-        print("Export Client")
-
     def export_check_with_clients(self):
         print("Export Check")
 
@@ -703,9 +726,30 @@ class App(tk.CTkToplevel):
     ### SETTING AND GETTING OBJECTS
     ########################################################################################################
 
+    # Add a new file to recents and save!
+    def set_recents(self,new):
+        if new in self.RECENTS:
+            #Swap with the first one
+            index = self.RECENTS.index(new)
+            temp=self.RECENTS[0]
+            self.RECENTS[0]=new
+            self.RECENTS[index]=temp
+        else:
+            #Add to front and push
+            self.RECENTS.insert(0,new)
+            if len(self.RECENTS)>10:
+                self.RECENTS.pop(-1)
+        # Update recents file
+        set_recents(self.RECENTS)
+        # Update menu
+
+        # Update landing frame
+
+
+
     # Move a file to a different client using drag and drop
     def move_file(self,file,client_name):
-        if get_name(file.name,22)==client_name:
+        if get_name(self.current_client.name,22)==client_name:
             return
         for i in self.clients:
             if get_name(i.name,22) == client_name:
@@ -718,6 +762,7 @@ class App(tk.CTkToplevel):
                 self.close_file()
                 #Close current req
                 return
+
 
     #Box to add a new client!
     def new_client(self):
@@ -1038,24 +1083,6 @@ class App(tk.CTkToplevel):
 def create_window(root):
     App(root)
 
-# Load a new window with files
-def load_window(root,files,filename):
-    # Create new window
-    master=App(root)
-    for f in files:
-        # Set the new master to this window
-        f.set_master(master)
-        # Add the object to the list of open files
-        master.files.append(f)
-    master.requests_frame.show_clients(master.clients)
-    if master.current_client != "":
-        master.requests_frame.show_files(master.current_client.files)# Show files
-    master.set_file(master.files[0])# Set first files request
-    master.requests_frame.show_list(master.reqs)# Show requests
-    master.requests_frame.scroll_to()
-    master.requests_frame.scroll_to_file()
-    master.quick_save_file = filename.replace(".discovery","")
-
 
 # MAIN LOOP
 ############################################################################################################
@@ -1076,35 +1103,34 @@ if __name__ == "__main__":
 #CTkMessagebox(title="Error", message="Something went wrong!!!", icon="cancel",corner_radius=0)
 
 #Current:
-#Add way to see what has been saved
-#Do quicksave feature
-#Add open recent set
-#Create a user guide!!!!
-#Add check with clients
-#Add loading bar & threads
-#Account for file closing while details open, just close win on this event
 #Make 17.1's fully work included
+#Redo grey/green system
+#Fix opening client from file +
+#Add way to see what has been saved
+#Add check with clients
+#Account for file closing while details open, just close win on this event
 #Change objection objects
 #Add firm details
-#Fix move file working on itself
-#Redo grey/green system
-#Test and tweak file reading
 #Make objections typable
 #Add italics and bold capability for all text. Maybe special key?
-#Add options menu
+#Warning for open file with no client
+#Reset heading on close client
+#Fix preview docx
+#Add GUI for hotkeys
+#Add basic hotkeys and accelerators
+#Make logo consistent
+#Remove open and save file, only pdfs
+
+
+#Test and tweak file reading so that all files work, else give an error! 
+#NOTE some files do not start at 1, so must load this differently. Clean the loading code and make work for all,
+#when it works for one move that file!
+#Make REQUEST take priority over just number
 
 
 
 
 
+#10:10 - 12:30
 
-
-
-
-
-
-
-
-
-#7:00 - 3:10
-#3:20 - 3:30
+#3:00 - 4:30

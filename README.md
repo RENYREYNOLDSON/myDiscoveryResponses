@@ -1,9 +1,9 @@
 # myDiscoveryResponses
 Software for the creation of Discovery Responses
 ## Installation
-### Windows Installer
-### Download Windows EXE directly
-### Download Python Files
+### Using Windows Installer
+### Downloading Windows EXE directly
+### Downloading raw Python Files
 
 ## User Guide
 ### Software Overview

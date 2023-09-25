@@ -7,7 +7,7 @@ Software for the creation of Discovery Responses
 3. Run the program from the windows start menu or by using the Desktop Shortcut
 
 ### Downloading Windows EXE directly
-1. Download the ```myDiscoveryResponses``` zip file
+1. Download the ```myDiscoveryResponses.zip``` file
 2. Unzip the file
 3. The myDiscoveryResponses.exe can be run directly from this folder
 ### Downloading raw Python Files

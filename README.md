@@ -9,6 +9,7 @@ Software for the creation of Discovery Responses
 ### Software Overview
 ![Example Screenshot](./USER_GUIDE_IMAGE.png)
 General description of usage here
+#### 1. Menu Bar
 
 ### Usage Examples
 

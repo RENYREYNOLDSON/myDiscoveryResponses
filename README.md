@@ -3,7 +3,8 @@ Software for the creation of Discovery Responses
 ## Installation
 ### Using Windows Installer
 1. Download the ```setup.exe```
-2. Run setup.exe, this will install myDiscoveryResponses in your Local Program Files
+2. Run the setup.exe, this will install myDiscoveryResponses in your Local Program Files
+3. Run the program from the windows start menu or by using the Desktop Shortcut
 
 ### Downloading Windows EXE directly
 1. Download folder with exe in

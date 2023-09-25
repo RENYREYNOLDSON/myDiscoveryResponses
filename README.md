@@ -18,7 +18,7 @@ Software for the creation of Discovery Responses
 ```
 pip install requirements.txt
 ```
-4. Run the app.py program using
+4. Run the app.py program using:
 ```
 python app.py
 ```

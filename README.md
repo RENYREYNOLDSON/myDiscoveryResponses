@@ -23,3 +23,7 @@ General description of usage here
 #### Change firm details
 
 #### Create, save and load clients
+
+#### Change theme
+
+#### Change hotkeys

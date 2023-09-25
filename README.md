@@ -10,6 +10,7 @@ Software for the creation of Discovery Responses
 ![Example Screenshot](./USER_GUIDE_IMAGE.png)
 General description of usage here
 #### 1. Menu Bar
+#### 2. Client
 
 ### Usage Examples
 #### Importing discovery request files

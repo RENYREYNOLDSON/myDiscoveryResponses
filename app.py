@@ -15,18 +15,37 @@
 # IMPORTS
 ############################################################################################################
 
+# Main Imports
 import converter as cnv
-from windows import *
-from frames import *
-from objects import *
-from functions import *
-from functions import *
 from CTkMessagebox import CTkMessagebox
 import customtkinter as tk
 import json,os,copy
 import pickle
 from threading import Thread
 import re
+import os
+# Frame Imports
+from frames.BarFrame import *
+from frames.LandingFrame import *
+from frames.ObjectionsFrame import *
+from frames.RequestsFrame import *
+from frames.ResponseFrame import *
+# Window Imports
+from windows.Detail import *
+from windows.EditObjections import *
+from windows.FirmDetail import *
+from windows.Hotkeys import *
+from windows.Preview import *
+from windows.PreviewText import *
+from windows.Theme import *
+# Object Imports
+from objects.Client import *
+from objects.File import *
+from objects.Objection import *
+from objects.Request import *
+from objects.Save import *
+# Functions
+from functions import *
 
 # CONSTANTS
 ############################################################################################################
@@ -126,7 +145,7 @@ class App(tk.CTkToplevel):
     def __init__(self,master, **kwargs):
         super().__init__(master, **kwargs)
         ##### VERSION AND USER STUFF
-        self.version=0.6
+        self.version=1.0
 
 
         #####
@@ -142,6 +161,7 @@ class App(tk.CTkToplevel):
         self.req_type=""#Type of the current request
         self.prev_type=""#Type of the previous request
         self.current_req=0#Currently selected request
+        self.previous_objection_text=""
         self.HOTKEYS=open_hotkeys()
         self.RECENTS=get_recents()
 
@@ -149,9 +169,10 @@ class App(tk.CTkToplevel):
         self.win=None#Container for the pop out window
 
         # WINDOW SETUP
-        self.wm_iconbitmap("assets/icon.ico")#Icon
+        self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico"))#Icon
         self.minsize(1050,720)#Min Size
         self.geometry("1050x720")#Start size
+        
         self.state("zoomed")
         self.title("myDiscoveryResponses")#Window title
         self.after(100, self.refresher)
@@ -163,6 +184,11 @@ class App(tk.CTkToplevel):
         self.bind("<Escape>",self.escape_pressed)
         self.bind("<Button-1>",self.mouse_pressed)
         self.protocol("WM_DELETE_WINDOW", self.exit_window)
+        # MENU HOTKEYS
+        self.bind("<Control-n>",self.cntrl_n)
+        self.bind("<Control-o>",self.cntrl_o)
+        self.bind("<Control-f>",self.cntrl_f)
+        self.bind("<Control-s>",self.cntrl_s)
 
         # POPULATE WINDOW WITH OBJECTS
         self.populate_window()
@@ -181,17 +207,13 @@ class App(tk.CTkToplevel):
         # Requests Frame
         self.requests_frame = Requests_Frame(master=self,corner_radius=0,width=100)
         self.requests_frame.pack(padx=0,pady=0,expand=False,side="left",fill="both")
-
+        #Landing Frame
         self.landing_frame = Landing_Frame(master=self,corner_radius=15)
         self.landing_frame.pack(padx=100,pady=100,expand=True,side="left",fill="both")
-
         # Objections Frame
         self.objections_frame = Objections_Frame(master=self,corner_radius=0,width=250)
-
         # Response Frame
         self.response_frame = Response_Frame(master=self)
-
-
         self.set_theme("text")#Set theme just for text, as main theme loaded at start
         
     # Create a new MAIN window
@@ -212,8 +234,11 @@ class App(tk.CTkToplevel):
             if not ((self.req_type!="RFP" and len(self.response_frame.get_response())>0) or (self.req_type=="RFP" and len(self.response_frame.get_RFP())>0)):
                 remove_end = True
             text = get_objection_text(self.current_req.opts,self.objections,remove_end)#Get objections with no end if text in response
-            if text!=temp.replace("\n",""):#If the text has changed REDRAW
+            #Check if any of the objections or params have changed
+            if text!=self.previous_objection_text:#If the text has changed REDRAW
                 self.response_frame.set_objection(text)
+                self.set_client_unsaved(self.current_client)
+            self.previous_objection_text = text # Save for next time
 
             # 2. UPDATE RESPONSE TEXTBOX
             if self.req_type=="RFA":
@@ -229,6 +254,7 @@ class App(tk.CTkToplevel):
                 if option!="Available" and resp!="":
                     text = (text+RFP_EXTRA).replace("[VAR]",resp)
                 if text!=temp.replace("\n",""):#If the text has changed REDRAW
+                    self.set_client_unsaved(self.current_client)
                     #Change response text
                     self.response_frame.set_response(text)
                     #Change color of request
@@ -240,13 +266,13 @@ class App(tk.CTkToplevel):
                 temp = self.response_frame.get_response()#Get prev text from box
                 text = RFA_responses[option]
                 if text!=temp.replace("\n",""):#If the text has changed REDRAW
+                    self.set_client_unsaved(self.current_client)
                     #Change response text
                     self.response_frame.set_response(text)
                     #Change color of request
                     self.current_req.color="grey"
                     self.current_client.current_file.color=("black","white")
                     self.requests_frame.update_files(self.current_client.files)
-
 
             # NORMAL
             else:#If NOT RFP
@@ -258,9 +284,10 @@ class App(tk.CTkToplevel):
                 start=0
                 for fill in self.HOTKEYS:# Replace all autofill phrases
                     position = -1
-                    position = resp.find(fill)#Pos of index
+                    trigger = " "+fill+" "
+                    position = resp.find(trigger)#Pos of index
                     if position<0:
-                        position = resp.find("\n"+fill[1:])# Try new line instances
+                        position = resp.find("\n"+trigger[1:])# Try new line instances
                         if position>=0:
                             start=1
                     if position>=0:
@@ -270,17 +297,19 @@ class App(tk.CTkToplevel):
                     text = resp[1:]#Remove space
                     # Update index if grown in length, must add suffic n + chars
                     text_index="0.0 + "+str(use_pos)+" chars"
-                    text_end_index="0.0 + "+str(use_pos+len(use_fill)-1)+" chars"
+                    text_end_index="0.0 + "+str(use_pos+len(" "+use_fill+" ")-1)+" chars"
                     # Put the text here 
                     self.response_frame.current_frame.response_text.delete(text_index,text_end_index)
-                    self.response_frame.current_frame.response_text.insert(text_index,self.HOTKEYS[use_fill][start:])
+                    self.response_frame.current_frame.response_text.insert(text_index,(" "+self.HOTKEYS[use_fill]+" "))
                     # Reset index
-                    insert_index+=" + "+str(len(self.HOTKEYS[use_fill])-len(use_fill)+1)+" chars"
+                    insert_index+=" + "+str(len(" "+self.HOTKEYS[use_fill]+" ")-len(use_fill)+1)+" chars"
                     self.response_frame.current_frame.response_text.mark_set("insert",insert_index)
-                if resp[1:]!=self.current_req.resp.replace("\n",""):# Change colour back if edited
+                if resp[1:].replace("\n","")!=self.current_req.resp.replace("\n",""):# Change colour back if edited
                     self.current_req.color="grey"
+                    self.current_req.resp=resp[1:]
                     self.current_client.current_file.color=("black","white")
                     self.requests_frame.update_files(self.current_client.files)
+                    self.set_client_unsaved(self.current_client)
 
         self.after(100, self.refresher)#REFRESH AGAIN
 
@@ -304,10 +333,35 @@ class App(tk.CTkToplevel):
 
         self.requests_frame.show_files(self.current_client.files)
         self.title("myDiscoveryResponses   |   "+str(self.current_client.current_file.name))
-
-
+        self.set_client_unsaved(self.current_client)
         self.cancel_win()
-        #CHANGE FILE NAME HERE!
+        
+    def save_firm_detail_win(self):
+        new_details={"firm_name":self.win.name.get("0.0","end-1c"),
+                    "address_line_1":self.win.address_line_1.get("0.0","end-1c"),
+                    "address_line_2":self.win.address_line_2.get("0.0","end-1c"),
+                    "telephone":self.win.telephone.get("0.0","end-1c"),
+                    "facsimile":self.win.facsimile.get("0.0","end-1c"),
+                    "email":self.win.email.get("0.0","end-1c"),
+                    "attorneys":self.win.attorneys.get("0.0","end-1c")}
+        
+        if self.current_client!="":
+            self.set_client_unsaved(self.current_client)
+        if self.current_client!="":
+            self.current_client.firm_details = new_details
+        else:
+            set_firm_details(new_details)
+        self.cancel_win()
+
+
+    def client_already_open(self,client_name):
+        for client in self.clients:
+            if client.name == client_name:
+                #Show a warning
+                CTkMessagebox(title="Error", message="Already have a client open with the name '"+str(client_name)+"' !", icon="cancel",corner_radius=0)
+                #Return 
+                return True
+        return False
         
 
     # validates wether a valid file is open
@@ -324,6 +378,12 @@ class App(tk.CTkToplevel):
             self.win = Detail(self)
             self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
             self.win.mainloop()
+
+    def view_firm_details(self):
+        self.cancel_win()
+        self.win = FirmDetail(self)
+        self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
+        self.win.mainloop()  
 
     # View and edit the OBJECTIONS JSON
     def view_objections(self):
@@ -348,10 +408,10 @@ class App(tk.CTkToplevel):
 
     # View a text preview of the objections+response
     def view_preview(self):
-        if self.current_client!="":
+        if self.file_open():
             self.cancel_win()
             # Create a temporary docx
-            self.export(self.current_client.current_file,"assets/temp")
+            self.export(self.current_client.current_file,os.path.join(os.path.dirname(__file__),"assets/temp"))
             self.win = Preview(self)
             self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
             self.win.mainloop()
@@ -377,16 +437,36 @@ class App(tk.CTkToplevel):
 
     # Exit this window and delete
     def exit_window(self):
+        unsaved=False
+        for client in self.clients:
+            if client.saved==False:
+                unsaved=True
+        if unsaved:#Check if the user wants to save without closing!!
+            msg = CTkMessagebox(title="Exit?", message="Are you sure you want to close without saving?",
+                                icon="question", option_1="Cancel", option_3="Yes",corner_radius=0)
+            if msg.get()!="Yes":
+                return
         self.destroy()
         c=0
         for w in root.winfo_children():
             c+=1
-        if c==0:
+        if c==0:#Destroy root if no windows left open
             root.destroy()
 
 
     ### KEY PRESSES
     ########################################################################################################
+    # HOTKEYS
+    # CNTRL-N New Client
+    def cntrl_n(self,e):
+        self.new_client()
+    # CNTRL-
+    def cntrl_o(self,e):
+        self.select_file()
+    def cntrl_f(self,e):
+        self.select_folder()
+    def cntrl_s(self,e):
+        self.quick_save()
 
     # If up arrow
     def up_pressed(self,e):
@@ -466,6 +546,9 @@ class App(tk.CTkToplevel):
         for filename in filenames:
             if os.path.exists(filename):
                 if filename[-4:].lower()==".pdf":#PDF
+                    if self.current_client=="":# If no client selected
+                        CTkMessagebox(title="Error", message="Must create a client to open Discovery Requests", icon="cancel",corner_radius=0)
+                        return
                     self.title("myDiscoveryResponses   |   "+str(filename.split("/")[-1]))
                     self.open_file(filename)
                     #Else if a obj
@@ -541,6 +624,8 @@ class App(tk.CTkToplevel):
         
     #Load Client
     def load_client(self,new_client,filename):
+        if self.client_already_open(new_client.name):
+            return
         #Set new master
         new_client.set_master(self)
         # Add file
@@ -593,8 +678,11 @@ class App(tk.CTkToplevel):
         # Add the master back
         self.current_client.set_master(self)
         # Set the quicksave
-        self.current_client.save = filename
-        self.set_recents(filename)
+        self.current_client.save = filename+".discovery"
+        self.current_client.saved = True
+        #Update clients to show saved
+        self.requests_frame.update_clients(self.clients)
+        self.set_recents(self.current_client.save)
 
     #QUICKSAVE: Only saves CLIENT!
     def quick_save(self):
@@ -604,14 +692,6 @@ class App(tk.CTkToplevel):
                 return
             else:
                 self.select_save_client()#Save client if nothing else!
-
-        """ REMOVED AS I ONLY WANT TO QUICKSAVE CLIENT
-        if self.file_open():
-        #If the file has a unique save, save this
-        if valid_file_path(self.current_client.current_file.save):
-            self.save_file(self.current_client.current_file.save)
-            return"""
-
 
 
     #Close the current file
@@ -638,6 +718,11 @@ class App(tk.CTkToplevel):
     #Close the current open client
     def close_client(self):
         if self.current_client!="":
+            if self.current_client.saved==False:
+                msg = CTkMessagebox(title="Close Client?", message="Are you sure you want to close the client without saving?",
+                                    icon="question", option_1="Cancel", option_3="Yes",corner_radius=0)
+                if msg.get()!="Yes":
+                    return
             #Get new index for new selected client
             index = self.clients.index(self.current_client)
             if index==0:
@@ -677,15 +762,37 @@ class App(tk.CTkToplevel):
         self.objections_frame.reset()
         #Reopen landing page
         self.open_landing_frame()
+        #Set window title
+        self.title("myDiscoveryResponses")#Window title
 
 
-
+    def load_client_feedback(self):
+        if self.file_open():
+            filename = tk.filedialog.askopenfilename(title='Load Client Feedback', filetypes=(('Word Docx', '.docx'),('All files', '*.*')))
+            if filename!="":
+                feedback = cnv.read_client_feedback(filename)
+                #KEY,RESP,TYPE
+                for f in feedback:
+                    for file in self.current_client.files:
+                        if file.req_type == f["type"]:
+                            for req in file.reqs:
+                                if str(req.custom_key)==f["key"]:
+                                    if req.req_type=="RFA" and req.RFA_option!="Custom":#If RFA then set this to custom
+                                        req.RFA_option="Custom"
+                                        req.resp=""
+                                    elif req.req_type=="RFP" and req.RFP_option!="Custom":#If RFP then set this to custom
+                                        req.RFP_option="Custom"
+                                        req.resp=""
+                                    req.resp = req.resp + f["response"]#Add client feedback to end of the response text
+                                    if req==self.current_req:#If this is the current request then update screen
+                                        self.response_frame.set_RFP("Custom")
+                                        self.response_frame.set_RFA("Custom")
+                                        self.response_frame.set_response(req.resp)
 
 
 
     ### EXPORTING AS DOCX
     ########################################################################################################
-
 
     
     # Export a file as DOCX
@@ -701,7 +808,7 @@ class App(tk.CTkToplevel):
             resps.append(full_text)
             #3. ADD NUMBER POINTERS
             numbers.append(r.custom_key)
-        cnv.updateDOC(reqs,resps,file.details,self.req_type,str(filename),numbers)
+        cnv.updateDOC(reqs,resps,file.details,self.current_client.firm_details,self.req_type,str(filename),numbers)
 
     # Export all as a folder of DOCX's
     def export_all(self):
@@ -719,12 +826,40 @@ class App(tk.CTkToplevel):
             filename=tk.filedialog.asksaveasfilename(filetypes=(("DOCX","*.docx"),('All files', '*.*')))
             self.export(self.current_client.current_file,filename)
 
-    def export_check_with_clients(self):
-        print("Export Check")
-
+    def export_check_with_clients(self):#This outputs all of the check with clients WITHIN the client
+        if self.file_open():
+            # Get all check with clients / red
+            filename=tk.filedialog.asksaveasfilename(filetypes=(("DOCX","*.docx"),('All files', '*.*')))
+            if filename!="":
+                reqs=[]
+                resps=[]
+                numbers=[]
+                req_types=[]
+                for file in self.current_client.files:
+                    for r in file.reqs:#Get responses and requests
+                        if r.color=="#FF0000":
+                            #1. ADD REQUESTS
+                            reqs.append(r.req)
+                            #2. ADD RESPONSES
+                            full_text = r.get_full_resp()
+                            resps.append(full_text)
+                            #3. ADD NUMBER POINTERS
+                            numbers.append(r.custom_key)
+                            #4. ADD REQUEST TYPE
+                            req_types.append(r.req_type)
+                if len(reqs)>0:
+                    cnv.updateDOC(reqs,resps,file.details,self.current_client.firm_details,req_types,str(filename),numbers)
 
     ### SETTING AND GETTING OBJECTS
     ########################################################################################################
+
+    def set_client_unsaved(self,client):
+        if client.saved==False:
+            return
+        client.saved = False
+        self.requests_frame.update_clients(self.clients)
+
+
 
     # Add a new file to recents and save!
     def set_recents(self,new):
@@ -742,8 +877,9 @@ class App(tk.CTkToplevel):
         # Update recents file
         set_recents(self.RECENTS)
         # Update menu
-
+        self.bar_frame.update_recents(self.RECENTS)
         # Update landing frame
+        self.landing_frame.update_recents(self.RECENTS)
 
 
 
@@ -766,8 +902,10 @@ class App(tk.CTkToplevel):
 
     #Box to add a new client!
     def new_client(self):
-        dialog = tk.CTkInputDialog(text="Enter new client name:", title="New Client")
+        dialog = tk.CTkInputDialog(text="Enter new client name:", title="New Client",)
         text = dialog.get_input()  # waits for input
+        if self.client_already_open(text):
+            return
         if text!=None and text!="":
             #Check if text in clients if it is then return
             for client in self.clients:
@@ -849,8 +987,7 @@ class App(tk.CTkToplevel):
             self.requests_frame.show_files(self.current_client.files)
             self.requests_frame.show_list(self.current_client.current_file.reqs)
             self.set_request(self.current_client.current_file.current_req)
-            #self.requests_frame.scroll_to(True)
-            self.response_frame.redraw(self.current_client.current_file.req_type)
+            self.requests_frame.scroll_to(True)
             self.title("myDiscoveryResponses   |   "+str(self.current_client.current_file.name.split("/")[-1]))
         else:
             #RESET THE REQUESTS HERE
@@ -879,8 +1016,7 @@ class App(tk.CTkToplevel):
         self.requests_frame.update_files(self.current_client.files)
         self.requests_frame.show_list(self.current_client.current_file.reqs)
         self.set_request(file.current_req)
-        #self.requests_frame.scroll_to(True)
-        self.response_frame.redraw(file.req_type)
+        self.requests_frame.scroll_to(True)
         self.title("myDiscoveryResponses   |   "+str(file.name.split("/")[-1]))
 
     # Save request and open a different one
@@ -911,33 +1047,42 @@ class App(tk.CTkToplevel):
             ################################################
             
         # 2. ENTERING NEW RESPONSE INTO FRAME
-        if self.current_req==req:#For when I set to itself
+        self.response_frame.redraw(req.req_type)
+        #If set to itself then return
+        if self.current_req==req:
             return
+        #SET THE NEW REQ
         self.current_req=req
         self.current_client.current_file.current_req=req# Set the current req of the file
-        #Save,Reset and add text
+
+        #UPDATING THE RESPONSE FRAME
+        #Set the request textbox
         self.response_frame.set_request(req.req)
+        #Set the response number label
         if req.custom_key!="":
             text = req.custom_key
         else:
             text = req.no+1
         self.response_frame.request_label.configure(text=self.req_type+" NO. "+str(text)+":")
-        #Response text
+        #Set the response textbox
         self.response_frame.set_response(req.resp)
-        #RFP
+        #RFP & RFA Options and labels
         if self.req_type=="RFP":
             self.response_frame.set_RFP(req.RFP_option)
             self.response_frame.set_RFP_text(req.RFP_text)
         elif self.req_type=="RFA":
             self.response_frame.set_RFA(req.RFA_option)
             self.response_frame.set_RFA_text(req.RFA_text)
-        #Change the objections list!
+
+        #Set the request type to itself
+        self.set_type(self.req_type)    
+
+        #Update Objections List
         self.objections_frame.redraw(req)
-        self.requests_frame.update_list(self.reqs)#Redraw the buttons
-        self.set_type(self.req_type)
-        #Change the objection special input
+        #Redraw the request buttons
+        self.requests_frame.update_list(self.reqs)
+        #Update the objection special input
         self.objections_frame.update_current(self.current_req.current_objection)
-        self.update()   
 
 
     # Update the theme JSON and set the new theme
@@ -949,18 +1094,18 @@ class App(tk.CTkToplevel):
             "text_color":self.win.text_picker.cget("text"),
             "text_bg":self.win.bg_picker.cget("text"),
             "text_font":self.win.font_entry.get(),
-            "theme":self.win.theme_button.get(),
+            "theme":self.win.theme,
             "layout":["Requests","Responses","Objections"]
         }
-        with open("assets/theme.json", "w") as outfile:#Save the new theme JSON
+        with open(os.path.join(os.path.dirname(__file__),"assets/theme.json"), "w") as outfile:#Save the new theme JSON
             json.dump(self.theme, outfile)
         self.set_theme()
         self.cancel_win()#Destroy Window
 
     # Open and set the theme
     def set_theme(self,param="both"):# Return API key from file if possible
-        if os.path.exists("assets/theme.json"):
-            with open('assets/theme.json', 'r') as file:
+        if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/theme.json")):
+            with open(os.path.join(os.path.dirname(__file__),'assets/theme.json'), 'r') as file:
                 self.theme = json.load(file)
             # Set relevant things here
             if param=="theme" or param=="both":
@@ -980,6 +1125,7 @@ class App(tk.CTkToplevel):
     # Set a request to submitted
     def submit(self):
         if self.current_req!=0:
+            self.set_client_unsaved(self.current_client)
             #Update autos
             self.set_auto_objections()
             if self.current_req.color=="#50C878":
@@ -988,11 +1134,23 @@ class App(tk.CTkToplevel):
                 self.current_req.color="#50C878"
             self.requests_frame.update_list(self.reqs)
             
+            prev_req=self.current_req
             #Go to next request
             index = self.reqs.index(self.current_req)
             if index<len(self.reqs)-1:
                 self.set_request(self.reqs[index+1])
 
+            #If an RFA request then update 17.1 response if needed
+            
+            if prev_req.RFA_option!="Admit":
+                #If not admit then add the 17.1 response
+                #Find the 17.1
+                for file in self.current_client.files:
+                    if file.req_type=="FROG":
+                        for frog in file.reqs:
+                            if frog.custom_key=="17.1":
+                                frog.resp = frog.resp + "\n" + prev_req.RFA_text
+            
             #Scroll to this request
             self.requests_frame.scroll_to()
             # If all are green set file green!
@@ -1070,12 +1228,6 @@ class App(tk.CTkToplevel):
 
 
 
-
-
-
-
-
-
 # WINDOW SPECIFIC FUNTIONS (cannot be elsewhere)
 ############################################################################################################
 
@@ -1091,6 +1243,7 @@ if __name__ == "__main__":
     #APPLICATION UTILITY SETUP
     initial_theme()
     root=tk.CTk()
+    root.iconbitmap(default=os.path.join(os.path.dirname(__file__),"assets/icon.ico"))
     root.withdraw()
     create_window(root)
     root.mainloop()
@@ -1100,37 +1253,19 @@ if __name__ == "__main__":
 
 # CHANGES
 ############################################################################################################
-#CTkMessagebox(title="Error", message="Something went wrong!!!", icon="cancel",corner_radius=0)
 
 #Current:
-#Make 17.1's fully work included
-#Redo grey/green system
-#Fix opening client from file +
-#Add way to see what has been saved
-#Add check with clients
-#Account for file closing while details open, just close win on this event
-#Change objection objects
-#Add firm details
-#Make objections typable
-#Add italics and bold capability for all text. Maybe special key?
-#Warning for open file with no client
-#Reset heading on close client
-#Fix preview docx
-#Add GUI for hotkeys
-#Add basic hotkeys and accelerators
-#Make logo consistent
-#Remove open and save file, only pdfs
+#Create user guide
+#Get details from frogs
+#Check export works on exe
 
+#MUST COMPLETE
+#Fix normal files
+#Fix Installer, use command window to see errors
 
-#Test and tweak file reading so that all files work, else give an error! 
-#NOTE some files do not start at 1, so must load this differently. Clean the loading code and make work for all,
-#when it works for one move that file!
-#Make REQUEST take priority over just number
+#SHOULD COMPLETE
+#Add trys and error checkers
+#Bold and italic options
 
-
-
-
-
-#10:10 - 12:30
-
-#3:00 - 4:30
+#3:50 - 6:50
+#7:30 - 

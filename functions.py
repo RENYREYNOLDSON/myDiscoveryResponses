@@ -19,7 +19,13 @@ HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage
 # FUNCTIONS 
 ############################################################################################################
 
-
+def get_nth_key(dictionary, n=0):
+    if n < 0:
+        n += len(dictionary)
+    for i, key in enumerate(dictionary.keys()):
+        if i == n:
+            return key
+    raise IndexError("dictionary index out of range") 
 
 def valid_file_path(filename):
     if filename=="":
@@ -45,9 +51,10 @@ def get_name(name,length):
         text = text[:-3] +"..."
     return text
 
+#GETTERS AND SETTERS FOR RECENT FILES
 def get_recents():
     #Open the recent files list
-    with open("assets/recents", "rb") as fp:   # Unpickling
+    with open(os.path.join(os.path.dirname(__file__),"assets/recents"), "rb") as fp:   # Unpickling
         lst = pickle.load(fp)
     new=[]
     for file in lst:
@@ -55,45 +62,58 @@ def get_recents():
             new.append(file)
     return new
 def set_recents(lst):
-    with open("assets/recents", "wb") as fp:   #Pickling
+    with open(os.path.join(os.path.dirname(__file__),"assets/recents"), "wb") as fp:   #Pickling
         pickle.dump(lst, fp)
+
+#GETTERS AND SETTERS FOR FIRM DETAILS
+def get_firm_details():
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/firm_details.json")):
+        with open(os.path.join(os.path.dirname(__file__),"assets/firm_details.json"),"r") as file:
+            data = json.load(file)
+        return data
+    return None
+
+def set_firm_details(data):
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/firm_details.json")):
+        with open(os.path.join(os.path.dirname(__file__),'assets/firm_details.json'), 'w') as file:
+            json.dump(data,file)
     
 
 # Open the hotkeys
 def open_hotkeys():
-    if os.path.exists("assets/hotkeys.json"):
-        with open("assets/hotkeys.json","r") as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/hotkeys.json")):
+        with open(os.path.join(os.path.dirname(__file__),"assets/hotkeys.json"),"r") as file:
             data = json.load(file)
         return data
     return None
 
 # Save the new hotkeys file
 def save_hotkeys(data):
-    if os.path.exists("assets/hotkeys.json"):
-        with open('assets/hotkeys.json', 'w') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/hotkeys.json")):
+        with open(os.path.join(os.path.dirname(__file__),'assets/hotkeys.json'), 'w') as file:
             json.dump(data,file)
 
 
 # Opens the objections file
 def open_objections():# Return API key from file if possible
-    if os.path.exists("assets/objections.json"):
-        with open('assets/objections.json', 'r') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/objections.json")):
+        with open(os.path.join(os.path.dirname(__file__),'assets/objections.json'), 'r') as file:
             data = json.load(file)
         return data
     return None
 
 # Opens the objections file
 def open_objections_backup():# Return API key from file if possible
-    if os.path.exists("assets/objections_backup.json"):
-        with open('assets/objections_backup.json', 'r') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/objections_backup.json")):
+        with open(os.path.join(os.path.dirname(__file__),'assets/objections_backup.json'), 'r') as file:
             data = json.load(file)
         return data
     return None
 
 # Save the new objections file
 def save_objections(data):
-    if os.path.exists("assets/objections.json"):
-        with open('assets/objections.json', 'w') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/objections.json")):
+        with open(os.path.join(os.path.dirname(__file__),'assets/objections.json'), 'w') as file:
             json.dump(data,file)
 
 # Find all instances of keywords [start,end]
@@ -127,8 +147,8 @@ def bold_keywords(obj,text):
 
 # Set the initial tkinter theme
 def initial_theme():
-    if os.path.exists("assets/theme.json"):
-        with open('assets/theme.json', 'r') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/theme.json")):
+        with open(os.path.join(os.path.dirname(__file__),'assets/theme.json'), 'r') as file:
             data= json.load(file)
         # Set relevant things here
         tk.set_appearance_mode(data["theme"])
@@ -176,8 +196,7 @@ def get_objection_text(opts,objections,remove_end=False):
                     else:
                         text = text.replace("[VAR]"," "+obj.additional_param)# Replace [VAR]
                     extra = extra+str(text)+". "#Add new text!
-            
-            
+                    
             full_text = full_text + final_text + extra
         return full_text
     return ""

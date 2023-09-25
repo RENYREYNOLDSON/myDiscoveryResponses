@@ -14,6 +14,7 @@ import re
 from docx import Document
 from docx.text.paragraph import Paragraph
 from docx.oxml.xmlchemy import OxmlElement
+from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt
 from pdfminer.high_level import extract_text
 import fitz
@@ -36,7 +37,9 @@ FORM_VALUES = ["(1)","(2)",'1.1', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7
 def insert_paragraph_after(paragraph, text=None, style=None):
     """Insert a new paragraph after the given paragraph."""
     new_p = OxmlElement("w:p")
+
     paragraph._p.addnext(new_p)
+    
     new_para = Paragraph(new_p, paragraph._parent)
     if text:
         new_para.add_run(text)
@@ -51,8 +54,6 @@ def delete_paragraph(paragraph):
         p.getparent().remove(p)
         paragraph._p = paragraph._element = None
 
-
-
 ### READ THE PDF
 ########################################################################################################
 
@@ -66,7 +67,6 @@ def readPDF(file):
     text = "".join(list(text))
     return text
 
-
 #Reads a pdf using fitz
 def readPDF3(file):
     doc = fitz.open(file)
@@ -79,7 +79,11 @@ def readPDF3(file):
                 if wdir[0] == 0:  # either 90° or 270°
                     page.add_redact_annot(line["bbox"])
         page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)  # remove text, but no image
-        #ADD TEXT
+        #REMOVE MARGINS AND FOOTERS
+
+
+        rect = fitz.Rect(0,0,page.rect.height,page.rect.width)
+        print(page.rect.width)
         text+=page.get_text()
     return text
 
@@ -90,14 +94,14 @@ def readPDF3(file):
 def readForm(file):
     cfg = config.PipelinesConfig()
     # important to adjust these values to match the size of boxes on your image
-    cfg.width_range = (10,30)
-    cfg.height_range = (10,30)
+    cfg.width_range = (9,30)
+    cfg.height_range = (9,30)
     # the more scaling factors the more accurate the results but also it takes more time to processing
     # too small scaling factor may cause false positives
     # too big scaling factor will take a lot of processing time
-    cfg.scaling_factors = [1.3]
+    cfg.scaling_factors = [1]
     # w/h ratio range for boxes/rectangles filtering
-    cfg.wh_ratio_range = (0.3, 2)
+    cfg.wh_ratio_range = (0.8, 2.5)
     # group_size_range starting from 2 will skip all the groups
     # with a single box detected inside (like checkboxes)
     cfg.group_size_range = (1, 1)
@@ -109,30 +113,30 @@ def readForm(file):
     f = fitz.open(file)
     for page in f:
         img = page.get_pixmap()
-        img.save("assets/out.png")
+        img.save(os.path.join(os.path.dirname(__file__),"assets/out.png"))
         #SPLIT INTO COLUMNS
-        img = cv2.imread("assets/out.png")
+        img = cv2.imread(os.path.join(os.path.dirname(__file__),"assets/out.png"))
         height = img.shape[0]
         width = img.shape[1]
 
         # Cut the image in half
-        width_cutoff = width // 2
+        width_cutoff = int(width // 2.5)
         s1 = img[:, :width_cutoff]
         s2 = img[:, width_cutoff:]
 
-        cv2.imwrite("assets/s1.png", s1)
-        cv2.imwrite("assets/s2.png", s2)
+        cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s1.png"), s1)
+        cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s2.png"), s2)
 
-        checkboxes1 = get_checkboxes("assets/s1.png", cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-        checkboxes2 = get_checkboxes("assets/s2.png", cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+        checkboxes1 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s1.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+        checkboxes2 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s2.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
         for checkboxes in [checkboxes1,checkboxes2]:
             #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
             for check in checkboxes:
                 #Get array
                 array = check[2]
                 total=0
-                for row in array[1:-1]:
-                    total+=sum(row[1:-1])/len(row[1:-1])
+                for row in array[2:-3]:
+                    total+=sum(row[2:-3])/len(row[1:-1])
                 total = total/len(array[1:-1])
                 vals.append(total)
                 if total>=20:
@@ -151,15 +155,22 @@ def readForm(file):
 
 
 
+
+
+
+
+
 ### FILTER THROUGH THE PDF
 ########################################################################################################
 # Get requests and details from a pdf text string
 def filterPDF(data):
     #Search Terms
-    terms=["REQUESTNO.","INTERROGATORYNO.","ANDNO.","ENTSNO.","ONSNO.","TIONNO."]
+    terms=["REQUESTNO.","INTERROGATORYNO.","ANDNO.","ENTSNO.","ONSNO.","TIONNO.","REQUESTFORADMISSION"]
     reqs=[]
     req=""
     adding=False
+    term_used=False
+    hard_stop=False
     split = data.split("\n")
 
     ####################### MAIN LOOP
@@ -176,46 +187,45 @@ def filterPDF(data):
     for i in range(len(split)):
         check=2
 
-        #DOCUMENT DETAILS!!!!!!!!!!!!!!!!!!!!
-
-        if adding==False:#THIS KEEPS THE OBJECTS IN ORDER AND COLLECTING PROPERLY!
-            check=1
-            #Get extra data here:
-            if "CASENO." in split[i].replace(" ","").upper() and case_number=="":# Case Number & Document
-                case_number = split[i].upper().split("NO.")[1].replace(" ","").replace(":","")
-                #Get Document until can't
-                c=1
-                bypass=True
-                while bypass or ("ASSIGNEDTO" not in split[i+c].replace(" ","").upper() and "CUTOFF:" not in split[i+c].upper() and "PLACE:" not in split[i+c].upper() and "FILED:" not in split[i+c].upper() and "DATE:" not in split[i+c].upper() and c<20 and "PROPOUNDINGPARTY:" not in split[i+c].replace(" ","")):
-                    val = min(max(0,len(split[i+c])-1),10)
-                    if val>2:
-                        if split[i+c][:val]==split[i+c][:val].upper() or bypass==False:
-                            document = document + split[i+c]
-                            bypass=False
-                    c+=1
-
-            elif "COUNTY" in split[i].replace(" ","") and county=="":# County
-                county = split[i].split("COUNTY OF",1)[-1]
-                c=1
-                #Get County until can't
-                while split[i+c].replace(" ","").replace("\n","")!="" and split[i+c]==split[i+c].upper() and c<10:
-                    county=county+split[i+c]
-                    c+=1
-
-            elif "PROPOUNDINGPARTY:" in split[i].replace(" ","") and plaintiff=="":#Plaintiff and defendant
-                #Add until not propounding party
-                plaintiff=split[i].split(":")[-1]
-                c=1
-                while "SETNUMBER" not in split[i+c].replace(" ","") and "SETNO" not in split[i+c].replace(" ","")  and c<20:
-                    if defendant=="":# If adding to plaintiff
-                        if "RESPONDINGPARTY:" in split[i+c].replace(" ",""):
-                            defendant = split[i+c].split(":")[-1]
+        try:
+            #DOCUMENT DETAILS!!!!!!!!!!!!!!!!!!!!
+            if adding==False:#THIS KEEPS THE OBJECTS IN ORDER AND COLLECTING PROPERLY!
+                check=1
+                #Get extra data here:
+                if "CASENO." in split[i].replace(" ","").upper() and case_number=="":# Case Number & Document
+                    case_number = split[i].upper().split("NO.")[1].replace(" ","").replace(":","")
+                    #Get Document until can't
+                    c=1
+                    bypass=True
+                    while bypass or ("ASSIGNEDTO" not in split[i+c].replace(" ","").upper() and "CUTOFF:" not in split[i+c].upper() and "PLACE:" not in split[i+c].upper() and "FILED:" not in split[i+c].upper() and "DATE:" not in split[i+c].upper() and c<20 and "PROPOUNDINGPARTY:" not in split[i+c].replace(" ","")):
+                        val = min(max(0,len(split[i+c])-1),10)
+                        if val>2:
+                            if split[i+c][:val]==split[i+c][:val].upper() or bypass==False:
+                                document = document + split[i+c]
+                                bypass=False
+                        c+=1
+                elif "COUNTY" in split[i].replace(" ","") and county=="":# County
+                    county = split[i].split("COUNTY OF",1)[-1]
+                    c=1
+                    #Get County until can't
+                    while split[i+c].replace(" ","").replace("\n","")!="" and split[i+c]==split[i+c].upper() and c<10:
+                        county=county+split[i+c]
+                        c+=1
+                elif "PROPOUNDINGPARTY:" in split[i].replace(" ","") and plaintiff=="":#Plaintiff and defendant
+                    #Add until not propounding party
+                    plaintiff=split[i].split(":")[-1]
+                    c=1
+                    while "SETNUMBER" not in split[i+c].replace(" ","") and "SETNO" not in split[i+c].replace(" ","")  and c<20:
+                        if defendant=="":# If adding to plaintiff
+                            if "RESPONDINGPARTY:" in split[i+c].replace(" ",""):
+                                defendant = split[i+c].split(":")[-1]
+                            else:
+                                plaintiff = plaintiff + split[i+c]
                         else:
-                            plaintiff = plaintiff + split[i+c]
-                    else:
-                        defendant = defendant + split[i+c]
-                    c+=1
-
+                            defendant = defendant + split[i+c]
+                        c+=1
+        except:
+            pass
         #Clean Plaintiff and defendant
         plaintiff = plaintiff.upper().replace("DEFENDANT","").replace("(S)","")
         done = False
@@ -224,7 +234,6 @@ def filterPDF(data):
                 if plaintiff[i2].isalpha():
                     plaintiff = plaintiff[i2:]
                     done = True
-
         defendant = defendant.upper().replace("PLAINTIFF","").replace("(S)","")
         done = False
         for i2 in range(len(defendant)):
@@ -232,34 +241,44 @@ def filterPDF(data):
                 if defendant[i2].isalpha():
                     defendant = defendant[i2:]
                     done = True
-
         #SWAP THEM!!! TEMP
         temp = plaintiff
         plaintiff = defendant
         defendant = temp
 
-        #GET REQUESTS!!!!!!!!!!!!!!!!!!!!
 
-        if any(t in split[i].replace(" ","") for t in terms):# If request term used
-            adding=True
-            if req!="":
-                reqs.append(req.strip())
-            req=""
-        elif "1. "==split[i][:3]:#Restart requests
-            reqs=[]
-            adding=True
-            req = split[i].split(".",1)[1]
-        elif str(len(reqs)+check)+". " in split[i][:10]:# If basic numbering used
-            adding=True
-            if req!="":
-                reqs.append(req.strip())
-            req = split[i].split(".",1)[1]
-        elif adding==True:# Add the request text 
-            if "DATED:" in split[i].replace(" ","")[:10].upper():
-                adding = False
-            elif len(split[i].replace(" ",""))>2 and not(split[i].replace(" ","")==split[i].replace(" ","").upper() and  "." not in split[i]):
-                req = req+" "+split[i].strip()
-        #print(split[i])
+
+
+        #GET REQUESTS!!!!!!!!!!!!!!!!!!!!
+        if not hard_stop:
+            if any(t in split[i].replace(" ","") for t in terms) and split[i].replace(" ","")[-1]==":":#       If request term used
+                adding=True
+                if req!="":
+                    reqs.append(req.strip())
+                req=""
+                if not term_used:
+                    reqs=[]
+                term_used=True
+            elif "1. "==split[i][:3] and term_used==False:#                                    Restart requests
+                reqs=[]
+                adding=True
+                req = split[i].split(".",1)[1]
+            elif str(len(reqs)+check)+". " in split[i][:10] and term_used==False:#            If basic numbering used
+                adding=True
+                if req!="":
+                    reqs.append(req.strip())
+                req = split[i].split(".",1)[1]
+            elif adding==True:#                                         Add the request text 
+                if "DATED:" in split[i].replace(" ","")[:10].upper():
+                    adding = False
+                    hard_stop=True#Used to stop scanning for reqs
+                elif len(split[i].replace(" ",""))>2 and not(split[i].replace(" ","")==split[i].replace(" ","").upper() and  "." not in split[i]):
+                    req = req+" "+split[i].strip()
+
+    #Stop reading of the footer!
+    #Add last line before date!
+
+
 
     #ISSUE end of each page continues to the margin text!
 
@@ -268,9 +287,9 @@ def filterPDF(data):
     #Get type of discovery
     req_type=""
     search = data[:1000].replace(" ","")# Search 1st 1000 chars
-    if "INTERROGATORIES" in search:
+    if "INTERROGATOR" in search:
         req_type="SPROG"
-    elif "ADMISSIONS" in search:
+    elif "ADMISSION" in search:
         req_type="RFA"
     else:
         req_type="RFP"
@@ -307,7 +326,8 @@ def getRequests(file):
                     "document":"",
                     "county":"",
                     "plaintiff":"",
-                    "defendant":""}
+                    "defendant":"",
+                    "date":""}
     else:
         reqs,reqs_type,details = filterPDF(data)
         breqs,breqs_type,bdetails = filterPDF(backup_data)
@@ -320,18 +340,29 @@ def getRequests(file):
 ### UPLOAD THE DOCS
 ########################################################################################################
 # Save requests, responses and details to a word DOCX
-def updateDOC(reqs,resps,details,file,name,numbers):
+def updateDOC(reqs,resps,details,firm_details,file,name,numbers):
     templates = {
     "RFA":"assets/Response to RFA.docx",
     "RFP":"assets/Response to RFP.docx",
     "SPROG":"assets/Response to SROG.docx",
     "FROG":"assets/Response to FROG2.docx"
     }
-    #Loading template file
-    file=templates[file]
-    doc = Document(file)
+    headings = {
+    "RFA":"REQUEST FOR ADMISSION",
+    "RFP":"DEMAND",
+    "SPROG":"SPECIAL INTERROGATORY",
+    "FROG":"FORM INTERROGATORY"
+    }
+    #Select the correct heading for the file
+    if isinstance(file,str):
+        heading=headings[file]
+        #Loading template file
+        filename=os.path.join(os.path.dirname(__file__),templates[file])
+    else:#If a list of types (for export with client), set headings later
+        filename=os.path.join(os.path.dirname(__file__),templates["RFA"])
+    doc = Document(filename)
     #Normal Style
-    if "FROG" in file:
+    if "FROG" in filename:
         style = doc.styles["Normal"]
         font = style.font
         font.name = "Times New Roman"
@@ -340,8 +371,15 @@ def updateDOC(reqs,resps,details,file,name,numbers):
         style = doc.styles['Normal']
         font = style.font
         font.size = Pt(12)
-    # 1. ADD THE DETAILS
+    #Heading style
+    style = doc.styles.add_style('Heading', WD_STYLE_TYPE.PARAGRAPH)
+    font = style.font
+    font.name = "Times New Roman"
+    font.size = Pt(12)
+    font.bold=True
+    font.underline=True
 
+    # 1. ADD THE DETAILS
     #FOOTER
     for section in doc.sections:
         footer=section.footer
@@ -366,13 +404,24 @@ def updateDOC(reqs,resps,details,file,name,numbers):
             p.text=""
             run = p.add_run("PLAINTIFF'S RESPONSES TO "+str(details["document"]))
             run.bold=True
+
     #GENERAL TEXT
     for p in doc.paragraphs:
         text = str(p.text)
-        if "PLAINTIFFX" in text or "DEFENDANTX" in text or "DOCUMENTX" in text:
+        if (x in text for x in ["PLAINTIFFX","DEFENDANTX","DOCUMENTX","DATEX","ATTORNEYSX","FIRM_NAMEX","ADDRESS_LINE_1X","ADDRESS_LINE_2X","TELEPHONEX","FACSIMILEX","EMAILX"]):
+            #Normal Details
             text=text.replace("PLAINTIFFX",details["plaintiff"])
             text=text.replace("DEFENDANTX",details["defendant"])
             text=text.replace("DOCUMENTX",details["document"])
+            text=text.replace("DATEX",details["date"])
+            #Firm Details
+            text=text.replace("ATTORNEYSX",firm_details["attorneys"])
+            text=text.replace("FIRM_NAMEX",firm_details["firm_name"])
+            text=text.replace("ADDRESS_LINE_1X",firm_details["address_line_1"])
+            text=text.replace("ADDRESS_LINE_2X",firm_details["address_line_2"])
+            text=text.replace("TELEPHONEX",firm_details["telephone"])
+            text=text.replace("FACSIMILEX",firm_details["facsimile"])
+            text=text.replace("EMAILX",firm_details["email"])
             p.text = text
         if "NAME OF COUNTYX" in text:
             p.text=""
@@ -381,45 +430,77 @@ def updateDOC(reqs,resps,details,file,name,numbers):
 
 
     # 2. ADD THE REQUEST RESPONSES
-    if "FROG" in file:# Use the 'numbers' list for this
-        add_next = False
-        counter=0
-        for p in doc.paragraphs:
-            if "NO. " in p.text:
-                if counter<len(numbers):#If still valid
-                    if str(numbers[counter]) in p.text:
-                        insert_paragraph_after(p,"           "+reqs[counter],"Normal")#Add req
-                        add_next = True
-                    else:
-                        delete_paragraph(p)
-                else:#If finished
-                    delete_paragraph(p)
-            elif "RESPONSE:" in p.text:
-                if add_next:#Add new para
-                    insert_paragraph_after(p,"           "+resps[counter],"Normal")#Add req
-                    counter+=1
-                    add_next = False
-                else:#Delete this
-                    delete_paragraph(p)
-    else:
-        counter=0
-        for p in doc.paragraphs:
-            if "NO. " in p.text:
-                if counter<len(reqs):
-                    if "RESPONSE" not in p.text:
-                        insert_paragraph_after(p,"           "+reqs[counter],"Normal")
-                    else:
-                        insert_paragraph_after(p,"           "+resps[counter],"Normal")
-                        counter+=1
-                else:
-                    #Destroy para
-                    if "RESPONSE" not in p.text:
-                        delete_paragraph(prev_p)
-                    delete_paragraph(p)
-            prev_p = p
-    doc.save(str(name)+".docx")
+    counter=0
+    started=False
+    for p in doc.paragraphs:
+        if "STARTX" in p.text:
+            started=True
+            delete_paragraph(p)
+        if started:
+            for i in range(len(reqs)):#Add each paragraph with it's own correct heading
+                if not isinstance(file,str):
+                    heading = headings[file[counter]]
+                #Add heading
+                prev_p = insert_paragraph_after(prev_p,heading+" NO. "+str(numbers[counter])+":","Heading")
+                #Add request
+                prev_p = insert_paragraph_after(prev_p,"           "+reqs[counter],"Normal")
+                #Add heading
+                prev_p = insert_paragraph_after(prev_p,"RESPONSE TO "+heading+":","Heading")
+                #Add response
+                prev_p = insert_paragraph_after(prev_p,"           "+resps[counter],"Normal")
+                #Next
+                counter+=1
+            doc.save(str(name)+".docx")
+            return
+        prev_p = p
 
 
+
+
+### READ CLIENT FEEDBACK
+########################################################################################################
+def read_client_feedback(filename):
+    #Read client feedback from a DOCX file
+    #Given this filename, open, get data into sections. Send to main program to update requests
+    #Each one needs key,resp,type
+    #EXAMPLE FORMAT: feedback=[{"key":"1","type":"RFA","response":"CLIENT FEEDBACK: incredible"}]
+    feedback=[]
+    doc = Document(filename)
+    #Get each key from the request
+    #Then find the response and add to a new dict
+    current_key=""
+    current_type=""
+    current_response=""
+    for p in doc.paragraphs:
+        #RFA
+        if "REQUEST FOR ADMISSION NO. " in p.text:
+            if current_response!="":
+                feedback.append({"key":current_key,"type":current_type,"response":"CLIENT FEEDBACK: "+str(current_response)})
+            current_key = ".".join(re.findall(r'\d+', p.text))
+            current_type = "RFA"
+        elif "RESPONSE TO REQUEST FOR ADMISSION:" in p.text or "RESPONSE TO DEMAND:" in p.text or "RESPONSE TO SPECIAL INTERROGATORY:" in p.text or "RESPONSE TO FORM INTERROGATORY:" in p.text:
+            current_response = ""
+        #RFP
+        elif "DEMAND NO. " in p.text:
+            if current_response!="":
+                feedback.append({"key":current_key,"type":current_type,"response":"CLIENT FEEDBACK: "+str(current_response)})
+            current_key = ".".join(re.findall(r'\d+', p.text))
+            current_type = "RFP"
+        #SPROG
+        elif "SPECIAL INTERROGATORY NO. " in p.text:
+            if current_response!="":
+                feedback.append({"key":current_key,"type":current_type,"response":"CLIENT FEEDBACK: "+str(current_response)})
+            current_key = ".".join(re.findall(r'\d+', p.text))
+            current_type = "SPROG"
+        #FROG
+        elif "FORM INTERROGATORY NO. " in p.text or "Dated:" in p.text[:8]:
+            if current_response!="":
+                feedback.append({"key":current_key,"type":current_type,"response":"CLIENT FEEDBACK: "+str(current_response)})
+            current_key = ".".join(re.findall(r'\d+', p.text))
+            current_type = "FROG"
+        else:
+            current_response = current_response + p.text#Add current paragraph
+    return feedback
 
 
 

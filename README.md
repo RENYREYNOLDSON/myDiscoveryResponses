@@ -1,6 +1,6 @@
 # myDiscoveryResponses
 ## User Guide
-![Example Screenshot](./USER_GUIDE_IMAGE.PNG)
+![Example Screenshot](./USER_GUIDE_IMAGE.png)
 
 
 ## VERSION 0.4

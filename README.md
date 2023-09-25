@@ -2,8 +2,17 @@
 Software for the creation of Discovery Responses
 ## Installation
 ### Using Windows Installer
+1. Download setup
+2. Install the setup
+3. Run
 ### Downloading Windows EXE directly
+1. Download folder with exe in
+2. Run this
 ### Downloading raw Python Files
+1. Ensure python 3.11 is installed
+2. Download all of the relevant project files
+3. pip install requirements.txt
+4. Run the app.py program
 
 ## User Guide
 ### Software Overview

@@ -1,9 +1,9 @@
 # myDiscoveryResponses
-User Guide
+## User Guide
 ![Example Screenshot](./USER_GUIDE_IMAGE.png)
-Software Overview
+### Software Overview
 
-#### Usage Examples
+### Usage Examples
 
 ## VERSION 0.4
 ![Example Screenshot](./img2.PNG)

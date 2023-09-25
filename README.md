@@ -9,14 +9,19 @@ Software for the creation of Discovery Responses
 ### Downloading Windows EXE directly
 1. Download the ```myDiscoveryResponses.zip``` file
 2. Unzip the file
-3. The myDiscoveryResponses.exe can be run directly from this folder
+3. Run ```myDiscoveryResponses.exe``` directly from this folder
+4. 
 ### Downloading raw Python Files
-1. Ensure python 3.11 is installed
+1. Ensure that you have Python 3.11 or higher installed
 2. Download all of the relevant project files
+3. Install the required Python packages using:
 ```
 pip install requirements.txt
 ```
-4. Run the app.py program
+4. Run the app.py program using
+```
+python app.py
+```
 
 ## User Guide
 ### Software Overview

@@ -1,7 +1,7 @@
 # myDiscoveryResponses
-## User Guide
+User Guide
 ![Example Screenshot](./USER_GUIDE_IMAGE.png)
-#### Software Overview
+Software Overview
 
 #### Usage Examples
 

@@ -10,7 +10,12 @@ Software for the creation of Discovery Responses
 ![Example Screenshot](./USER_GUIDE_IMAGE.png)
 General description of usage here
 #### 1. Menu Bar
-#### 2. Client
+#### 2. Clients
+#### 3. Files
+#### 4. Requests
+#### 5. Current Request Window
+#### 6. Objections
+#### 7. Objections Input
 
 ### Usage Examples
 #### Importing discovery request files

@@ -51,3 +51,7 @@ General description of usage here
 #### Change theme
 
 #### Change hotkeys
+
+## Details
+Version: 1.0
+Contact: reynoldson2002@gmail.com

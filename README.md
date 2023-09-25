@@ -5,7 +5,7 @@ Software for the creation of Discovery Responses
 1. Download setup
 2. Install the setup
 3. Run
-**_NOTE:_**  The note content.
+> **_NOTE:_**  The note content.
 ### Downloading Windows EXE directly
 1. Download folder with exe in
 2. Run this

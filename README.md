@@ -54,4 +54,5 @@ General description of usage here
 
 ## Details
 Version: 1.0
-\nContact: reynoldson2002@gmail.com
+<br />
+Contact: reynoldson2002@gmail.com

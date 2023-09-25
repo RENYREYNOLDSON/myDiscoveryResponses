@@ -14,7 +14,7 @@ General description of usage here
 #### 3. Files
 #### 4. Requests
 #### 5. Current Request Window
-#### 6. Objections
+#### 6. All Objections
 #### 7. Objections Input
 
 ### Usage Examples

@@ -1,8 +1,8 @@
 # myDiscoveryResponses
-## VERSION 4.0
+## VERSION 0.4
 ![Example Screenshot](./img2.PNG)
 
-## VERSION 2.0
+## VERSION 0.2
 ![Example Screenshot](./Capture.PNG)
 
 

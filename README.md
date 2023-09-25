@@ -15,7 +15,9 @@ code
 ### Downloading raw Python Files
 1. Ensure python 3.11 is installed
 2. Download all of the relevant project files
-``` pip install requirements.txt ```
+```
+pip install requirements.txt
+```
 4. Run the app.py program
 
 ## User Guide

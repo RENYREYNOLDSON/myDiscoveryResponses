@@ -10,7 +10,7 @@ Software for the creation of Discovery Responses
 1. Download the ```myDiscoveryResponses.zip``` file
 2. Unzip the file
 3. Run ```myDiscoveryResponses.exe``` directly from this folder
-4. 
+
 ### Downloading raw Python Files
 1. Ensure that you have Python 3.11 or higher installed
 2. Download all of the relevant project files

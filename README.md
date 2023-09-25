@@ -2,13 +2,9 @@
 Software for the creation of Discovery Responses
 ## Installation
 ### Using Windows Installer
-1. Download setup
-2. Install the setup
-3. Run
-> **_NOTE:_**  The note content.
-```
-code
-```
+1. Download the ```setup.exe```
+2. Run setup.exe, this will install myDiscoveryResponses in your Local Program Files
+
 ### Downloading Windows EXE directly
 1. Download folder with exe in
 2. Run this

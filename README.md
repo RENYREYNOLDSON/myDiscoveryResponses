@@ -54,7 +54,7 @@ This window is the editor for the current requests response. Contains the **requ
 This window contains all of the Objections saved within the software. Left-Click to toggle if it is active for the current request, right-click to edit the objection's parameters.
 
 #### 7. Objections Input
-
+If the objection requires an input then it can be typed in here, there is also an input for an additional input.
 
 ### Usage Examples
 #### Importing discovery request files

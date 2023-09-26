@@ -69,9 +69,18 @@ def readPDF(file):
 
 #Reads a pdf using fitz
 def readPDF3(file):
-    doc = fitz.open(file)
+    doc = fitz.Document(file)
     text = ""
     for page in doc:
+        """
+        print(page.rect.width)
+        crop_rect = fitz.Rect(300,0,page.rect.width,page.rect.height)
+        page.set_mediabox(crop_rect)
+        page.set_cropbox(crop_rect)
+        page.set_trimbox(crop_rect)
+        print(page)
+        print(page.mediabox)
+        """
         #REMOVE VERTICAL TEXT!!
         for block in page.get_text("dict", flags=fitz.TEXTFLAGS_TEXT)["blocks"]:
             for line in block["lines"]:
@@ -79,12 +88,10 @@ def readPDF3(file):
                 if wdir[0] == 0:  # either 90° or 270°
                     page.add_redact_annot(line["bbox"])
         page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)  # remove text, but no image
-        #REMOVE MARGINS AND FOOTERS
+        
 
-
-        rect = fitz.Rect(0,0,page.rect.height,page.rect.width)
-        print(page.rect.width)
         text+=page.get_text()
+        #print(page.rect.width)
     return text
 
 
@@ -111,6 +118,7 @@ def readForm(file):
     results=[]
     vals=[]
     f = fitz.open(file)
+    page_count = 0#Used to add extra results when scanning fails
     for page in f:
         img = page.get_pixmap()
         img.save(os.path.join(os.path.dirname(__file__),"assets/out.png"))
@@ -135,14 +143,16 @@ def readForm(file):
                 #Get array
                 array = check[2]
                 total=0
-                for row in array[2:-3]:
-                    total+=sum(row[2:-3])/len(row[1:-1])
-                total = total/len(array[1:-1])
+                for row in array[2:-4]:
+                    total+=sum(row[2:-4])/len(row[2:-4])
+                total = total/len(array[2:-4])
                 vals.append(total)
                 if total>=20:
                     results.append(True)
                 else:
                     results.append(False)
+        if page_count==0 and len(results)==0:
+            results.append(False)
     output=[]
     print(len(results))
     print(len(FORM_VALUES))
@@ -167,10 +177,12 @@ def filterPDF(data):
     #Search Terms
     terms=["REQUESTNO.","INTERROGATORYNO.","ANDNO.","ENTSNO.","ONSNO.","TIONNO.","REQUESTFORADMISSION"]
     reqs=[]
+    keys=[]
     req=""
     adding=False
     term_used=False
     hard_stop=False
+    start_at_one=True
     split = data.split("\n")
 
     ####################### MAIN LOOP
@@ -252,6 +264,11 @@ def filterPDF(data):
         #GET REQUESTS!!!!!!!!!!!!!!!!!!!!
         if not hard_stop:
             if any(t in split[i].replace(" ","") for t in terms) and split[i].replace(" ","")[-1]==":":#       If request term used
+                #Add the custom key
+                key =re.findall(r'\d+', split[i][10:])[0]
+                if start_at_one==False or (term_used==False and key!="1"):
+                    keys.append(key)
+                    start_at_one=False
                 adding=True
                 if req!="":
                     reqs.append(req.strip())
@@ -259,24 +276,26 @@ def filterPDF(data):
                 if not term_used:
                     reqs=[]
                 term_used=True
+                
             elif "1. "==split[i][:3] and term_used==False:#                                    Restart requests
                 reqs=[]
                 adding=True
                 req = split[i].split(".",1)[1]
-            elif str(len(reqs)+check)+". " in split[i][:10] and term_used==False:#            If basic numbering used
+            elif str(len(reqs)+check)+"." in split[i][:10] and term_used==False:#            If basic numbering used
                 adding=True
                 if req!="":
                     reqs.append(req.strip())
                 req = split[i].split(".",1)[1]
             elif adding==True:#                                         Add the request text 
-                if "DATED:" in split[i].replace(" ","")[:10].upper():
+                if any(end in split[i].replace(" ","")[:10].upper() for end in ["DATED:","DATEDTHIS"]):
                     adding = False
                     hard_stop=True#Used to stop scanning for reqs
-                elif len(split[i].replace(" ",""))>2 and not(split[i].replace(" ","")==split[i].replace(" ","").upper() and  "." not in split[i]):
-                    req = req+" "+split[i].strip()
+                elif len(split[i].replace(" ",""))>2 and not(split[i].replace(" ","")==split[i].replace(" ","").upper() and len(split[i].replace(" ",""))>15 and split[i][-1].replace(" ","").strip() not in [".","?"]):
+                    req = req+" "+re.sub(r"-[ 0-9 ]-","",split[i].strip().replace("///",""))
 
-    #Stop reading of the footer!
-    #Add last line before date!
+    #Stop reading numbers in margin
+    #Stop reading side text
+
 
 
 
@@ -309,7 +328,7 @@ def filterPDF(data):
                 "defendant":defendant,
                 "date":""}
 
-    return reqs,req_type,details
+    return reqs,req_type,details,keys
 
 
 ### COMBINE ALL INTO GETREQUESTS
@@ -328,13 +347,16 @@ def getRequests(file):
                     "plaintiff":"",
                     "defendant":"",
                     "date":""}
+        keys=[]
     else:
-        reqs,reqs_type,details = filterPDF(data)
-        breqs,breqs_type,bdetails = filterPDF(backup_data)
+        reqs,reqs_type,details,keys = filterPDF(data)
+        """
+        breqs,breqs_type,bdetails,keys = filterPDF(backup_data)
         for i in range(len(reqs)):
             if reqs[i]=="":
                 reqs[i]=breqs[i]
-    return reqs,reqs_type,details
+        """
+    return reqs,reqs_type,details,keys
 
 
 ### UPLOAD THE DOCS
@@ -453,6 +475,8 @@ def updateDOC(reqs,resps,details,firm_details,file,name,numbers):
             doc.save(str(name)+".docx")
             return
         prev_p = p
+
+
 
 
 

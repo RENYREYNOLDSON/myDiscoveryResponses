@@ -31,7 +31,7 @@ class PreviewText(tk.CTkToplevel):
         font = (master.theme["text_font"],int(master.theme["text_size"]))
         self.text = tk.CTkTextbox(master=self,wrap="word",font=font,text_color=master.theme["text_color"],fg_color=master.theme["text_bg"])
         self.text.pack(fill="both",expand=True,padx=20,pady=10)
-        self.text.insert("0.0",master.response_frame.get_objection())
+        self.text.insert("0.0",master.current_req.get_full_resp())
         self.text.configure(state="disabled")
         #OK button
         self.ok_button = tk.CTkButton(master=self,text="Ok",command=master.cancel_win)

@@ -9,7 +9,7 @@
 ############################################################################################################
 
 import customtkinter as tk
-import json,os,pickle
+import json,os,pickle,webbrowser
 
 # CONSTANTS 
 ############################################################################################################
@@ -36,10 +36,7 @@ def valid_file_path(filename):
 
 # Open the user guide pdf
 def open_user_guide():
-    script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-    file = "assets/user_guide.pdf"
-    file = os.path.join(script_dir, file)
-    os.startfile(file)
+    webbrowser.open("https://github.com/RENYREYNOLDSON/myDiscoveryResponses")
 
 
 

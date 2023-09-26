@@ -568,7 +568,7 @@ class App(tk.CTkToplevel):
     def open_file(self,filename):
         if os.path.exists(filename):
             self.close_landing_frame()
-            reqs,req_type,doc_details = cnv.getRequests(filename)
+            reqs,req_type,doc_details,custom_keys = cnv.getRequests(filename)
             self.set_type(req_type)# Sets the current type
             self.reqs=[]
             #Redraw for production
@@ -583,7 +583,10 @@ class App(tk.CTkToplevel):
             else:
                 c=0
                 for i in reqs:
-                    self.reqs.append(Request(i,"",c,self,req_type,""))
+                    key = ""
+                    if custom_keys!=[]:
+                        key = custom_keys[c]
+                    self.reqs.append(Request(i,"",c,self,req_type,key))
                     c+=1
 
             ### ADD NEW FILE TO CLIENT, IF NONE THEN CREATE NEW CLIENT!
@@ -1254,18 +1257,22 @@ if __name__ == "__main__":
 # CHANGES
 ############################################################################################################
 
-#Current:
-#Create user guide
-#Get details from frogs
-#Check export works on exe
+# Current:
+#Fix remaining normal files
+#Fix Installer, use command window to see errors. Test installer when done
 
-#MUST COMPLETE
-#Fix normal files
-#Fix Installer, use command window to see errors
 
-#SHOULD COMPLETE
-#Add trys and error checkers
+# Future: 
+#ADD LOG FILE!
+#ADD error checkers
+#FROGS need to collect details
 #Bold and italic options
 
-#3:50 - 6:50
-#7:30 - 
+# DONE:
+#Fixed frogs
+#Improved normal reading
+#Created most of user guide
+#Fixed previews
+#Removed -number-
+#Don't have to start at 1 now
+#Add error prints

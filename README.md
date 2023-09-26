@@ -64,6 +64,7 @@ If the objection requires an input then it can be typed in here, there is also a
 #### Editing Objections
 To edit objections: ```Options -> Objections```. In this window you can save, add, delete, reset and edit the saved objections. Each objection contains:
 <br /><br />
+> ![Example Screenshot](./OBJECTIONS_IMAGE.PNG)
 **Objection Name:** Name of Objection.
 <br />
 **Objection Body:** This is the main text that will appear when selected.
@@ -75,7 +76,7 @@ To edit objections: ```Options -> Objections```. In this window you can save, ad
 **Alter 'Notwithstanding' Text:** If the objection alters this text
 <br />
 **Use Autofills:** If the objection actually uses the autofills
-> ![Example Screenshot](./OBJECTIONS_IMAGE.PNG)
+
 
 #### Change firm details
 > ![Example Screenshot](./FIRM_IMAGE.PNG)

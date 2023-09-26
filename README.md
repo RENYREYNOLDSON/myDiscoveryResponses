@@ -28,10 +28,15 @@ python app.py
 ![Example Screenshot](./USER_GUIDE_IMAGE.png)
 General description of usage here
 #### 1. Menu Bar
+The menu bar is used to navigate through the software and also contains special commands on the left.
 #### 2. Clients
+Each open client/editor is shown here and they can be swapped between by simply clicking on them. You can drag a file from one client name onto another to move it between them.
 #### 3. Files
+All of the files for the current client are shown here and can be swapped between by simply clicking on them.
 #### 4. Requests
+All of the requests for the current file are shown here and can be swapped between by simply clicking them. They are coloured WHITE - Unchanged, GREY - Edited, GREEN - Submitted and RED - Check with Clients.
 #### 5. Current Request Window
+This window is the editor for the current request's response.
 #### 6. All Objections
 #### 7. Objections Input
 

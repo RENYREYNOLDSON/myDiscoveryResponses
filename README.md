@@ -65,6 +65,7 @@ If the objection requires an input then it can be typed in here, there is also a
 To edit objections: ```Options -> Objections```. In this window you can save, add, delete, reset and edit the saved objections. Each objection contains:
 <br /><br />
 > ![Example Screenshot](./OBJECTIONS_IMAGE.PNG)
+
 **Objection Name:** Name of Objection.
 <br />
 **Objection Body:** This is the main text that will appear when selected.

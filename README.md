@@ -35,7 +35,6 @@ python app.py
 ## User Guide
 ### Software Overview
 ![Example Screenshot](./USER_GUIDE_IMAGE.png)
-General description of usage here
 #### 1. Menu Bar
 The menu bar is used to navigate through the software and also contains special commands on the left.
 

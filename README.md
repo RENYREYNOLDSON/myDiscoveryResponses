@@ -37,8 +37,6 @@ python app.py
 ![Example Screenshot](./USER_GUIDE_IMAGE.png)
 #### 1. Menu Bar
 The menu bar is used to navigate through the software and also contains special commands on the left.
-<br />**File:**
-
 
 #### 2. Clients
 Each open client/editor is shown here and they can be swapped between by simply clicking on them. You can drag a file from one client name onto another to move it between them.
@@ -50,9 +48,10 @@ All of the files for the current client are shown here and can be swapped betwee
 All of the requests for the current file are shown here and can be swapped between by simply clicking them. They are coloured WHITE - Unchanged, GREY - Edited, GREEN - Submitted and RED - Check with Clients.
 
 #### 5. Current Request Window
-This window is the editor for the current request's response.
+This window is the editor for the current request's response. Contains the **request**, **objections** and the **response**. For RFA's and RFP's we have additional input options.
 
 #### 6. All Objections
+This window contains all of the Objections saved within the software. Left-Click to toggle if it is active for the current request, right-click to edit the objection's parameters.
 
 #### 7. Objections Input
 

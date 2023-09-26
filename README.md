@@ -98,7 +98,7 @@ The theme of the software can be changed using the menu ```Options -> Theme```.
 > ![Example Screenshot](./THEME_IMAGE.PNG)
 
 #### Change hotkeys
-Each hotkey is a shortcut which when typed into the **response** will insert the full hotkey. e.g. 'rp' -> 'Responding Party'.
+Each hotkey is a shortcut which when typed into the **response** will insert the full hotkey. e.g. 'rp' -> 'Responding Party'. These can be added and changed by going to ```Options -> Hotkeys```.
 > ![Example Screenshot](./HOTKEYS_IMAGE.PNG)
 
 ## Details

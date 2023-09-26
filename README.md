@@ -90,7 +90,11 @@ You can export client feedback by doing ```File -> Export Check with Client```. 
 To load the client feedback do ```File -> Load Client Feedback```, this will insert the responses from the client feedback into the open files (if they are present).
 
 #### Create, save and load clients
-
+To open request files, you must first create a client. To create a client use ```File -> New Client``` or ```Cntrl-N```.
+<br />
+To save a client do ```Save```, ```File -> Save Client``` or ```Cntrl-S```. To save as do ```File -> Save Client As```. If you try to close a client without saving you will be prompted to confirm.
+<br />
+To load a saved client (.discovery file) either open from recents or do ```File -> Open File``` and select the save.
 
 #### Change theme
 > ![Example Screenshot](./THEME_IMAGE.PNG)

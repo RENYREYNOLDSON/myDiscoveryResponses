@@ -37,7 +37,7 @@ python app.py
 
 ## User Guide
 ### Software Overview
-![Example Screenshot](./USER_GUIDE_IMAGE.png)
+![Example Screenshot](./Images/USER_GUIDE_IMAGE.png)
 #### 1. Menu Bar
 The menu bar is used to navigate through the software and also contains special commands on the left.
 
@@ -65,7 +65,7 @@ If the objection requires an input then it can be typed in here, there is also a
 #### Editing Objections
 To edit the objections: ```Options -> Objections```. In this window you can save, add, delete, reset and edit the saved objections. Each objection contains:
 <br /><br />
-> ![Example Screenshot](./OBJECTIONS_IMAGE.PNG)
+> ![Example Screenshot](./Images/OBJECTIONS_IMAGE.PNG)
 
 **Objection Name:** Name of Objection.
 <br />
@@ -83,7 +83,7 @@ To edit the objections: ```Options -> Objections```. In this window you can save
 #### Change firm details
 The firm details are saved to each responses export. To edit the firm details: ```Options -> Firm Details```. If you have a client open then this client will be saved with custom firm details, otherwise these firm details will be the default.
 
-> ![Example Screenshot](./FIRM_IMAGE.PNG)
+> ![Example Screenshot](./Images/FIRM_IMAGE.PNG)
 
 #### Exporting and Loading client feedback
 - You can export client feedback by doing ```File -> Export Check with Client```. This will export all of the requests belonging to the client into one DOCX file. These can then be edited by or with the clients and loaded back into the software.
@@ -96,11 +96,11 @@ The firm details are saved to each responses export. To edit the firm details: `
 
 #### Change theme
 The theme of the software can be changed using the menu ```Options -> Theme```.
-> ![Example Screenshot](./THEME_IMAGE.PNG)
+> ![Example Screenshot](./Images/THEME_IMAGE.PNG)
 
 #### Change hotkeys
 Each hotkey is a shortcut which when typed into the **response** will insert the full hotkey. e.g. 'rp' -> 'Responding Party'. These can be added and changed by going to ```Options -> Hotkeys```.
-> ![Example Screenshot](./HOTKEYS_IMAGE.PNG)
+> ![Example Screenshot](./Images/HOTKEYS_IMAGE.PNG)
 
 ## Details
 Version: 1.0

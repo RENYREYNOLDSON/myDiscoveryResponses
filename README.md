@@ -37,7 +37,7 @@ python app.py
 ![Example Screenshot](./USER_GUIDE_IMAGE.png)
 #### 1. Menu Bar
 The menu bar is used to navigate through the software and also contains special commands on the left.
-**File:**
+<br />**File:**
 
 
 #### 2. Clients

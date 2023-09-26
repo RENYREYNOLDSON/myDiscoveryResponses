@@ -62,7 +62,7 @@ If the objection requires an input then it can be typed in here, there is also a
 ### Usage Examples
 
 #### Editing Objections
-
+![Example Screenshot](./OBJECTIONS_IMAGE.png)
 
 #### Change firm details
 

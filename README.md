@@ -62,8 +62,14 @@ If the objection requires an input then it can be typed in here, there is also a
 ### Usage Examples
 
 #### Editing Objections
-To edit objections: '''Options -> Objections'''
-
+To edit objections: ```Options -> Objections```. In this window you can save, add, delete, reset and edit the saved objections. Each objection contains:
+<br />
+**Objection Name:** Name of Objection.
+**Objection Body:** This is the main text that will appear when selected.
+**Additional Text:** This text appears after the main response.
+**Auto Fills:** This is a list of comma seperated terms that will trigger this objection to be automatically selected if present in the request. e.g. ALL documents, ALL photos. NOTE THAT: On submitting a request, any items entered into the objections input will be saved to the autofills and will show here!
+**Alter 'Notwithstanding' Text:** If the objection alters this text
+**Use Autofills:** If the objection actually uses the autofills
 > ![Example Screenshot](./OBJECTIONS_IMAGE.PNG)
 
 #### Change firm details

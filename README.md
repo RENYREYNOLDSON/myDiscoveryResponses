@@ -85,7 +85,9 @@ The firm details are saved to each responses export. To edit the firm details: `
 > ![Example Screenshot](./FIRM_IMAGE.PNG)
 
 #### Exporting and Loading client feedback
-
+You can export client feedback by doing ```File -> Export Check with Client```. This will export all of the requests belonging to the client into one DOCX file. These can then be edited by or with the clients and loaded back into the software.
+<br />
+To load the client feedback do ```File -> Load Client Feedback```, this will insert the responses from the client feedback into the open files (if they are present).
 
 #### Create, save and load clients
 

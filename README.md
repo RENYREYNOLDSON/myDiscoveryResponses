@@ -55,7 +55,7 @@ This window contains all of the Objections saved within the software. Left-Click
 
 #### 7. Objections Input
 If the objection requires an input then it can be typed in here, there is also an input for an additional input.
-
+---
 ### Usage Examples
 #### Importing discovery request files
 

@@ -8,7 +8,7 @@ Software for the creation of Discovery Responses. Load discovery request pdf's o
 > <br />
 > Form Interrogatories (FROG)
 
-Once loaded you can move between each request and apply set objections in addition to custom responses. Once these responses have been created the file can then be exported as a response word document (DOCX).
+Once loaded you can move between each request and apply set objections in addition to custom responses. When these responses have been created, the file can then be exported as a response word document (DOCX).
 ## Installation
 ### Using Windows Installer
 1. Download the ```setup.exe```

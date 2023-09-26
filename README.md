@@ -48,7 +48,7 @@ All of the files for the current client are shown here and can be swapped betwee
 All of the requests for the current file are shown here and can be swapped between by simply clicking them. They are coloured WHITE - Unchanged, GREY - Edited, GREEN - Submitted and RED - Check with Clients.
 
 #### 5. Current Request Window
-This window is the editor for the current request's response. Contains the **request**, **objections** and the **response**. For RFA's and RFP's we have additional input options.
+This window is the editor for the current requests response. Contains the **request**, **objections** and the **response**. For RFA's and RFP's we have additional input options.
 
 #### 6. All Objections
 This window contains all of the Objections saved within the software. Left-Click to toggle if it is active for the current request, right-click to edit the objection's parameters.

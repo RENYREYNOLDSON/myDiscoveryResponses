@@ -62,10 +62,12 @@ If the objection requires an input then it can be typed in here, there is also a
 ### Usage Examples
 
 #### Editing Objections
+To edit objections: '''Options -> Objections'''
+
 > ![Example Screenshot](./OBJECTIONS_IMAGE.PNG)
 
 #### Change firm details
-![Example Screenshot](./FIRM_IMAGE.PNG)
+> ![Example Screenshot](./FIRM_IMAGE.PNG)
 
 #### Exporting and Loading client feedback
 
@@ -74,10 +76,10 @@ If the objection requires an input then it can be typed in here, there is also a
 
 
 #### Change theme
-![Example Screenshot](./THEME_IMAGE.PNG)
+> ![Example Screenshot](./THEME_IMAGE.PNG)
 
 #### Change hotkeys
-![Example Screenshot](./HOTKEYS_IMAGE.PNG)
+> ![Example Screenshot](./HOTKEYS_IMAGE.PNG)
 
 ## Details
 Version: 1.0

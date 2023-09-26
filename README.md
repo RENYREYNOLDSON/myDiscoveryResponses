@@ -1,5 +1,5 @@
 # myDiscoveryResponses
-![Example Screenshot](./TITLE_IMAGE.png)
+![Example Screenshot](./TITLE_IMAGE.PNG)
 Software for the creation of Discovery Responses. Load discovery request pdf's of type:
 > Requests for Admissions (RFA)
 > <br />

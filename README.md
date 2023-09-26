@@ -94,9 +94,11 @@ The firm details are saved to each responses export. To edit the firm details: `
 - To load a saved client (.discovery file) either open from recents or do ```File -> Open File``` and select the save.
 
 #### Change theme
+The theme of the software can be changed using the menu ```Options -> Theme```.
 > ![Example Screenshot](./THEME_IMAGE.PNG)
 
 #### Change hotkeys
+Each hotkey is a shortcut which when typed into the **response** will insert the full hotkey. e.g. 'rp' -> 'Responding Party'.
 > ![Example Screenshot](./HOTKEYS_IMAGE.PNG)
 
 ## Details

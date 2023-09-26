@@ -1,5 +1,9 @@
 # myDiscoveryResponses
-Software for the creation of Discovery Responses
+Software for the creation of Discovery Responses. Load discovery request pdf's of types:
+> Requests for Admissions (RFA)
+> Demands for Production (RFP)
+> Special Interrogatories (SPROG)
+> Form Interrogatories (FROG)
 ## Installation
 ### Using Windows Installer
 1. Download the ```setup.exe```

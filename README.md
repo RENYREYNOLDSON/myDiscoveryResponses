@@ -60,19 +60,14 @@ If the objection requires an input then it can be typed in here, there is also a
 
 ---
 ### Usage Examples
-#### Importing discovery request files
-
-
-#### Exporting discovery response files
-
-
-#### Loading client feedback
-
 
 #### Editing Objections
 
 
 #### Change firm details
+
+
+#### Exporting and Loading client feedback
 
 
 #### Create, save and load clients

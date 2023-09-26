@@ -80,6 +80,8 @@ To edit the objections: ```Options -> Objections```. In this window you can save
 
 
 #### Change firm details
+The firm details are saved to each responses export. To edit the firm details: ```Options -> Firm Details```. If you have a client open then this client will be saved with custom firm details, otherwise these firm details will be the default.
+
 > ![Example Screenshot](./FIRM_IMAGE.PNG)
 
 #### Exporting and Loading client feedback

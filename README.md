@@ -37,6 +37,8 @@ python app.py
 ![Example Screenshot](./USER_GUIDE_IMAGE.png)
 #### 1. Menu Bar
 The menu bar is used to navigate through the software and also contains special commands on the left.
+**File:**
+
 
 #### 2. Clients
 Each open client/editor is shown here and they can be swapped between by simply clicking on them. You can drag a file from one client name onto another to move it between them.

@@ -243,6 +243,42 @@ class App(tk.CTkToplevel):
             # 2. UPDATE RESPONSE TEXTBOX
             if self.req_type=="RFA":
                 option = self.response_frame.get_RFA()
+
+                #Do Hotkeys for the 17.1 Response
+
+                ###COPIED FROM BELOW: REPLACE!!! CREATE A FUNCTION FOR THIS
+
+                #Do HOTKEYS HERE
+                insert_index = self.response_frame.current_frame.RFA_text.index(tk.INSERT)#Current index
+                resp = " "+self.response_frame.get_RFA_text()#Current response text
+                use_fill=None
+                use_pos=0
+                start=0
+                for fill in self.HOTKEYS:# Replace all autofill phrases
+                    position = -1
+                    trigger = " "+fill+" "
+                    position = resp.find(trigger)#Pos of index
+                    if position<0:
+                        position = resp.find("\n"+trigger[1:])# Try new line instances
+                        if position>=0:
+                            start=1
+                    if position>=0:
+                        use_fill = fill# Set this to fill
+                        use_pos = position
+                if use_fill!=None:# IF AN AUTOFILL USED
+                    text = resp[1:]#Remove space
+                    # Update index if grown in length, must add suffic n + chars
+                    text_index="0.0 + "+str(use_pos)+" chars"
+                    text_end_index="0.0 + "+str(use_pos+len(use_fill+" "))+" chars"
+                    # Put the text here 
+                    self.response_frame.current_frame.RFA_text.delete(text_index,text_end_index)
+                    self.response_frame.current_frame.RFA_text.insert(text_index,(self.HOTKEYS[use_fill]+" "))
+                    # Reset index
+                    insert_index+=" + "+str(len(self.HOTKEYS[use_fill]+" ")-len(use_fill)-1)+" chars"
+                    self.response_frame.current_frame.RFA_text.mark_set("insert",insert_index)
+
+
+
             else:
                 option = self.response_frame.get_RFP()
             
@@ -297,13 +333,14 @@ class App(tk.CTkToplevel):
                     text = resp[1:]#Remove space
                     # Update index if grown in length, must add suffic n + chars
                     text_index="0.0 + "+str(use_pos)+" chars"
-                    text_end_index="0.0 + "+str(use_pos+len(" "+use_fill+" ")-1)+" chars"
+                    text_end_index="0.0 + "+str(use_pos+len(use_fill+" "))+" chars"
                     # Put the text here 
                     self.response_frame.current_frame.response_text.delete(text_index,text_end_index)
-                    self.response_frame.current_frame.response_text.insert(text_index,(" "+self.HOTKEYS[use_fill]+" "))
+                    self.response_frame.current_frame.response_text.insert(text_index,(self.HOTKEYS[use_fill]+" "))
                     # Reset index
-                    insert_index+=" + "+str(len(" "+self.HOTKEYS[use_fill]+" ")-len(use_fill)+1)+" chars"
+                    insert_index+=" + "+str(len(self.HOTKEYS[use_fill]+" ")-len(use_fill)-1)+" chars"
                     self.response_frame.current_frame.response_text.mark_set("insert",insert_index)
+
                 if resp[1:].replace("\n","")!=self.current_req.resp.replace("\n",""):# Change colour back if edited
                     self.current_req.color="grey"
                     self.current_req.resp=resp[1:]
@@ -312,6 +349,11 @@ class App(tk.CTkToplevel):
                     self.set_client_unsaved(self.current_client)
 
         self.after(100, self.refresher)#REFRESH AGAIN
+
+    #Reload the objections for each request! Stops errors when objections changed
+    def reload_objections(self):
+        for client in self.clients:
+            client.reload_objections()
 
     #Destroy this windows sub window
     def cancel_win(self):
@@ -963,12 +1005,11 @@ class App(tk.CTkToplevel):
     def set_auto_objections(self):
         for i in self.current_req.opts:
             if i.key in self.objections:#If in the auto objections
-                vals=re.findall("[\"'‘][ a-zA-Z1-9]+[\"'’]",i.param)
+                vals=i.param.split(",")
                 for v in vals:
-                    v2 = v[1:-1]
-                    if v2 not in self.objections[i.key][4]:
-                        self.objections[i.key][4].append(v2)#Add new autos to the dict
-                        print("added")
+                    if v.strip() not in self.objections[i.key][4]:
+                        self.objections[i.key][4].append(v.strip())#Add new autos to the dict
+                        print("Added New Autofill: "+str(v.strip()))
         save_objections(self.objections)#Save the file!
 
     # Set type of request and save previous also
@@ -1148,19 +1189,25 @@ class App(tk.CTkToplevel):
             if prev_req.RFA_option!="Admit":
                 #If not admit then add the 17.1 response
                 #Find the 17.1
+                self.current_client.add_special_response([prev_req.custom_key,prev_req.RFA_text])
                 for file in self.current_client.files:
                     if file.req_type=="FROG":
                         for frog in file.reqs:
                             if frog.custom_key=="17.1":
-                                frog.resp = frog.resp + "\n" + prev_req.RFA_text
+                                #Add strings
+                                frog.resp=""
+                                for texts in self.current_client.special_responses:
+                                    frog.resp+=(str(texts[1])+"\n")#Add new text to 17.1
             
             #Scroll to this request
             self.requests_frame.scroll_to()
             # If all are green set file green!
             for req in self.reqs:
                 if req.color!="#50C878":
+                    self.current_client.current_file.color="white"#SET FILE TO WHITE if still requests not done
+                    self.requests_frame.update_files(self.current_client.files)
                     return
-            self.current_client.current_file.color="#50C878"
+            self.current_client.current_file.color="#50C878"#Set file to green if all done!
             self.requests_frame.update_files(self.current_client.files)
 
 
@@ -1258,8 +1305,22 @@ if __name__ == "__main__":
 ############################################################################################################
 
 # Current:
-#Fix remaining normal files
-#Fix Installer, use command window to see errors. Test installer when done
+
+# FILE FIXES
+#1 Fix remaining normal files
+#2 Make FROGs export properly
+#3 Add custom preliminary statements
+
+# SOFTWARE BUGS
+#1 Change how plaintiff and case name are done
+
+# WEBSITE
+#1 Add downloads to downloads page
+#3 Get it hosted on GoDaddy
+
+# DONE:
+# Fixed submit colours
+# Fixed autofill glitch
 
 
 # Future: 
@@ -1268,11 +1329,4 @@ if __name__ == "__main__":
 #FROGS need to collect details
 #Bold and italic options
 
-# DONE:
-#Fixed frogs
-#Improved normal reading
-#Created most of user guide
-#Fixed previews
-#Removed -number-
-#Don't have to start at 1 now
-#Add error prints
+

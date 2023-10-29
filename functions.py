@@ -58,6 +58,7 @@ def get_recents():
         if valid_file_path(file):
             new.append(file)
     return new
+
 def set_recents(lst):
     with open(os.path.join(os.path.dirname(__file__),"assets/recents"), "wb") as fp:   #Pickling
         pickle.dump(lst, fp)
@@ -75,7 +76,6 @@ def set_firm_details(data):
         with open(os.path.join(os.path.dirname(__file__),'assets/firm_details.json'), 'w') as file:
             json.dump(data,file)
     
-
 # Open the hotkeys
 def open_hotkeys():
     if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/hotkeys.json")):
@@ -89,7 +89,6 @@ def save_hotkeys(data):
     if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/hotkeys.json")):
         with open(os.path.join(os.path.dirname(__file__),'assets/hotkeys.json'), 'w') as file:
             json.dump(data,file)
-
 
 # Opens the objections file
 def open_objections():# Return API key from file if possible
@@ -150,7 +149,6 @@ def initial_theme():
         # Set relevant things here
         tk.set_appearance_mode(data["theme"])
 
-
 # Form the objection text using the selected objections
 def get_objection_text(opts,objections,remove_end=False):
     full_text = "Objection. "
@@ -171,7 +169,26 @@ def get_objection_text(opts,objections,remove_end=False):
                     if obj.param=="":
                         text = text.replace("[VAR]","")# Replace [VAR]
                     else:
-                        text = text.replace("[VAR]"," "+obj.param)# Replace [VAR]
+                        #Format this nicely if using autofills
+                        if obj.autofill:
+                            #Add these formatted nicely
+                            words = obj.param.split(",")
+                            fill=""
+                            c=0
+                            for w in words:
+                                if fill=="":#If the first autofill word
+                                    fill = "as to ‘"+w+"’"
+                                elif c==len(words)-1:
+                                    fill = fill + " and ‘"+w+"’"
+                                else:
+                                    fill = fill[:-2] + ",’ ‘"+w+"’"
+
+                                c+=1
+
+                            text = text.replace("[VAR]"," "+str(fill))# Replace [VAR]
+                        else:
+                            #Add basic parameter
+                            text = text.replace("[VAR]"," "+obj.param)# Replace [VAR]
                     full_text = full_text+str(text)+". "#Add new text!
 
         # 3. ADD FINAL OBJECTION IF REQUESTED AND VALID
@@ -183,6 +200,7 @@ def get_objection_text(opts,objections,remove_end=False):
             for obj in objs:
                 #Change Scope
                 if obj.alter_scope:
+                    print("alter")
                     final_text = "Notwithstanding the foregoing objections and subject thereto, and as Responding Party understands the proper scope and/or meaning of this request, Responding Party responds as follows: "
                 
                 #Add Extra Text

@@ -121,8 +121,8 @@ class EditObjections(tk.CTkToplevel):
 
     def swap_buttons(self,i1,i2,name1,name2):
         #Swap obj1 and obj2 buttons
-        self.objection_buttons[i1].configure(text=name2,command=partial(self.load_objection,self.objections[name2]))
-        self.objection_buttons[i2].configure(text=name1,command=partial(self.load_objection,self.objections[name1]))
+        self.objection_buttons[i1].configure(text=name2,command=partial(self.load_objection,name2))
+        self.objection_buttons[i2].configure(text=name1,command=partial(self.load_objection,name1))
 
 
     def up_button(self,button):
@@ -195,6 +195,8 @@ class EditObjections(tk.CTkToplevel):
         save_objections(self.objections)
         #Update main window objections
         self.master.objections = open_objections()
+        #Reload objections into files
+        self.master.reload_objections()
         #Close window
         self.master.objections_frame.redraw_all()
         if self.master.current_req!=0:#Reset all selected objections

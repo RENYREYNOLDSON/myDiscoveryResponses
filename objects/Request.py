@@ -35,19 +35,31 @@ class Request:
             self.custom_key = no+1
         self.current_objection = ""
 
+    #Used to reload the objections, when changed by the objection edit menu
+    def reload_objections(self):
+        #Retain data if the key is the same, selected, param, additional param
+        opts2=[]
+        for i in self.master.objections_frame.options:
+            new_obj = Objection(i,self.master)
+
+            #See if same key!
+            for opt in self.opts:
+                if opt.key==i:
+                    #Set Variables from old objection
+                    new_obj.selected=opt.selected
+                    new_obj.param=opt.param
+                    new_obj.additional_param=opt.additional_param
+
+            opts2.append(new_obj)
+        self.opts=opts2
+
     #Fill objections automatically using saved answers
     def auto_obj(self):
         for obj in self.master.objections:
-            added=0
             if self.master.objections[obj][3]:
                 for word in self.master.objections[obj][4]:
                     if word in self.req:
                         self.add_param(obj,word)#Add param to the params
-                        added+=1
-                if added>1:#Set final , to and
-                    for i in self.opts:
-                        if i.key==obj:
-                            i.param = ", and ".join(i.param.rsplit(", ", 1))#Add the AND
 
     #Add a parameter from autofill list to the string
     def add_param(self,obj,param):
@@ -55,10 +67,11 @@ class Request:
             if i.key==obj:
                 if i.param=="":
                     self.check_off(obj)
-                    i.param = "as to ‘"+param+"’"
-                    return
-                i.param=i.param+", ‘"+param+"’"
+                    i.param = param
+                else:
+                    i.param = i.param +","+param
                 return
+            
     #Set self as the current request
     def set(self):
         self.master.set_request(self)

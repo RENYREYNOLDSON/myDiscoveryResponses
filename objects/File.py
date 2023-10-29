@@ -14,6 +14,12 @@ class File:
         self.master=master
         self.color=("black","white")
         self.save=""
+
+    #Reload all objections
+    def reload_objections(self):
+        for req in self.reqs:
+            req.reload_objections()
+
     # Set current file as this
     def set(self):
         self.master.set_file(self)

@@ -19,7 +19,7 @@
 import converter as cnv
 from CTkMessagebox import CTkMessagebox
 import customtkinter as tk
-import json,os,copy
+import json,os,copy,sys
 import pickle
 from threading import Thread
 import re
@@ -1282,9 +1282,11 @@ class App(tk.CTkToplevel):
 ############################################################################################################
 
 # Create a new window with root as parent
-def create_window(root):
-    App(root)
-
+def create_window(root,from_file="file which will not exist on anybody's file path"):
+    if os.path.exists(from_file.replace("\\","/")):
+        App(root).load(from_file.replace("\\","/"))#Create a window with the selected client open
+    else:
+        App(root)
 
 # MAIN LOOP
 ############################################################################################################
@@ -1295,7 +1297,12 @@ if __name__ == "__main__":
     root=tk.CTk()
     root.iconbitmap(default=os.path.join(os.path.dirname(__file__),"assets/icon.ico"))
     root.withdraw()
-    create_window(root)
+    ##CHECK if file has been opened from a saved client
+    print(sys.argv)
+    if len(sys.argv)>1:
+        create_window(root,sys.argv[-1])
+    else:
+        create_window(root)
     root.mainloop()
 
 
@@ -1315,12 +1322,12 @@ if __name__ == "__main__":
 #1 Change how plaintiff and case name are done
 
 # WEBSITE
+# Create EXE
+# Create installer 
 #1 Add downloads to downloads page
-#3 Get it hosted on GoDaddy
+#2 Publish page and check works
 
 # DONE:
-# Fixed submit colours
-# Fixed autofill glitch
 
 
 # Future: 
@@ -1328,5 +1335,4 @@ if __name__ == "__main__":
 #ADD error checkers
 #FROGS need to collect details
 #Bold and italic options
-
 

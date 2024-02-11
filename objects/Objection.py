@@ -20,6 +20,11 @@ class Objection:
         self.alter_scope=self.master.objections[key][2]
         self.autofill=self.master.objections[key][3]
 
+    # Set self.master to a value (for saving)
+    def set_master(self,val):
+        self.master=val
+
+
     #Toggle if this objection is selected
     def toggle(self):
         self.selected = not self.selected

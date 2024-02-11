@@ -26,14 +26,21 @@ class Client:
         for file in self.files:
             file.reload_objections()
 
+        #Update the selected objection here! Only for the open request
+        if self.master.current_req!=0:
+            self.master.toggle_selected_objection(str(self.master.current_req.current_objection.key),None)
+
+
     # Set the current client to self
     def set(self):
         self.master.set_client(self)
+
     # Set self.master to a value (for saving)
     def set_master(self,val):
         self.master=val
         for i in self.files:#Remove master from all of the sub objects etc
             i.set_master(val)
+
     #Adds a 17.1 response in order
     def add_special_response(self,resp):
         if hasattr(self,"special_responses")==False:

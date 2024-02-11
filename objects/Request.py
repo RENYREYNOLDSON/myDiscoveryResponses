@@ -1,6 +1,7 @@
 # IMPORTS
 from functions import *
 from .Objection import *
+import copy
 # REQUEST CLASS
 ############################################################################################################
 # Class for each request/response
@@ -35,6 +36,13 @@ class Request:
             self.custom_key = no+1
         self.current_objection = ""
 
+    # Set self.master to a value (for saving)
+    def set_master(self,val):
+        self.master=val
+        for i in self.opts:
+            i.set_master(val)
+
+
     #Used to reload the objections, when changed by the objection edit menu
     def reload_objections(self):
         #Retain data if the key is the same, selected, param, additional param
@@ -52,6 +60,8 @@ class Request:
 
             opts2.append(new_obj)
         self.opts=opts2
+        opts2=[]
+        self.current_objection=self.opts[0]
 
     #Fill objections automatically using saved answers
     def auto_obj(self):
@@ -92,11 +102,11 @@ class Request:
                 end = RFP_responses[option].replace("[VAR]",self.RFP_text)
                 if option!="Available" and self.RFP_text!="":
                     end = (end+extra).replace("[VAR]",self.RFP_text)
-            else:
-                end = self.master.response_frame.get_response()
+            else:######EDITING THIS
+                end = self.resp#.master.response_frame.get_response()
         else:
-            end = self.master.response_frame.get_response()
+            end = self.resp#.master.response_frame.get_response()
         if full_text.replace(" ","").replace("\n","")!="":
             full_text = full_text + "\n"
         full_text = full_text + end
-        return full_text
+        return full_text#################

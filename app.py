@@ -145,7 +145,7 @@ class App(tk.CTkToplevel):
     def __init__(self,master, **kwargs):
         super().__init__(master, **kwargs)
         ##### VERSION AND USER STUFF
-        self.version=1.0
+        self.version="1.0.2"
 
 
         #####
@@ -460,7 +460,7 @@ class App(tk.CTkToplevel):
 
     # View a DOCX preview of the output file
     def preview_text(self):
-        if self.current_client!="":
+        if self.file_open():
             self.cancel_win()
             self.win = PreviewText(self)
             self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
@@ -610,7 +610,12 @@ class App(tk.CTkToplevel):
     def open_file(self,filename):
         if os.path.exists(filename):
             self.close_landing_frame()
-            reqs,req_type,doc_details,custom_keys = cnv.getRequests(filename)
+            try:
+                reqs,req_type,doc_details,custom_keys = cnv.getRequests(filename)
+            except Exception as e:
+                msg = CTkMessagebox(title="Loading Issue", message="The selected file: "+str(filename)+" could not be loaded!\n Error Message: "+str(e),
+                                    icon="warning", option_1="Okay",corner_radius=0)
+                return
             self.set_type(req_type)# Sets the current type
             self.reqs=[]
             #Redraw for production
@@ -648,7 +653,14 @@ class App(tk.CTkToplevel):
         # Create file obj
         file = open(filename,"rb")
         # Load the file object
-        save_obj = pickle.load(file)
+        try:
+            save_obj = pickle.load(file)
+        except:
+            file.close()
+            msg = CTkMessagebox(title="File Corrupted", message="An error has caused this file to become corrupted!",
+                                icon="warning", option_1="Okay",corner_radius=0)
+            return
+        file.close()
         # Get files array
         if save_obj.save_type == "file":
             self.load_file(save_obj.files[0])
@@ -681,6 +693,7 @@ class App(tk.CTkToplevel):
         #SET THE QUICKSAVE!
         self.current_client.save=filename
         self.set_recents(filename)
+        self.reload_objections()
 
 
     #Select the save file
@@ -702,6 +715,7 @@ class App(tk.CTkToplevel):
         pickle.dump(save_obj,file)#Need to fix saving with the name
         # Add the master back
         self.current_client.current_file.set_master(self)
+        file.close()
 
     #Select a save to save the client file as
     def select_save_client(self):
@@ -711,15 +725,17 @@ class App(tk.CTkToplevel):
             return
         self.save_client(filename)
 
+    """
     #Actually save the client file
-    def save_client(self,filename):
-        file = open(filename+".discovery","wb")
+    def save_client_OLD(self,filename):
         # Remove master from the save
         self.current_client.set_master(None)
         # Create save object
         save_obj = Save([self.current_client],"client")
         # Pickle the current File
+        file = open(filename+".discovery","wb")
         pickle.dump(save_obj,file)#Need to fix saving with the name
+        file.close()
         # Add the master back
         self.current_client.set_master(self)
         # Set the quicksave
@@ -728,6 +744,50 @@ class App(tk.CTkToplevel):
         #Update clients to show saved
         self.requests_frame.update_clients(self.clients)
         self.set_recents(self.current_client.save)
+    """
+
+    #Actually save the client file
+    def save_client(self,filename):
+        # Remove master from the save
+        self.current_client.set_master(None)
+        # Create save object
+        save_obj = Save([self.current_client],"client")
+
+        #STORE AS A TEMPORARY FILE!
+        # Pickle the current File
+        file = open(filename+"TEMPORARY"+".discovery","wb")
+        try:
+            pickle.dump(save_obj,file)#Need to fix saving with the name
+        except:
+            file.close()
+            self.current_client.set_master(self)
+            msg = CTkMessagebox(title="Saving Issue", message="The selected file: "+str(filename)+" could not be saved [1]!",
+                                icon="warning", option_1="Okay",corner_radius=0)
+            return 
+        file.close()
+
+        try:
+            #DELETE ORIGINAL
+            if os.path.exists(filename+".discovery"):
+                os.remove(filename+".discovery")
+
+            #REPLACE ORIGINAL FILE WITH TEMPORARY FILE!
+            os.rename(filename+"TEMPORARY"+".discovery",filename+".discovery")
+        except:
+            self.current_client.set_master(self)
+            msg = CTkMessagebox(title="Saving Issue", message="The selected file: "+str(filename)+" could not be saved [2]! SAVE UNDER A NEW NAME!",
+                                icon="warning", option_1="Okay",corner_radius=0)
+            return 
+           
+        # Add the master back
+        self.current_client.set_master(self)
+        # Set the quicksave
+        self.current_client.save = filename+".discovery"
+        self.current_client.saved = True
+        #Update clients to show saved
+        self.requests_frame.update_clients(self.clients)
+        self.set_recents(self.current_client.save)
+
 
     #QUICKSAVE: Only saves CLIENT!
     def quick_save(self):
@@ -984,6 +1044,7 @@ class App(tk.CTkToplevel):
                 if o.key == obj:
                     self.current_req.current_objection = o
                     self.objections_frame.update_current(o)
+
                     #Set the objection input area to this objection
 
 
@@ -1007,9 +1068,8 @@ class App(tk.CTkToplevel):
             if i.key in self.objections:#If in the auto objections
                 vals=i.param.split(",")
                 for v in vals:
-                    if v.strip() not in self.objections[i.key][4]:
+                    if v.strip() not in self.objections[i.key][4] and len(v)>1:
                         self.objections[i.key][4].append(v.strip())#Add new autos to the dict
-                        print("Added New Autofill: "+str(v.strip()))
         save_objections(self.objections)#Save the file!
 
     # Set type of request and save previous also
@@ -1183,6 +1243,8 @@ class App(tk.CTkToplevel):
             index = self.reqs.index(self.current_req)
             if index<len(self.reqs)-1:
                 self.set_request(self.reqs[index+1])
+            else:
+                self.set_request(self.current_req)
 
             #If an RFA request then update 17.1 response if needed
             
@@ -1314,25 +1376,27 @@ if __name__ == "__main__":
 # Current:
 
 # FILE FIXES
-#1 Fix remaining normal files
-#2 Make FROGs export properly
-#3 Add custom preliminary statements
+#Fix docx preview in app
+#Test
+#Update GUI
 
 # SOFTWARE BUGS
 #1 Change how plaintiff and case name are done
 
-# WEBSITE
-# Create EXE
-# Create installer 
-#1 Add downloads to downloads page
-#2 Publish page and check works
+
 
 # DONE:
+#Fixed saving and updating of the objections
+#Made autofills double curly quotation marks
+#Make autofills on automatically
+#Fixed files output and glitch when only one request
+#Added popup for not loaded with error
+#Updated version number
+#Fixed autofills saving spaces
+#Added warning for corrupted files
+#Fixed a text preview error
+#Updated the client saving and added a failsafe!!
+#Added pop up windows for failed saving with 2 possible errors
 
 
-# Future: 
-#ADD LOG FILE!
-#ADD error checkers
-#FROGS need to collect details
-#Bold and italic options
 

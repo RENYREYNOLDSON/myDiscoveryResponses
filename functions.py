@@ -177,11 +177,11 @@ def get_objection_text(opts,objections,remove_end=False):
                             c=0
                             for w in words:
                                 if fill=="":#If the first autofill word
-                                    fill = "as to ‘"+w+"’"
+                                    fill = "as to “"+w+"”"
                                 elif c==len(words)-1:
-                                    fill = fill + " and ‘"+w+"’"
+                                    fill = fill + " and “"+w+"”"
                                 else:
-                                    fill = fill[:-2] + ",’ ‘"+w+"’"
+                                    fill = fill[:-2] + ",” “"+w+"”"
 
                                 c+=1
 

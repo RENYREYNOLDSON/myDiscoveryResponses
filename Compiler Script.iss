@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "myDiscoveryResponses"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.2"
 #define MyAppPublisher "Jurisprudence Analytics"
 #define MyAppURL "http://mydiscoveryresponses.com/"
 #define MyAppExeName "myDiscoveryResponses.exe"

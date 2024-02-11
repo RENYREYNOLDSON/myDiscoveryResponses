@@ -263,8 +263,11 @@ def filterPDF(data):
 
         #GET REQUESTS!!!!!!!!!!!!!!!!!!!!
         if not hard_stop:
-            if any(t in split[i].replace(" ","") for t in terms) and split[i].replace(" ","")[-1]==":":#       If request term used
+            print("Next")
+            print(split[i])
+            if any(t in split[i].replace(" ","") for t in terms) and (split[i].replace(" ","")[-1] in [":","."] or split[i].replace(" ","")[-1].isdigit()):#       If request term used, must end in a certain character or a number, in case it is in text. Could check split length?
                 #Add the custom key
+                print(split[i])
                 key =re.findall(r'\d+', split[i][10:])[0]
                 if start_at_one==False or (term_used==False and key!="1"):
                     keys.append(key)

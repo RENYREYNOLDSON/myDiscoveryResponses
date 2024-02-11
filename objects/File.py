@@ -27,9 +27,8 @@ class File:
     def set_master(self,val):
         self.master=val
         for i in self.reqs:
-            i.master=val#Remove master from all of the sub objects etc
-            for i2 in i.opts:
-                i2.master=val
+            i.set_master(val)
+
     def on_drop(self,event):
         x,y = event.widget.winfo_pointerxy()
         try:

@@ -11,6 +11,7 @@
 from functions import *
 import PyPDF2 as pdf
 import re
+import copy
 from docx import Document
 from docx.text.paragraph import Paragraph
 from docx.oxml.xmlchemy import OxmlElement
@@ -18,6 +19,7 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt
 from pdfminer.high_level import extract_text
 import fitz
+from CTkMessagebox import CTkMessagebox
 from boxdetect.pipelines import get_checkboxes
 from boxdetect import config
 from boxdetect.pipelines import get_boxes
@@ -99,66 +101,71 @@ def readPDF3(file):
 ### READ FROGs FORM
 ########################################################################################################
 def readForm(file):
-    cfg = config.PipelinesConfig()
-    # important to adjust these values to match the size of boxes on your image
-    cfg.width_range = (9,30)
-    cfg.height_range = (9,30)
-    # the more scaling factors the more accurate the results but also it takes more time to processing
-    # too small scaling factor may cause false positives
-    # too big scaling factor will take a lot of processing time
-    cfg.scaling_factors = [1]
-    # w/h ratio range for boxes/rectangles filtering
-    cfg.wh_ratio_range = (0.8, 2.5)
-    # group_size_range starting from 2 will skip all the groups
-    # with a single box detected inside (like checkboxes)
-    cfg.group_size_range = (1, 1)
-    # num of iterations when running dilation tranformation (to engance the image)
-    cfg.dilation_iterations = 0
+    try:
+        cfg = config.PipelinesConfig()
+        # important to adjust these values to match the size of boxes on your image
+        cfg.width_range = (9,30)
+        cfg.height_range = (9,30)
+        # the more scaling factors the more accurate the results but also it takes more time to processing
+        # too small scaling factor may cause false positives
+        # too big scaling factor will take a lot of processing time
+        cfg.scaling_factors = [1]
+        # w/h ratio range for boxes/rectangles filtering
+        cfg.wh_ratio_range = (0.8, 2.5)
+        # group_size_range starting from 2 will skip all the groups
+        # with a single box detected inside (like checkboxes)
+        cfg.group_size_range = (1, 1)
+        # num of iterations when running dilation tranformation (to engance the image)
+        cfg.dilation_iterations = 0
 
-    results=[]
-    vals=[]
-    f = fitz.open(file)
-    page_count = 0#Used to add extra results when scanning fails
-    for page in f:
-        img = page.get_pixmap()
-        img.save(os.path.join(os.path.dirname(__file__),"assets/out.png"))
-        #SPLIT INTO COLUMNS
-        img = cv2.imread(os.path.join(os.path.dirname(__file__),"assets/out.png"))
-        height = img.shape[0]
-        width = img.shape[1]
+        results=[]
+        vals=[]
+        f = fitz.open(file)
+        page_count = 0#Used to add extra results when scanning fails
+        for page in f:
+            img = page.get_pixmap()
+            img.save(os.path.join(os.path.dirname(__file__),"assets/out.png"))
+            #SPLIT INTO COLUMNS
+            img = cv2.imread(os.path.join(os.path.dirname(__file__),"assets/out.png"))
+            height = img.shape[0]
+            width = img.shape[1]
 
-        # Cut the image in half
-        width_cutoff = int(width // 2.5)
-        s1 = img[:, :width_cutoff]
-        s2 = img[:, width_cutoff:]
+            # Cut the image in half
+            width_cutoff = int(width // 2.5)
+            s1 = img[:, :width_cutoff]
+            s2 = img[:, width_cutoff:]
 
-        cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s1.png"), s1)
-        cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s2.png"), s2)
+            cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s1.png"), s1)
+            cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s2.png"), s2)
 
-        checkboxes1 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s1.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-        checkboxes2 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s2.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-        for checkboxes in [checkboxes1,checkboxes2]:
-            #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
-            for check in checkboxes:
-                #Get array
-                array = check[2]
-                total=0
-                for row in array[2:-4]:
-                    total+=sum(row[2:-4])/len(row[2:-4])
-                total = total/len(array[2:-4])
-                vals.append(total)
-                if total>=20:
-                    results.append(True)
-                else:
-                    results.append(False)
-        if page_count==0 and len(results)==0:
-            results.append(False)
-    output=[]
-    print(len(results))
-    print(len(FORM_VALUES))
-    for i in range(len(FORM_VALUES)):
-        if results[i]==True:
-            output.append(FORM_VALUES[i])
+            checkboxes1 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s1.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+            checkboxes2 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s2.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+            for checkboxes in [checkboxes1,checkboxes2]:
+                #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
+                for check in checkboxes:
+                    #Get array
+                    array = check[2]
+                    total=0
+                    for row in array[2:-4]:
+                        total+=sum(row[2:-4])/len(row[2:-4])
+                    total = total/len(array[2:-4])
+                    vals.append(total)
+                    if total>=20:
+                        results.append(True)
+                    else:
+                        results.append(False)
+            if page_count==0 and len(results)==0:
+                results.append(False)
+        output=[]
+        print(len(results))
+        print(len(FORM_VALUES))
+        for i in range(len(FORM_VALUES)):
+            if results[i]==True:
+                output.append(FORM_VALUES[i])
+    except:
+        msg = CTkMessagebox(title="Could not load FROG", message="The FROG file could not be read correctly. Defaulted to using all discovery requests.",
+                            icon="warning", option_1="Okay",corner_radius=0)
+        output = FORM_VALUES.copy()
     return output
 
 
@@ -265,7 +272,7 @@ def filterPDF(data):
         if not hard_stop:
             print("Next")
             print(split[i])
-            if any(t in split[i].replace(" ","") for t in terms) and (split[i].replace(" ","")[-1] in [":","."] or split[i].replace(" ","")[-1].isdigit()):#       If request term used, must end in a certain character or a number, in case it is in text. Could check split length?
+            if any(t in split[i].replace(" ","").upper() for t in terms) and (split[i].replace(" ","")[-1] in [":","."] or split[i].replace(" ","")[-1].isdigit()):#       If request term used, must end in a certain character or a number, in case it is in text. Could check split length?
                 #Add the custom key
                 print(split[i])
                 key =re.findall(r'\d+', split[i][10:])[0]
@@ -532,3 +539,4 @@ def read_client_feedback(filename):
 
 
 
+##SHOULD ADD THREADS FOR BOX DETECT!

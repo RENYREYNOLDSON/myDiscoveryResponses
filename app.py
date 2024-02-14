@@ -613,7 +613,7 @@ class App(tk.CTkToplevel):
             try:
                 reqs,req_type,doc_details,custom_keys = cnv.getRequests(filename)
             except Exception as e:
-                msg = CTkMessagebox(title="Loading Issue", message="The selected file: "+str(filename)+" could not be loaded!\n Error Message: "+str(e),
+                msg = CTkMessagebox(title="Loading Issue", message="The selected file: "+str(filename)+" could not be loaded!\nError Message: "+str(e),
                                     icon="warning", option_1="Okay",corner_radius=0)
                 return
             self.set_type(req_type)# Sets the current type
@@ -1373,30 +1373,12 @@ if __name__ == "__main__":
 # CHANGES
 ############################################################################################################
 
-# Current:
-
-# FILE FIXES
-#Fix docx preview in app
-#Test
-#Update GUI
-
 # SOFTWARE BUGS
 #1 Change how plaintiff and case name are done
 
 
+#6:30 - 
 
-# DONE:
-#Fixed saving and updating of the objections
-#Made autofills double curly quotation marks
-#Make autofills on automatically
-#Fixed files output and glitch when only one request
-#Added popup for not loaded with error
-#Updated version number
-#Fixed autofills saving spaces
-#Added warning for corrupted files
-#Fixed a text preview error
-#Updated the client saving and added a failsafe!!
-#Added pop up windows for failed saving with 2 possible errors
-
-
-
+#To Do:
+# Add FROG fail safe
+# Ensure only curcly brackets used in response

@@ -3,7 +3,7 @@ from functions import *
 import customtkinter as tk
 from tkinter import *
 from docx2pdf import convert
-import fitz,io
+import fitz,io,sys
 from PIL import Image
 
 # PREVIEW DOCX WINDOW
@@ -25,13 +25,17 @@ class Preview(tk.CTkToplevel):
 
         self.preview_frame=tk.CTkScrollableFrame(master=self)
         self.preview_frame.place(relx=0.5,rely=0.5,relwidth=0.8,relheight=0.9,anchor="center")
-        
+
         # Convert this docx to PDF
+        sys.stderr = open(os.path.join(os.path.dirname(__file__),"../assets/console.log"), "w")
         convert(os.path.join(os.path.dirname(__file__),"../assets/temp.docx"), os.path.join(os.path.dirname(__file__),"../assets/temp.pdf"))
+        sys.stderr.close()
         #Show PDF
         pdf_location=os.path.join(os.path.dirname(__file__),"../assets/temp.pdf")
         self.pages=[]
+
         open_pdf = fitz.open(pdf_location)
+
         for page in open_pdf:
             pix = page.get_pixmap()
             pix1 = fitz.Pixmap(pix,0) if pix.alpha else pix
@@ -43,6 +47,7 @@ class Preview(tk.CTkToplevel):
             timg = tk.CTkImage(light_image=i,size=(w,w*1.41))
             label = tk.CTkLabel(master=self.preview_frame, image = timg,text=None)
             label.pack()
+
         #self.bind("<Configure>",self.redraw)
         self.count=0
 

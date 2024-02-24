@@ -9,7 +9,7 @@
 ############################################################################################################
 
 import customtkinter as tk
-import json,os,pickle,webbrowser
+import json,os,pickle,webbrowser,re
 
 # CONSTANTS 
 ############################################################################################################
@@ -213,5 +213,47 @@ def get_objection_text(opts,objections,remove_end=False):
                     extra = extra+str(text)+". "#Add new text!
                     
             full_text = full_text + final_text + extra
+
         return full_text
     return ""
+
+
+#Convert text with " and ' to curly
+def curly_convert(text):
+    double_state="closed"
+    doubles={"closed":"“","open":"”"}
+    single_state="closed"
+    singles={"closed":"‘","open":"’"}
+    #First replace singles with text either side!
+    pattern = r"'"
+    # Define the replacement string
+    replacement = r'’'
+    # Perform the substitution
+    text = re.sub(pattern, replacement, text)
+
+    for i in range(len(text)):
+        if text[i]=="“":
+            double_state="open"
+        elif text[i]=="”":
+            double_state="closed"
+        elif text[i]=='"':
+            text = text[:i] + doubles[double_state] + text[i+1:]
+            if double_state=="open":
+                double_state="closed"
+            else:
+                double_state="open"
+
+    """
+    for i in range(len(text)):
+        if text[i]=="‘":
+            single_state="open"
+        elif text[i]=="’":
+            single_state="closed"
+        elif text[i]=="'":
+            text = text[:i] + singles[single_state] + text[i+1:]
+            if single_state=="open":
+                single_state="closed"
+            else:
+                single_state="open"
+    """
+    return text

@@ -6,7 +6,7 @@ from functions import *
 # Each file is stored as one of these
 class File:
     def __init__(self,name,details,req_type,reqs,master):
-        self.name = name.split("/")[-1][:-4]
+        self.name = req_type+" "+name.split("/")[-1][:-4]
         self.details = details
         self.req_type = req_type
         self.reqs = reqs

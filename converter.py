@@ -10,7 +10,7 @@
 
 from functions import *
 import PyPDF2 as pdf
-import re
+import re,time,random
 import copy
 from docx import Document
 from docx.text.paragraph import Paragraph
@@ -24,6 +24,7 @@ from boxdetect.pipelines import get_checkboxes
 from boxdetect import config
 from boxdetect.pipelines import get_boxes
 import cv2
+import concurrent.futures
 
 
 ### CONSTANTS
@@ -96,12 +97,213 @@ def readPDF3(file):
         #print(page.rect.width)
     return text
 
+def generate_unique_key():
+    # Get current timestamp
+    timestamp = int(time.time() * 1000)  # Multiply by 1000 to get milliseconds
+    # Generate a random number
+    random_number = random.randint(0, 1000000)
+    # Combine timestamp and random number to create a unique key
+    unique_key = f"{timestamp}-{random_number}"
+    return unique_key
 
 
 ### READ FROGs FORM
 ########################################################################################################
-def readForm(file):
+"""
+def readForm(file):# file, (w,h,ratio,dilation)
+    cfg = config.PipelinesConfig()
+    # important to adjust these values to match the size of boxes on your image
+    cfg.width_range = (9,30)
+    cfg.height_range = (9,30)
+    # the more scaling factors the more accurate the results but also it takes more time to processing
+    # too small scaling factor may cause false positives
+    # too big scaling factor will take a lot of processing time
+    cfg.scaling_factors = [10]
+    # w/h ratio range for boxes/rectangles filtering
+    cfg.wh_ratio_range = (0.8, 2.5)
+    # group_size_range starting from 2 will skip all the groups
+    # with a single box detected inside (like checkboxes)
+    cfg.group_size_range = (1, 1)
+    # num of iterations when running dilation tranformation (to engance the image)
+    cfg.dilation_iterations = 0
+
+    results=[]
+    vals=[]
+    f = fitz.open(file)
+    page_count = 0#Used to add extra results when scanning fails
+    sizes=[]
+    for page in f:
+        img = page.get_pixmap()
+        img.save(os.path.join(os.path.dirname(__file__),"assets/out.png"))
+        #SPLIT INTO COLUMNS
+        img = cv2.imread(os.path.join(os.path.dirname(__file__),"assets/out.png"))
+        height = img.shape[0]
+        width = img.shape[1]
+
+        # Cut the image in half
+        width_cutoff = int(width // 2.2)
+        s1 = img[:, :width_cutoff]
+        s2 = img[:, width_cutoff:]
+        s1 = img[:, :100]
+        s2 = img[:, width_cutoff:width_cutoff+150]
+
+        cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s1.png"), s1)
+        cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s2.png"), s2)
+
+        checkboxes1 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s1.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+        checkboxes2 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s2.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+
+        for checkboxes in [checkboxes1,checkboxes2]:
+            #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
+
+            for check in checkboxes:
+                print("Checkbox bounding rectangle (x,y,width,height): ", check[0])
+                sizes.append(check[0])
+
+                #Get array
+                array = check[2]
+                total=0
+                for row in array[2:-4,2:-4]:
+                    total+=sum(row)/len(row)
+                total = total/len(array[2:-4])
+
+                vals.append(total)
+                
+                if total>=20:
+                    results.append(True)
+                else:
+                    results.append(False)
+        if page_count==0 and len(results)==0:
+            results.append(False)
+    output=[]
+
+    #IF NOT ENOUGH, ENHANCE AND DO AGAIN WITH EXACT SHAPE!
+    if len(results)<90:
+        print(len(results))
+        print("NOT ENOUGH DETECTED: TRYING AGAIN")
+        avg_width = int(sum(item[2] for item in sizes[5:20])/len(sizes[5:20]))
+        avg_height = int(sum(item[3] for item in sizes[5:20])/len(sizes[5:20]))
+        ratio = avg_width/avg_height
+        print(ratio)
+        print(avg_width,avg_height)
+        cfg.width_range = (avg_width-5,avg_width+5)
+        cfg.height_range = (avg_height-5,avg_height+5)
+        cfg.wh_ratio_range = (ratio-0.4, ratio+0.4)
+        cfg.dilation_iterations = 1
+        cfg.scaling_factors=[10]
+
+        results=[]
+        vals=[]
+        f = fitz.open(file)
+        page_count = 0#Used to add extra results when scanning fails
+        sizes=[]
+        for page in f:
+            img = page.get_pixmap()
+            img.save(os.path.join(os.path.dirname(__file__),"assets/out.png"))
+            #SPLIT INTO COLUMNS
+            img = cv2.imread(os.path.join(os.path.dirname(__file__),"assets/out.png"))
+            height = img.shape[0]
+            width = img.shape[1]
+
+            # Cut the image in half
+            width_cutoff = int(width // 2.5)
+            s1 = img[:, :200]
+            s2 = img[:, width_cutoff:width_cutoff+200]
+
+            cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s1.png"), s1)
+            cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s2.png"), s2)
+
+            checkboxes1 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s1.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+            checkboxes2 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s2.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+
+            for checkboxes in [checkboxes1,checkboxes2]:
+                #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
+
+                for check in checkboxes:
+                    sizes.append(check[0])
+
+                    #Get array
+                    array = check[2]
+                    total=0
+                    for row in array[2:-4,2:-4]:
+                        total+=sum(row)/len(row)
+                    total = total/len(array[2:-4])
+
+                    vals.append(total)
+                    
+                    if total>=20:
+                        results.append(True)
+                    else:
+                        results.append(False)
+            if page_count==0 and len(results)==0:
+                results.append(False)
+    
+    print(len(results))
+    results = results[:90]
+    print(len(FORM_VALUES))
+
+
+readForm(str("C:/Users/Adam/Desktop/Freelancing/Darren Reid PDF/Darren Reid PDF/FROGs for Adam/SERVED - Def FROGs (Set 1) to Plf.pdf"))
+"""
+### READ FROGs FORM THREADED!!!!
+########################################################################################################
+
+def formThread(page,cfg):
+    #SAVE PDF PAGE AS IMAGE
+    checkbox_sizes=[]
+    tag = str(generate_unique_key())
+    local_results=[]
+    img = page.get_pixmap()
+    img.save(os.path.join(os.path.dirname(__file__),"assets/"+tag+"out.png"))
+
+    #CUT IMAGE IN HALF
+    img = cv2.imread(os.path.join(os.path.dirname(__file__),"assets/"+tag+"out.png"))
+    height = img.shape[0]
+    width = img.shape[1]
+    width_cutoff = int(width // 2.5)
+    s1 = img[:, :200]
+    s2 = img[:, width_cutoff:width_cutoff+200]
+    cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/"+tag+"s1.png"), s1)
+    cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/"+tag+"s2.png"), s2)
+
+    #GET CHECKBOXES
+    checkboxes1 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/"+tag+"s1.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+    checkboxes2 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/"+tag+"s2.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+
+    #FILTERING
+    for checkboxes in [checkboxes1,checkboxes2]:
+        #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
+        for check in checkboxes:
+            #Get array
+            checkbox_sizes.append(check[0])
+            array = check[2]
+            #Get an average pixel value
+            total=0
+            for row in array[2:-4,2:-4]:
+                total+=sum(row)/len(row)
+            total = total/len(array[2:-4])
+
+            #If above a threshold then True
+            if total>=20:
+                local_results.append(True)
+            else:
+
+                local_results.append(False)
+    
+    #DELETE SAVED IMAGES
+    files = [os.path.join(os.path.dirname(__file__),"assets/"+tag+"out.png"),
+             os.path.join(os.path.dirname(__file__),"assets/"+tag+"s1.png"),
+             os.path.join(os.path.dirname(__file__),"assets/"+tag+"s2.png")]
+    for file in files:
+        if os.path.exists(file):
+            os.remove(file)
+
+    return local_results,checkbox_sizes
+
+
+def readFormThreaded(file):
     try:
+        #1. SETTING UP BOXDETECT PIPELINE
         cfg = config.PipelinesConfig()
         # important to adjust these values to match the size of boxes on your image
         cfg.width_range = (9,30)
@@ -118,59 +320,82 @@ def readForm(file):
         # num of iterations when running dilation tranformation (to engance the image)
         cfg.dilation_iterations = 0
 
-        results=[]
-        vals=[]
+        #2. USE THREADING TO FIND CHECKBOXES
         f = fitz.open(file)
-        page_count = 0#Used to add extra results when scanning fails
-        for page in f:
-            img = page.get_pixmap()
-            img.save(os.path.join(os.path.dirname(__file__),"assets/out.png"))
-            #SPLIT INTO COLUMNS
-            img = cv2.imread(os.path.join(os.path.dirname(__file__),"assets/out.png"))
-            height = img.shape[0]
-            width = img.shape[1]
+        futures=[]
+        results=[]
+        checkbox_sizes=[]
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            for page in f:
+                future = executor.submit(formThread, page,cfg)
+                futures.append(future)
+            c=0
+            for future in futures:
+                result = future.result()[0]
+                sizes_temp = future.result()[1]
+                results.extend(result) 
+                checkbox_sizes.extend(sizes_temp)
+                if c==0 and results==[]:
+                    results.append(False) 
+                c+=1
 
-            # Cut the image in half
-            width_cutoff = int(width // 2.5)
-            s1 = img[:, :width_cutoff]
-            s2 = img[:, width_cutoff:]
 
-            cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s1.png"), s1)
-            cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s2.png"), s2)
+        #3. IF NOT ENOUGH DETECTED, ENHANCE AND DO AGAIN WITH EXACT SHAPE!
+        
+        if len(results)<90:
+            print("NOT ENOUGH DETECTED: TRYING AGAIN")
+            avg_width = int(sum(item[2] for item in checkbox_sizes[5:20])/len(checkbox_sizes[5:20]))
+            avg_height = int(sum(item[3] for item in checkbox_sizes[5:20])/len(checkbox_sizes[5:20]))
+            ratio = avg_width/avg_height
+            print(ratio)
+            print(avg_width,avg_height)
+            cfg.scaling_factors = [10]
 
-            checkboxes1 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s1.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-            checkboxes2 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s2.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-            for checkboxes in [checkboxes1,checkboxes2]:
-                #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
-                for check in checkboxes:
-                    #Get array
-                    array = check[2]
-                    total=0
-                    for row in array[2:-4]:
-                        total+=sum(row[2:-4])/len(row[2:-4])
-                    total = total/len(array[2:-4])
-                    vals.append(total)
-                    if total>=20:
-                        results.append(True)
-                    else:
-                        results.append(False)
-            if page_count==0 and len(results)==0:
-                results.append(False)
+            #Repeat attempt but with fine tuned parameters
+            futures=[]
+            results=[]
+            checkbox_sizes=[]
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                for page in f:
+                    future = executor.submit(formThread, page,cfg)
+                    futures.append(future)
+                c=0
+                for future in futures:
+                    result = future.result()[0]
+                    sizes_temp = future.result()[1]
+                    results.extend(result) 
+                    checkbox_sizes.extend(sizes_temp)
+                    if c==0 and results==[]:
+                        results.append(False) 
+                    c+=1
+        
+
+        #4. ONLY TAKE THE FIRST 90 VALUES!!!!
         output=[]
         print(len(results))
+        results = results[:90]
         print(len(FORM_VALUES))
+
+        if len(results)!=len(FORM_VALUES):#IF THE NUMBER OF DETECTED BOXES IS NOT CORRECT
+            msg = CTkMessagebox(title="Could not load FROG", message="An incorrect number of FROG's was detected. Defaulted to using all discovery requests.",
+                                icon="warning", option_1="Okay",corner_radius=0)
+            output = FORM_VALUES.copy()
+            return output
+        
+        #5. GET THE FORM VALUES!
         for i in range(len(FORM_VALUES)):
             if results[i]==True:
                 output.append(FORM_VALUES[i])
-    except:
+
+    except Exception as e:
+        print(e)
         msg = CTkMessagebox(title="Could not load FROG", message="The FROG file could not be read correctly. Defaulted to using all discovery requests.",
                             icon="warning", option_1="Okay",corner_radius=0)
         output = FORM_VALUES.copy()
+    print("In Form")
+    print(output)
+    #6. RETURN THE OUTPUT VALUE!
     return output
-
-
-
-
 
 
 
@@ -345,11 +570,23 @@ def filterPDF(data):
 ########################################################################################################
 # Get the requests and filter
 def getRequests(file):
+    #If the user wants an empty frog file!
+    if file=="BLANK FROG":
+        reqs = FORM_VALUES
+        reqs_type = "FROG"
+        details = {"case_number":"",
+                    "document":"",
+                    "county":"",
+                    "plaintiff":"",
+                    "defendant":"",
+                    "date":""}
+        keys=[]
+        return reqs,reqs_type,details,keys
     #If a form interrogatory
     data = readPDF3(file)
     backup_data = readPDF(file)
     if "DISC-001" in data.replace(" ","")[:5000]:
-        reqs = readForm(file)
+        reqs = readFormThreaded(file)
         reqs_type = "FROG"
         details = {"case_number":"",
                     "document":"",

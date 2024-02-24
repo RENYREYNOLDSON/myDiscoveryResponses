@@ -145,7 +145,7 @@ class App(tk.CTkToplevel):
     def __init__(self,master, **kwargs):
         super().__init__(master, **kwargs)
         ##### VERSION AND USER STUFF
-        self.version="1.0.2"
+        self.version="1.0.3"
 
 
         #####
@@ -238,6 +238,14 @@ class App(tk.CTkToplevel):
             if text!=self.previous_objection_text:#If the text has changed REDRAW
                 self.response_frame.set_objection(text)
                 self.set_client_unsaved(self.current_client)
+            """
+            #If there are new quotes
+            if '"' in temp or "'" in temp:
+                text = curly_convert(temp)
+                self.response_frame.set_objection(text)
+                self.set_client_unsaved(self.current_client)
+            """
+
             self.previous_objection_text = text # Save for next time
 
             # 2. UPDATE RESPONSE TEXTBOX
@@ -312,9 +320,19 @@ class App(tk.CTkToplevel):
 
             # NORMAL
             else:#If NOT RFP
-                #Do HOTKEYS HERE
+
+                
                 insert_index = self.response_frame.current_frame.response_text.index(tk.INSERT)#Current index
                 resp = " "+self.response_frame.get_response()#Current response text
+
+                #DO CURCLY QUOTES HERE!
+                if '"' in resp or "'" in resp:
+                    resp = curly_convert(resp)
+                    # Put the text here 
+                    self.response_frame.current_frame.response_text.delete("0.0","end-1c")
+                    self.response_frame.current_frame.response_text.insert("0.0",resp[1:])
+
+                #DO HOTKEYS HERE
                 use_fill=None
                 use_pos=0
                 start=0
@@ -906,13 +924,15 @@ class App(tk.CTkToplevel):
         resps=[]
         numbers=[]
         for r in file.reqs:#Get responses and requests
-            #1. ADD REQUESTS
-            reqs.append(r.req)
-            #2. ADD RESPONSES
-            full_text = r.get_full_resp()
-            resps.append(full_text)
-            #3. ADD NUMBER POINTERS
-            numbers.append(r.custom_key)
+            #For FROGS, only export submitted values
+            if file.req_type!="FROG" or (file.req_type=="FROG" and r.color=="#50C878"):
+                #1. ADD REQUESTS
+                reqs.append(r.req)
+                #2. ADD RESPONSES
+                full_text = r.get_full_resp()
+                resps.append(full_text)
+                #3. ADD NUMBER POINTERS
+                numbers.append(r.custom_key)
         cnv.updateDOC(reqs,resps,file.details,self.current_client.firm_details,self.req_type,str(filename),numbers)
 
     # Export all as a folder of DOCX's
@@ -1223,6 +1243,38 @@ class App(tk.CTkToplevel):
                     self.requests_frame.show_files(self.current_client.files)
                 self.requests_frame.show_list(self.reqs)
 
+    def add_blank_frog(self):
+        if self.current_client!="":
+            self.close_landing_frame()
+
+            reqs,req_type,doc_details,custom_keys = cnv.getRequests("BLANK FROG")
+            self.set_type(req_type)# Sets the current type
+            self.reqs=[]
+            #Redraw for production
+            self.response_frame.redraw(self.req_type)
+            c=0
+            for i in FROGS:
+                if i in reqs and "(" not in i:
+                    new = Request(FROGS[i],"",c,self,req_type,i)
+                    self.reqs.append(new)
+                c+=1
+
+            ### ADD NEW FILE TO CLIENT, IF NONE THEN CREATE NEW CLIENT!
+            new_file = File("FROGFROG",doc_details,self.req_type,self.reqs,self)
+            if self.current_client!="":
+                self.current_client.files.append(new_file)
+
+            self.title("myDiscoveryResponses   |   "+str("FROG"))
+            self.open_file("FROG")
+            #Else if a obj
+            self.current_client.current_file =self.current_client.files[-1]
+            # Add file
+            self.requests_frame.show_clients(self.clients)
+            self.requests_frame.show_files(self.current_client.files)
+            self.requests_frame.show_list(self.reqs)
+            self.set_request(self.reqs[0])
+            self.requests_frame.scroll_to(True)
+            self.update()
     ### USER ACTIVITY
     ########################################################################################################
 
@@ -1375,10 +1427,13 @@ if __name__ == "__main__":
 
 # SOFTWARE BUGS
 #1 Change how plaintiff and case name are done
+#2 Text preview and exports of objection box
 
 
-#6:30 - 
+#3:20 - 4:10
+#12:30 -
+
+
 
 #To Do:
-# Add FROG fail safe
-# Ensure only curcly brackets used in response
+# Work on normal files working

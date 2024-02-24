@@ -27,6 +27,7 @@ class Bar_Frame(tk.CTkFrame):
         self.file._dropdown_menu.insert_cascade(3,menu=menu_recent, label='Open Recent')
         self.file._dropdown_menu.add_command(label="Open File", command=self.master.select_file, accelerator="Ctrl+O")
         self.file._dropdown_menu.add_command(label="Open Folder", command=self.master.select_folder, accelerator="Ctrl+F")
+        self.file._dropdown_menu.add_command(label="Add Blank FROG", command=self.master.add_blank_frog)
         self.file._dropdown_menu.add_command(label="Load Client Feedback", command=self.master.load_client_feedback)
         self.file._dropdown_menu.add_command(label="Save Client", command=self.master.quick_save, accelerator="Ctrl+S")
         self.file._dropdown_menu.add_command(label="Save Client As", command=self.master.select_save_client)
@@ -41,9 +42,9 @@ class Bar_Frame(tk.CTkFrame):
 
 
         self.file._dropdown_menu.insert_separator(1)
-        self.file._dropdown_menu.insert_separator(7)
-        self.file._dropdown_menu.insert_separator(10)
-        self.file._dropdown_menu.insert_separator(15)
+        self.file._dropdown_menu.insert_separator(8)
+        self.file._dropdown_menu.insert_separator(11)
+        self.file._dropdown_menu.insert_separator(16)
         self.file.pack(side="left")
 
 

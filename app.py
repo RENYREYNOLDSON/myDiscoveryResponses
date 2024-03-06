@@ -1430,10 +1430,11 @@ if __name__ == "__main__":
 #2 Text preview and exports of objection box
 
 
-#3:20 - 4:10
-#12:30 -
-
 
 
 #To Do:
 # Work on normal files working
+# Add open file and instantly open exported file
+# Add AI integration
+# Make preview a more obvious button
+# Add a seperate tab to preview the original file, maybe cropped versions of the requests

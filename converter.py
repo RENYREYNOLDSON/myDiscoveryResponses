@@ -14,7 +14,7 @@ import re,time,random
 import copy
 from docx import Document
 from docx.text.paragraph import Paragraph
-from docx.oxml.xmlchemy import OxmlElement
+from docx.oxml.parser import OxmlElement
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt
 from pdfminer.high_level import extract_text
@@ -497,7 +497,7 @@ def filterPDF(data):
         if not hard_stop:
             print("Next")
             print(split[i])
-            if any(t in split[i].replace(" ","").upper() for t in terms) and (split[i].replace(" ","")[-1] in [":","."] or split[i].replace(" ","")[-1].isdigit()):#       If request term used, must end in a certain character or a number, in case it is in text. Could check split length?
+            if len(split[i].replace(" ",""))<50 and any(t in split[i][:min(len(split[i]),50)].replace(" ","").upper() for t in terms) and (split[i].replace(" ","")[-1] in [":","."] or split[i].replace(" ","")[-1].isdigit()):#       If request term used, must end in a certain character or a number, in case it is in text. Could check split length?
                 #Add the custom key
                 print(split[i])
                 key =re.findall(r'\d+', split[i][10:])[0]

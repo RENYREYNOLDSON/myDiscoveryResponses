@@ -2,33 +2,27 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "myDiscoveryResponses"
-#define MyAppVersion "1.0.3"
-#define MyAppPublisher "Jurisprudence Analytics"
-#define MyAppURL "http://mydiscoveryresponses.com/"
+#define MyAppVersion "1.0.3.1"
 #define MyAppExeName "myDiscoveryResponses.exe"
-#define MyAppAssocName "Discovery Request File"
+#define MyAppAssocName MyAppName + " File"
 #define MyAppAssocExt ".discovery"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{DAA20F5E-9407-4841-A6DD-D430396CD586}
+AppId={{3AFA1D19-F0A4-4E56-9F30-F950C02C0A2F}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
-AppPublisher={#MyAppPublisher}
-AppPublisherURL={#MyAppURL}
-AppSupportURL={#MyAppURL}
-AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
-OutputDir=C:\Users\Adam\Desktop\Freelancing\Darren Reid PDF\Darren Reid PDF\myDiscoveryResponses
+OutputDir=C:\Users\reyno\Desktop\Freelancing\myDiscoveryResponses
 OutputBaseFilename=myDiscoveryResponses Installer
-SetupIconFile=C:\Users\Adam\Desktop\Freelancing\Darren Reid PDF\Darren Reid PDF\myDiscoveryResponses\assets\icon.ico
+SetupIconFile=C:\Users\reyno\Desktop\Freelancing\myDiscoveryResponses\dist\myDiscoveryResponses\assets\icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -40,8 +34,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Adam\Desktop\Freelancing\Darren Reid PDF\Darren Reid PDF\myDiscoveryResponses\dist\myDiscoveryResponses\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Adam\Desktop\Freelancing\Darren Reid PDF\Darren Reid PDF\myDiscoveryResponses\dist\myDiscoveryResponses\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\reyno\Desktop\Freelancing\myDiscoveryResponses\dist\myDiscoveryResponses\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\reyno\Desktop\Freelancing\myDiscoveryResponses\dist\myDiscoveryResponses\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]

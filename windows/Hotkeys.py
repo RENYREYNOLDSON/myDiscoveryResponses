@@ -12,7 +12,8 @@ class Hotkeys(tk.CTkToplevel):
         super().__init__()
         self.master=master
         self.title("Hotkey Editor")
-        self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico"))#Icon
+        #self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico"))#Icon
+        self.after(200, lambda: self.iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico")))
         self.minsize(800,400)
         self.resizable(False,False)
         self.lift()

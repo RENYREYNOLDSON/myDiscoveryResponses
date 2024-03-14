@@ -408,31 +408,35 @@ def readFormThreaded(file):
 def filterPDF(data):
     #Search Terms
     terms=["REQUESTNO.","INTERROGATORYNO.","ANDNO.","ENTSNO.","ONSNO.","TIONNO.","REQUESTFORADMISSION"]
+    #Found Requests
     reqs=[]
+    #Found Keys
     keys=[]
+    #Current request
     req=""
+    #Adding to the current request? (spans multiple lines)
     adding=False
     term_used=False
+    #If program must stop
     hard_stop=False
     start_at_one=True
+    #Split of ALL the data in the PDF
     split = data.split("\n")
-
-    ####################### MAIN LOOP
-
-    # Document vars
+    #List of document details
     case_number=""
     county=""
     plaintiff=""
     defendant=""
     document=""
+    propounding_party=""
+    responding_party=""
 
-    from_split =  re.split("([1-9]+\.[0-9]+)",data.replace("\n",""))
-    #print(from_split)
+    ########################################## MAIN SEARCH LOOP
+
     for i in range(len(split)):
         check=2
-
+        ##################################### 1. GET DOCUMENT DETAILS!
         try:
-            #DOCUMENT DETAILS!!!!!!!!!!!!!!!!!!!!
             if adding==False:#THIS KEEPS THE OBJECTS IN ORDER AND COLLECTING PROPERLY!
                 check=1
                 #Get extra data here:
@@ -449,68 +453,69 @@ def filterPDF(data):
                                 bypass=False
                         c+=1
                 elif "COUNTY" in split[i].replace(" ","") and county=="":# County
-                    county = split[i].split("COUNTY OF",1)[-1]
                     c=1
+                    county = split[i]
                     #Get County until can't
                     while split[i+c].replace(" ","").replace("\n","")!="" and split[i+c]==split[i+c].upper() and c<10:
                         county=county+split[i+c]
                         c+=1
-                elif "PROPOUNDINGPARTY:" in split[i].replace(" ","") and plaintiff=="":#Plaintiff and defendant
+                #Ignore couunty if possible
+                elif "Plaintiff" in split[i] and plaintiff=="" and county!="":
+                    print("Founde")
+                    c=1
+                    #Get County until can't
+                    while (split[i-c] not in county or len(split[i-c].replace(" ",""))<2) and c<20:
+                        plaintiff = split[i-c] + plaintiff
+                        c+=1
+                elif "Defendant" in split[i] and defendant=="" and plaintiff!="":
+                    print("def")
+                    c=1
+                    #Get County until can't
+                    isEnd = str(re.sub(r'[^a-zA-Z]', '', str(split[i-c])))
+                    while isEnd.replace(" ","").upper() not in ["V","VS"] and c<20:
+                        defendant = split[i-c] + defendant
+                        c+=1
+                        isEnd = str(re.sub(r'[^a-zA-Z]', '', str(split[i-c])))
+                elif "PROPOUNDINGPARTY:" in split[i].replace(" ","") or "REQUESTINGPARTY:" in split[i].replace(" ","") or "DEMANDINGPARTY:" in split[i].replace(" ","") and propounding_party=="":#Plaintiff and defendant
                     #Add until not propounding party
-                    plaintiff=split[i].split(":")[-1]
+                    propounding_party=split[i].split(":")[-1]
                     c=1
                     while "SETNUMBER" not in split[i+c].replace(" ","") and "SETNO" not in split[i+c].replace(" ","")  and c<20:
-                        if defendant=="":# If adding to plaintiff
+                        if responding_party=="":# If adding to plaintiff
                             if "RESPONDINGPARTY:" in split[i+c].replace(" ",""):
-                                defendant = split[i+c].split(":")[-1]
+                                responding_party = split[i+c].split(":")[-1]
                             else:
-                                plaintiff = plaintiff + split[i+c]
+                                propounding_party = propounding_party + split[i+c]
                         else:
-                            defendant = defendant + split[i+c]
+                            responding_party = responding_party + split[i+c]
                         c+=1
-        except:
-            pass
-        #Clean Plaintiff and defendant
-        plaintiff = plaintiff.upper().replace("DEFENDANT","").replace("(S)","")
-        done = False
-        for i2 in range(len(plaintiff)):
-            if done==False:
-                if plaintiff[i2].isalpha():
-                    plaintiff = plaintiff[i2:]
-                    done = True
-        defendant = defendant.upper().replace("PLAINTIFF","").replace("(S)","")
-        done = False
-        for i2 in range(len(defendant)):
-            if done==False:
-                if defendant[i2].isalpha():
-                    defendant = defendant[i2:]
-                    done = True
-        #SWAP THEM!!! TEMP
-        temp = plaintiff
-        plaintiff = defendant
-        defendant = temp
+        except Exception as e:
+            print(e)
+            print("Error getting document details!")
 
 
 
-
-        #GET REQUESTS!!!!!!!!!!!!!!!!!!!!
+        ##################################### 2. GET ACTUAL REQUESTS
         if not hard_stop:
-            print("Next")
+            #print("Next")
             print(split[i])
             if len(split[i].replace(" ",""))<50 and any(t in split[i][:min(len(split[i]),50)].replace(" ","").upper() for t in terms) and (split[i].replace(" ","")[-1] in [":","."] or split[i].replace(" ","")[-1].isdigit()):#       If request term used, must end in a certain character or a number, in case it is in text. Could check split length?
                 #Add the custom key
-                print(split[i])
-                key =re.findall(r'\d+', split[i][10:])[0]
-                if start_at_one==False or (term_used==False and key!="1"):
-                    keys.append(key)
-                    start_at_one=False
-                adding=True
-                if req!="":
-                    reqs.append(req.strip())
-                req=""
-                if not term_used:
-                    reqs=[]
-                term_used=True
+                #print(split[i])
+                key_matches =re.findall(r'\d+', split[i][min(10,len(split[i])):])
+                if key_matches:
+                    key = key_matches[0]
+                    if start_at_one==False or (term_used==False and key!="1"):
+                        keys.append(key)
+                        start_at_one=False
+                    adding=True
+                    if req!="":
+                        reqs.append(req.strip())
+                    req=""
+                    if not term_used:
+                        reqs=[]
+                    term_used=True
+
                 
             elif "1. "==split[i][:3] and term_used==False:#                                    Restart requests
                 reqs=[]
@@ -525,20 +530,15 @@ def filterPDF(data):
                 if any(end in split[i].replace(" ","")[:10].upper() for end in ["DATED:","DATEDTHIS"]):
                     adding = False
                     hard_stop=True#Used to stop scanning for reqs
-                elif len(split[i].replace(" ",""))>2 and not(split[i].replace(" ","")==split[i].replace(" ","").upper() and len(split[i].replace(" ",""))>15 and split[i][-1].replace(" ","").strip() not in [".","?"]):
+                elif len(split[i].replace(" ",""))>2 and not(split[i].replace(" ","")==split[i].replace(" ","").upper() and len(split[i].replace(" ",""))>30 and split[i].replace(" ","").strip()[-1] not in [".","?"]):
                     req = req+" "+re.sub(r"-[ 0-9 ]-","",split[i].strip().replace("///",""))
 
-    #Stop reading numbers in margin
-    #Stop reading side text
 
-
-
-
-    #ISSUE end of each page continues to the margin text!
-
+    #Add final request
     reqs.append(req.strip())
-    #######################
-    #Get type of discovery
+
+    ##################################### 3. GET TYPE OF DISCOVERY
+
     req_type=""
     search = data[:1000].replace(" ","")# Search 1st 1000 chars
     if "INTERROGATOR" in search:
@@ -547,20 +547,24 @@ def filterPDF(data):
         req_type="RFA"
     else:
         req_type="RFP"
-    
-    """
-    print("CASE: "+str(case_number))
-    print("DOCUMENT: "+str(document))
-    print("COUNTY: "+str(county))
-    print("Plaintiff: "+str(plaintiff))
-    print("Defendant: "+str(defendant))
-    """
 
-    details = {"case_number":case_number,
-                "document":document,
-                "county":county,
-                "plaintiff":plaintiff,
-                "defendant":defendant,
+    ##################################### 4. RETURN FINAL DATA
+
+    #Remove 'county of' from county
+    county = county.split("COUNTY OF ",1)[-1]
+    #Clean propounding party and responding party
+    #Remove plaintiff and defendant from the terms
+    propounding_party = " ".join(propounding_party.split()[1:])
+    responding_party = " ".join(responding_party.split()[1:])
+
+    print("GOT HERE!")
+    details = {"case_number":case_number.strip(),
+                "document":document.strip(),
+                "county":county.strip(),
+                "plaintiff":plaintiff.strip(),
+                "defendant":defendant.strip(),
+                "propounding_party":propounding_party.strip(),
+                "responding_party":responding_party.strip(),
                 "date":""}
 
     return reqs,req_type,details,keys
@@ -579,6 +583,8 @@ def getRequests(file):
                     "county":"",
                     "plaintiff":"",
                     "defendant":"",
+                    "propounding_party":"",
+                    "responding_party":"",
                     "date":""}
         keys=[]
         return reqs,reqs_type,details,keys
@@ -593,6 +599,8 @@ def getRequests(file):
                     "county":"",
                     "plaintiff":"",
                     "defendant":"",
+                    "propounding_party":"",
+                    "responding_party":"",
                     "date":""}
         keys=[]
     else:
@@ -677,10 +685,12 @@ def updateDOC(reqs,resps,details,firm_details,file,name,numbers):
     #GENERAL TEXT
     for p in doc.paragraphs:
         text = str(p.text)
-        if (x in text for x in ["PLAINTIFFX","DEFENDANTX","DOCUMENTX","DATEX","ATTORNEYSX","FIRM_NAMEX","ADDRESS_LINE_1X","ADDRESS_LINE_2X","TELEPHONEX","FACSIMILEX","EMAILX"]):
+        if (x in text for x in ["PLAINTIFFX","DEFENDANTX","PROPOUNDINGX","RESPONDINGX","DOCUMENTX","DATEX","ATTORNEYSX","FIRM_NAMEX","ADDRESS_LINE_1X","ADDRESS_LINE_2X","TELEPHONEX","FACSIMILEX","EMAILX"]):
             #Normal Details
             text=text.replace("PLAINTIFFX",details["plaintiff"])
             text=text.replace("DEFENDANTX",details["defendant"])
+            text=text.replace("PROPOUNDINGX",details["propounding_party"])
+            text=text.replace("RESPONDINGX",details["responding_party"])
             text=text.replace("DOCUMENTX",details["document"])
             text=text.replace("DATEX",details["date"])
             #Firm Details

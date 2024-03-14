@@ -18,7 +18,8 @@ class FirmDetail(tk.CTkToplevel):
         self.attributes("-topmost", True)
         self.grab_set()
 
-        self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico"))#Icon
+        #self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico"))#Icon
+        self.after(200, lambda: self.iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico")))
         self.resizable(False,False)
         self.grid_columnconfigure((0,1),weight=1)
         font = (master.theme["text_font"],int(master.theme["text_size"]))

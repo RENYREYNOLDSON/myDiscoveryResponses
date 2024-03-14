@@ -14,6 +14,7 @@ class Preview(tk.CTkToplevel):
         #CREATING THE CUSTOM TKINTER WINDOW
         super().__init__()
         self.title("Output DOCX Preview")
+        self.after(200, lambda: self.iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico")))
         self.minsize(600,750)
         self.prevw,self.prevh=600,750
 

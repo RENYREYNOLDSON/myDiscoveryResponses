@@ -15,7 +15,8 @@ class Theme(tk.CTkToplevel):
         self.master=master
         self.geometry("400x440")
         self.title("Theme Options")
-        self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico"))#Icon
+        #self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico"))#Icon
+        self.after(200, lambda: self.iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico")))
         self.resizable(False,False)
 
         self.lift()
@@ -32,12 +33,12 @@ class Theme(tk.CTkToplevel):
         self.theme = self.master.theme["theme"]
         self.window_text=tk.CTkLabel(master=self.window_frame,text="Window",font=heading_font)
         self.window_text.grid(row=0,column=0,sticky="ew",padx=20,pady=0,columnspan=2)
-        #self.theme_text=tk.CTkLabel(master=self.window_frame,text="Appearance")
-        #self.theme_text.grid(row=1,column=0,sticky="w",padx=20,pady=0)
+
         # Theme Buttons
         dark_mode_image = PhotoImage(master=self.window_frame,file=os.path.join(os.path.dirname(__file__),"../assets/dark_mode.png"))
         self.dark_mode_button = tk.CTkButton(master=self.window_frame,image=dark_mode_image,text="",hover=False,fg_color="transparent",command=self.set_dark)
         self.dark_mode_button.grid(row=1,column=0,sticky="ew",padx=10,pady=(10,0))
+        
         light_mode_image = PhotoImage(master=self.window_frame,file=os.path.join(os.path.dirname(__file__),"../assets/light_mode.png"))
         self.light_mode_button = tk.CTkButton(master=self.window_frame,image=light_mode_image,text="",hover=False,fg_color="transparent",command=self.set_light)
         self.light_mode_button.grid(row=1,column=1,sticky="ew",padx=10,pady=(10,0))

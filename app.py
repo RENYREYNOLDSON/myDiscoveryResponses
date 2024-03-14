@@ -145,7 +145,7 @@ class App(tk.CTkToplevel):
     def __init__(self,master, **kwargs):
         super().__init__(master, **kwargs)
         ##### VERSION AND USER STUFF
-        self.version="1.0.3"
+        self.version="1.0.5"
 
 
         #####
@@ -169,7 +169,11 @@ class App(tk.CTkToplevel):
         self.win=None#Container for the pop out window
 
         # WINDOW SETUP
-        self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico"))#Icon
+        #self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico"))#Icon
+        #self.iconbitmap(default=os.path.join(os.path.dirname(__file__),"assets/icon.ico"))
+
+        self.after(200, lambda: self.iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico")))
+
         self.minsize(1050,720)#Min Size
         self.geometry("1050x720")#Start size
         
@@ -331,6 +335,7 @@ class App(tk.CTkToplevel):
                     # Put the text here 
                     self.response_frame.current_frame.response_text.delete("0.0","end-1c")
                     self.response_frame.current_frame.response_text.insert("0.0",resp[1:])
+                    self.response_frame.current_frame.response_text.mark_set("insert",insert_index)
 
                 #DO HOTKEYS HERE
                 use_fill=None
@@ -386,6 +391,8 @@ class App(tk.CTkToplevel):
         self.current_client.current_file.details["document"] = self.win.document.get("0.0","end").replace("\n","")
         self.current_client.current_file.details["plaintiff"] = self.win.plaintiff.get("0.0","end").replace("\n","")
         self.current_client.current_file.details["defendant"] = self.win.defendant.get("0.0","end").replace("\n","")
+        self.current_client.current_file.details["propounding_party"] = self.win.propounding_party.get("0.0","end").replace("\n","")
+        self.current_client.current_file.details["responding_party"] = self.win.responding_party.get("0.0","end").replace("\n","")
         #Date
         self.current_client.current_file.details["date"] = self.win.date.get("0.0","end").replace("\n","")
         #Name
@@ -632,7 +639,7 @@ class App(tk.CTkToplevel):
                 reqs,req_type,doc_details,custom_keys = cnv.getRequests(filename)
             except Exception as e:
                 msg = CTkMessagebox(title="Loading Issue", message="The selected file: "+str(filename)+" could not be loaded!\nError Message: "+str(e),
-                                    icon="warning", option_1="Okay",corner_radius=0)
+                                    icon="warning", option_1="Okay",corner_radius=0,width=800)
                 return
             self.set_type(req_type)# Sets the current type
             self.reqs=[]
@@ -1409,7 +1416,7 @@ if __name__ == "__main__":
     #APPLICATION UTILITY SETUP
     initial_theme()
     root=tk.CTk()
-    root.iconbitmap(default=os.path.join(os.path.dirname(__file__),"assets/icon.ico"))
+    root.iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico"))
     root.withdraw()
     ##CHECK if file has been opened from a saved client
     print(sys.argv)
@@ -1426,7 +1433,6 @@ if __name__ == "__main__":
 ############################################################################################################
 
 # SOFTWARE BUGS
-#1 Change how plaintiff and case name are done
 #2 Text preview and exports of objection box
 
 
@@ -1438,3 +1444,28 @@ if __name__ == "__main__":
 # Add AI integration
 # Make preview a more obvious button
 # Add a seperate tab to preview the original file, maybe cropped versions of the requests
+# Fix theme menu for displays
+# Seperate tabs for details
+# FIX 2022-03-30 KLOTZLE Def RFA, request includes end text too, end of document issue
+
+#DONE:
+#Fix apostrophe going to end of index
+#Seperated plaintiffs,defendents, propounding party, responding party
+#Try fix icon
+#Fix objection issue with the objections not updating properly, update the request!
+    #Did this by changing master.options_frame.objections to master.objections, what it should have been!
+#Fix warning boxes, they don't really need fixing
+#Make the pdfs read info correctly and add to end document
+#Test many files and get details loading AND SAVING well
+
+
+#TODAY:
+#Ensure proper closing on crashes, long wait etc, add regular checker to root. If not windows then quit
+#Add details into frogs
+
+    
+#2:10 - 3:10
+#3:20 - 4:50
+#7:40 - 8:10
+#8:50 - 10:20
+#10:30 - 

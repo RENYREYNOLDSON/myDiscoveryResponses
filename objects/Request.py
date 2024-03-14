@@ -47,7 +47,7 @@ class Request:
     def reload_objections(self):
         #Retain data if the key is the same, selected, param, additional param
         opts2=[]
-        for i in self.master.objections_frame.options:
+        for i in self.master.objections:
             new_obj = Objection(i,self.master)
 
             #See if same key!

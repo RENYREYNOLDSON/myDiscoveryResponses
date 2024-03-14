@@ -12,7 +12,8 @@ class PreviewText(tk.CTkToplevel):
         #CREATING THE CUSTOM TKINTER WINDOW
         super().__init__()
         self.title("Response Preview")
-        self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico"))#Icon
+        #self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico"))#Icon
+        self.after(200, lambda: self.iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico")))
         self.geometry("600x400")
         
         #GET WINDOW FOCUS

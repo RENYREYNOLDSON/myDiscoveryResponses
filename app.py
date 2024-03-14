@@ -149,7 +149,6 @@ class App(tk.CTkToplevel):
 
 
         #####
-
         # CLASS ATTRIBUTES
         self.master=master#Master is root of the program (Top level tk)
         master.call()
@@ -226,6 +225,7 @@ class App(tk.CTkToplevel):
 
     # REFRESH WINDOW PERIODICALLY, (MUST BE EFFICIENT FOR PERFORMANCE)
     def refresher(self):
+        self.destroy()
         if self.current_req!=0:
             # 1. UPDATE OBJECTION TEXTBOX
             #Set the current objection parameters
@@ -1412,6 +1412,17 @@ def create_window(root,from_file="file which will not exist on anybody's file pa
 # MAIN LOOP
 ############################################################################################################
 
+#ROOT UTILITY FUNCTION
+def check_windows_open():
+    c=0
+    for w in root.winfo_children():
+        c+=1
+    if c==0:#Destroy root if no windows left open
+        print("ROOT CLOSED AS NO WINDOWS DETECTED")
+        root.destroy()
+    root.after(10000,check_windows_open)
+
+
 if __name__ == "__main__":
     #APPLICATION UTILITY SETUP
     initial_theme()
@@ -1424,6 +1435,7 @@ if __name__ == "__main__":
         create_window(root,sys.argv[-1])
     else:
         create_window(root)
+    root.after(10000,check_windows_open)
     root.mainloop()
 
 
@@ -1457,10 +1469,10 @@ if __name__ == "__main__":
 #Fix warning boxes, they don't really need fixing
 #Make the pdfs read info correctly and add to end document
 #Test many files and get details loading AND SAVING well
+#Ensure proper closing on crashes, long wait etc, add regular checker to root. If not windows then quit
 
 
 #TODAY:
-#Ensure proper closing on crashes, long wait etc, add regular checker to root. If not windows then quit
 #Add details into frogs
 
     

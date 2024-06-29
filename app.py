@@ -1619,7 +1619,7 @@ if __name__ == "__main__":
 
     splash_screen = Splash()
     splash_screen.update()
-    #time.sleep(2)
+    time.sleep(1)
     splash_screen.destroy()
     
     root=tk.CTk()

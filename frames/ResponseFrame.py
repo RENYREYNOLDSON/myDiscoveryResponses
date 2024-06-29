@@ -4,6 +4,8 @@ import customtkinter as tk
 from PIL import Image
 from functools import partial
 import tkinter
+from objects.SmartTextBox import *
+
 
 # RESPONSE FRAME 
 ############################################################################################################
@@ -40,8 +42,8 @@ class Response_Frame(tk.CTkFrame):
 
         #2. CUSTOM RESPONSE FRAMES
         #Default Frame
-        self.default_frame.response_label=tk.CTkLabel(master=self.default_frame,text="RESPONSE:",font=label_font)
-        self.default_frame.response_text=tk.CTkTextbox(master=self.default_frame,wrap="word",state="normal")
+        self.default_frame.response_label = tk.CTkLabel(master=self.default_frame,text="RESPONSE:",font=label_font)
+        self.default_frame.response_text = SmartTextbox(master=self.default_frame,main_master=self.master,wrap="word",state="normal")
         #pack
         self.default_frame.response_label.pack(padx=20,anchor="w",pady=10)
         self.default_frame.response_text.pack(padx=30,fill="both",expand=True,anchor="center")
@@ -49,7 +51,7 @@ class Response_Frame(tk.CTkFrame):
         #FRA Frame
         self.RFA_frame.response_label=tk.CTkLabel(master=self.RFA_frame,text="RESPONSE:",font=label_font)
         self.RFA_frame.response_text=tk.CTkTextbox(master=self.RFA_frame,wrap="word",state="disabled",height=60)
-        self.RFA_frame.RFA_option = tk.CTkSegmentedButton(master=self.RFA_frame,values=["Admit","Deny","Lack Info","Custom"],command=master.setRFA)
+        self.RFA_frame.RFA_option = tk.CTkSegmentedButton(master=self.RFA_frame,values=["Admit","Deny","Lack Info","Custom"],border_width=0,command=master.setRFA)
         self.RFA_frame.RFA_label=tk.CTkLabel(master=self.RFA_frame,text="17.1 RESPONSE:",font=label_font)
         self.RFA_frame.RFA_text=tk.CTkTextbox(master=self.RFA_frame,wrap="word",state="normal",height=60)
         self.RFA_frame.RFA_option.set("Admit")
@@ -68,7 +70,7 @@ class Response_Frame(tk.CTkFrame):
         self.RFP_frame.response_text=tk.CTkTextbox(master=self.RFP_frame,wrap="word",state="normal")
         self.RFP_frame.RFP_label = tk.CTkLabel(master=location_frame,text="Documents Location: ")
         self.RFP_frame.RFP_text = tk.CTkEntry(master=location_frame,state="normal")
-        self.RFP_frame.RFP_option = tk.CTkSegmentedButton(master=self.RFP_frame,values=["Available","Not Exist","Not Possessed","Lost","Custom"],command=master.setRFP)
+        self.RFP_frame.RFP_option = tk.CTkSegmentedButton(master=self.RFP_frame,values=["Available","Not Exist","Not Possessed","Lost","Custom"],border_width=0,command=master.setRFP)
         self.RFP_frame.RFP_option.set("Available")
         #pack
         self.RFP_frame.response_label.pack(padx=20,anchor="w",pady=(10,0))
@@ -145,6 +147,7 @@ class Response_Frame(tk.CTkFrame):
         #Bold tag for request
         #self.response_frame.request_text.tag_config("red",font=(self.theme["text_font"],1+int(self.theme["text_size"]), 'bold'))
         #Special Request
+
 
 
     # Getters and Setters for all parameters!

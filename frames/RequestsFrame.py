@@ -29,6 +29,7 @@ class Requests_Frame(tk.CTkFrame):
         #Client Button
         add_button = tk.CTkButton(master=client_title_frame,width=20,height=10,font=("arial",20),text="+",fg_color="transparent",text_color=("black","white"),hover=False,command=master.new_client)
         add_button.pack(side="left")
+        add_tooltip(add_button,"Create a blank client document")
         self.clients_frame = tk.CTkScrollableFrame(master=self,corner_radius=0,fg_color="transparent")
         self.clients_frame.pack(padx=0,pady=0,fill="x")
 
@@ -40,6 +41,7 @@ class Requests_Frame(tk.CTkFrame):
         text.pack(side="left",fill="both",padx=10)
         add_button = tk.CTkButton(master=file_title_frame,width=20,height=10,font=("arial",20),text="+",fg_color="transparent",text_color=("black","white"),hover=False,command=master.select_file)
         add_button.pack(side="left")
+        add_tooltip(add_button,"Load a PDF file")
         self.file_frame = tk.CTkScrollableFrame(master=self,corner_radius=0,fg_color="transparent")
         self.file_frame.pack(padx=0,pady=0,fill="x")
 
@@ -93,6 +95,8 @@ class Requests_Frame(tk.CTkFrame):
                 fg_color='#144870'
             button = tk.CTkButton(master=self.file_frame,image=PDF_ICON,anchor="w",text=get_name(i.name,22),hover=False,corner_radius=0,fg_color=fg_color,command=i.set,text_color=i.color)
             button.pack(fill="x",side="top")
+            if self.master.CONFIG["general"]["hover_tooltips"]:
+                add_tooltip(button,i.name,wraplength=2000)
             button.bind("<ButtonRelease-1>", i.on_drop)
             #button.bind("<B1-Motion>",i.on_drag)
             self.file_buttons.append(button)

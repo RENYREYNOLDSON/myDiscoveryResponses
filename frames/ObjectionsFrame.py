@@ -4,6 +4,8 @@ import customtkinter as tk
 from PIL import Image
 from functools import partial
 import tkinter
+from custom_hovertip import CustomTooltipLabel
+from objects.SmartToolTip import *
 
 # OBJECTIONS FRAME 
 ############################################################################################################
@@ -66,6 +68,13 @@ class Objections_Frame(tk.CTkFrame):
         for opt in self.options:
             optbox = tk.CTkButton(master=self.list_frame,text_color=("black","white"),text=opt,corner_radius=0,anchor="w",fg_color="transparent",hover=False,command=partial(self.master.toggle_objection,str(opt)))
             optbox.grid(row=c,column=0,sticky="ew",padx=(10,10),pady=2,columnspan=2)
+
+            #Get theme background
+            #SET THIS TO THE COLOUR OF THEME
+            if self.master.CONFIG["general"]["hover_tooltips"]:
+                SmartToolTip(anchor_widget=optbox, text=opt+". "+self.master.objections[opt][0])
+            
+            
             #Set Right Click Command
             optbox.bind("<Button-3>",partial(self.master.toggle_selected_objection,str(opt)))
             self.opts.append(optbox)

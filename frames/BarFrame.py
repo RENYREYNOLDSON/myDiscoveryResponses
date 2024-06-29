@@ -4,6 +4,7 @@ import customtkinter as tk
 from PIL import Image
 from functools import partial
 import tkinter
+import datetime
 from customtkinter.windows.widgets.core_widget_classes.dropdown_menu import DropdownMenu
 
 # BAR FRAME 
@@ -31,12 +32,13 @@ class Bar_Frame(tk.CTkFrame):
         self.file._dropdown_menu.add_command(label="Load Client Feedback", command=self.master.load_client_feedback)
         self.file._dropdown_menu.add_command(label="Save Client", command=self.master.quick_save, accelerator="Ctrl+S")
         self.file._dropdown_menu.add_command(label="Save Client As", command=self.master.select_save_client)
-        self.file._dropdown_menu.add_command(label="Export File as DOCX", command=self.master.export_current)
+        self.file._dropdown_menu.add_command(label="Export File as DOCX", command=self.master.export_current,accelerator="Ctrl+E")
         self.file._dropdown_menu.add_command(label="Export Client as DOCX", command=self.master.export_all)
         self.file._dropdown_menu.add_command(label="Export Check With Client", command=self.master.export_check_with_clients)
         self.file._dropdown_menu.add_command(label="Preview DOCX", command=self.master.view_preview)
         self.file._dropdown_menu.add_command(label="Close File", command=self.master.close_file)
         self.file._dropdown_menu.add_command(label="Close Client", command=self.master.close_client)
+        self.file._dropdown_menu.add_command(label="Check for Updates")
         self.file._dropdown_menu.add_command(label="Exit", command=self.master.exit_window)
 
 
@@ -50,7 +52,7 @@ class Bar_Frame(tk.CTkFrame):
 
         # View
         var = tk.StringVar(value="Options")
-        self.options=tk.CTkOptionMenu(master=self,anchor="center",variable=var,values=["Firm Details","Theme","Objections","Hotkeys","User Guide"],width=100,corner_radius=0,bg_color="transparent",command=self.call_options)
+        self.options=tk.CTkOptionMenu(master=self,anchor="center",variable=var,values=["Firm Details","Objections","Shortcuts","Settings","User Guide"],width=100,corner_radius=0,bg_color="transparent",command=self.call_options)
         self.options.configure(button_color="#161616",fg_color="#161616")
         self.options.pack(side="left")
         self.options._dropdown_menu.insert_separator(1)
@@ -58,22 +60,52 @@ class Bar_Frame(tk.CTkFrame):
         # Details
         self.details = tk.CTkButton(master=self,text="File Details",fg_color="transparent",width=100,command=self.master.view_details,corner_radius=0)
         self.details.pack(side="left")
+        self.details_tooltip = add_tooltip(self.details,"Edit this files details")
+
+        # Save Text
+        self.autosave_text = tk.CTkLabel(master=self,text="",width=100,text_color="grey")
+        self.autosave_text.pack(side="left")
+
+        # Toggle Fullscreen
+        self.fullscreen = tk.CTkButton(master=self,text="⤢",fg_color="transparent",width=40,corner_radius=0,command=self.master.toggle_fullscreen)
+        self.fullscreen.pack(side="right")
 
         # Clear
         self.clear = tk.CTkButton(master=self,text="Clear",fg_color="transparent",width=100,corner_radius=0,command=self.master.clear)
         self.clear.pack(side="right")
+        self.clear_tooltip = add_tooltip(self.clear,"Clear this request")
 
         # Copy Previous
         self.copy = tk.CTkButton(master=self,text="Copy Previous",fg_color="transparent",width=100,command=self.master.copy_previous,corner_radius=0)
         self.copy.pack(side="right")
+        self.copy_tooltip = add_tooltip(self.copy,"Copy the previous request")
 
         # Preview
-        self.copy = tk.CTkButton(master=self,text="Preview",fg_color="transparent",width=100,corner_radius=0,command=self.master.preview_text)
-        self.copy.pack(side="right")
+        self.preview = tk.CTkButton(master=self,text="Preview",fg_color="transparent",width=100,corner_radius=0,command=self.master.preview_text)
+        self.preview.pack(side="right")
+        self.preview_tooltip = add_tooltip(self.preview,"Preview current response only")
 
         # Save
-        self.copy = tk.CTkButton(master=self,text="Save",fg_color="transparent",width=100,corner_radius=0,command=self.master.quick_save)
-        self.copy.pack(side="right")
+        self.save = tk.CTkButton(master=self,text="Save",fg_color="transparent",width=100,corner_radius=0,command=self.master.quick_save)
+        self.save.pack(side="right")
+        self.save_tooltip = add_tooltip(self.save,"Save the current client")
+
+        # Language Text
+        self.language_text = tk.CTkLabel(master=self,text=self.master.CONFIG["spelling"]["language"],text_color="grey")
+        self.language_text.pack(side="right",padx=5)
+
+        #Change if the tooltips are enabled
+        self.set_tooltips()
+
+    def update_language_text(self):
+        self.language_text.configure(text=self.master.CONFIG["spelling"]["language"])
+
+    def update_autosave_time(self):
+        self.autosave_text.configure(text="Last Saved at "+datetime.datetime.now().strftime("%H:%M"))
+
+    def reset_autosave_time(self):
+        self.autosave_text.configure(text="")
+
 
     def update_recents(self,recents):
         menu_recent = DropdownMenu(self.file,values=recents,command=self.call_recent)
@@ -93,13 +125,27 @@ class Bar_Frame(tk.CTkFrame):
     #Trigger a command when an 'Options' button clicked
     def call_options(self,val):
         self.options.set("Options")
-        if val=="Theme":
-            self.master.view_theme()
-        elif val=="Objections":
+        if val=="Objections":
             self.master.view_objections()
-        elif val=="Hotkeys":
+        elif val=="Shortcuts":
             self.master.view_hotkeys()
         elif val=="User Guide":
             open_user_guide()
         elif val=="Firm Details":
             self.master.view_firm_details()
+        elif val=="Settings":
+            self.master.view_settings()
+
+    def set_tooltips(self):
+        if self.master.CONFIG["general"]["hover_tooltips"]:
+            self.details_tooltip.enable()
+            self.clear_tooltip.enable()
+            self.copy_tooltip.enable()
+            self.preview_tooltip.enable()
+            self.save_tooltip.enable()
+        else:
+            self.details_tooltip.disable()
+            self.clear_tooltip.disable()
+            self.copy_tooltip.disable()
+            self.preview_tooltip.disable()
+            self.save_tooltip.disable()

@@ -11,7 +11,7 @@ class Hotkeys(tk.CTkToplevel):
         #CREATING THE CUSTOM TKINTER WINDOW
         super().__init__()
         self.master=master
-        self.title("Hotkey Editor")
+        self.title("Shortcut Editor")
         #self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico"))#Icon
         self.after(200, lambda: self.iconbitmap(os.path.join(os.path.dirname(__file__),"../assets/icon.ico")))
         self.minsize(800,400)
@@ -68,9 +68,9 @@ class Hotkeys(tk.CTkToplevel):
         for w in self.scroll_frame.winfo_children():
             w.destroy()
         #Get font
-        font = (self.master.theme["text_font"],int(self.master.theme["text_size"]))
-        text_color=self.master.theme["text_color"]
-        fg_color=self.master.theme["text_bg"]
+        font = (self.master.CONFIG["appearance"]["text_font"],int(self.master.CONFIG["appearance"]["text_size"]))
+        text_color=self.master.CONFIG["appearance"]["text_color"]
+        fg_color=self.master.CONFIG["appearance"]["text_bg"]
         #Create a frame for each
         count=0
         for hot in self.hotkey_array:

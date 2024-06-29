@@ -57,7 +57,7 @@ class Theme(tk.CTkToplevel):
         # Text Frame
         self.text_frame = tk.CTkFrame(master=self,width=380)
         self.text_frame.grid_columnconfigure((0,1),weight=2)
-        cols=["#000000","#FFFFFF","#964B00","#89CFF0","#808080"]
+        #cols=["#000000","#FFFFFF","#964B00","#89CFF0","#808080"]
         self.text_text=tk.CTkLabel(master=self.text_frame,text="Text Options",font=heading_font)
         self.text_text.grid(row=0,column=0,sticky="ew",padx=20,pady=0,columnspan=2)
         # Text Colour

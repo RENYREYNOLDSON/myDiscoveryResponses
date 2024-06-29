@@ -20,8 +20,9 @@ class EditObjections(tk.CTkToplevel):
 
         #GET WINDOW FOCUS
         self.lift()
-        self.attributes("-topmost", True)
+        #self.attributes("-topmost", True)
         self.grab_set()
+        self.after(500,self.grab_release)
 
         self.objections = open_objections()
         # Turn list of autofills into string
@@ -34,8 +35,11 @@ class EditObjections(tk.CTkToplevel):
 
 
         self.current_objection=""
-        font = (master.theme["text_font"],int(master.theme["text_size"]))
+        font = (master.CONFIG["appearance"]["text_font"],int(master.CONFIG["appearance"]["text_size"]))
         label_font = tk.CTkFont("Arial",16,underline=True,weight="bold")
+
+        text_color = self.master.CONFIG["appearance"]["text_color"]
+        bg_color = self.master.CONFIG["appearance"]["text_bg"]
 
         #LAYOUT OF OBJECTIONS DICT FOR REFERENCE
         #Name,Objection,Additional,Modify?,Autofill?,Autofills
@@ -69,22 +73,22 @@ class EditObjections(tk.CTkToplevel):
         #Name
         name_label=tk.CTkLabel(master=self.edit_frame,text="OBJECTION NAME:",font=label_font,anchor="w")
         name_label.pack(fill="x",padx=10,pady=(5,5))
-        self.name_entry = tk.CTkEntry(master=self.edit_frame,font=font,text_color=master.theme["text_color"],fg_color=master.theme["text_bg"])
+        self.name_entry = tk.CTkEntry(master=self.edit_frame,font=font,text_color=text_color,fg_color=bg_color)
         self.name_entry.pack(padx=20,fill="x")
         #Objection
         objection_label=tk.CTkLabel(master=self.edit_frame,text="OBJECTION BODY:",font=label_font,anchor="w")
         objection_label.pack(fill="x",padx=10,pady=(5,5))
-        self.objection_entry = tk.CTkTextbox(master=self.edit_frame,wrap="word",height=100,font=font,text_color=master.theme["text_color"],fg_color=master.theme["text_bg"])
+        self.objection_entry = tk.CTkTextbox(master=self.edit_frame,wrap="word",height=100,font=font,text_color=text_color,fg_color=bg_color)
         self.objection_entry.pack(padx=20,fill="both",expand=True)
         #End Text
         additional_label=tk.CTkLabel(master=self.edit_frame,text="ADDITIONAL TEXT:",font=label_font,anchor="w")
         additional_label.pack(fill="x",padx=10,pady=(5,5))
-        self.additional_entry = tk.CTkTextbox(master=self.edit_frame,wrap="word",height=50,font=font,text_color=master.theme["text_color"],fg_color=master.theme["text_bg"])
+        self.additional_entry = tk.CTkTextbox(master=self.edit_frame,wrap="word",height=50,font=font,text_color=text_color,fg_color=bg_color)
         self.additional_entry.pack(padx=20,pady=(0,10),fill="both",expand=True)
         #Autofill Text
         autofill_label=tk.CTkLabel(master=self.edit_frame,text="AUTO FILLS:",font=label_font,anchor="w")
         autofill_label.pack(fill="x",padx=10,pady=(5,5))
-        self.autofill_entry = tk.CTkTextbox(master=self.edit_frame,wrap="word",height=50,font=font,text_color=master.theme["text_color"],fg_color=master.theme["text_bg"])
+        self.autofill_entry = tk.CTkTextbox(master=self.edit_frame,wrap="word",height=50,font=font,text_color=text_color,fg_color=bg_color)
         self.autofill_entry.pack(padx=20,pady=(0,10),fill="both",expand=True)
         #Checkboxes
         self.modify_box = tk.CTkCheckBox(master=self.edit_frame,text="Alter 'Notwithstanding' Text")

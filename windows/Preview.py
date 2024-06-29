@@ -20,8 +20,9 @@ class Preview(tk.CTkToplevel):
 
         #GET WINDOW FOCUS
         self.lift()
-        self.attributes("-topmost", True)
+        #self.attributes("-topmost", True)
         self.grab_set()
+
 
 
         self.preview_frame=tk.CTkScrollableFrame(master=self)
@@ -51,6 +52,7 @@ class Preview(tk.CTkToplevel):
 
         #self.bind("<Configure>",self.redraw)
         self.count=0
+        #self.after(500,self.grab_release)
 
     def redraw(self,e):
         if e.height!=self.prevh or e.width!=self.prevw:

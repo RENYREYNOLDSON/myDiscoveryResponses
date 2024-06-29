@@ -24,13 +24,13 @@ class PreviewText(tk.CTkToplevel):
         #SET THE TEXT HERE
         master.set_request(master.current_req)
 
-        #Box formatted like other text
+        #Box formatted like other text 
         label_font = tk.CTkFont("Arial",16,underline=True,weight="bold")
         self.response_label=tk.CTkLabel(master=self,text="RESPONSE:",font=label_font,anchor="w")
         self.response_label.pack(padx=10,pady=(10,0),fill="both")
         #Get style here from main program
-        font = (master.theme["text_font"],int(master.theme["text_size"]))
-        self.text = tk.CTkTextbox(master=self,wrap="word",font=font,text_color=master.theme["text_color"],fg_color=master.theme["text_bg"])
+        font = (master.CONFIG["appearance"]["text_font"],int(master.CONFIG["appearance"]["text_size"]))
+        self.text = tk.CTkTextbox(master=self,wrap="word",font=font,text_color=master.CONFIG["appearance"]["text_color"],fg_color=master.CONFIG["appearance"]["text_bg"])
         self.text.pack(fill="both",expand=True,padx=20,pady=10)
         self.text.insert("0.0",master.current_req.get_full_resp())
         self.text.configure(state="disabled")

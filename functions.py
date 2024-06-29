@@ -10,6 +10,10 @@
 
 import customtkinter as tk
 import json,os,pickle,webbrowser,re
+from enchant.checker import SpellChecker
+from objects.SmartToolTip import *
+import urllib.request
+
 
 # CONSTANTS 
 ############################################################################################################
@@ -18,6 +22,15 @@ HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage
 
 # FUNCTIONS 
 ############################################################################################################
+
+#Check for updates of software
+def check_for_update():
+    urllib.request.urlretrieve("https://mydiscoveryresponses.com/myDiscoveryResponsesInstaller.zip","myDiscoveryResponsesInstaller.zip")
+
+
+#Add a tooltip to an object
+def add_tooltip(obj,text,wraplength=400):
+    return SmartToolTip(anchor_widget = obj,text = text,wraplength=wraplength)
 
 def get_nth_key(dictionary, n=0):
     if n < 0:
@@ -141,13 +154,60 @@ def bold_keywords(obj,text):
     for i in indices:
         obj.tag_add("red", "0.0 + "+str(i[0])+" chars","0.0 + "+str(i[1])+" chars",)
 
+
+
+# Checks spelling in a textbox, highlights and returns
+def spellcheck(obj,text):
+    #Load the spelling config
+    chkr = obj.main_master.SPELL_CHECKER
+    spell_config = obj.main_master.CONFIG["spelling"]
+    chkr.set_text(text)
+    #Ignores
+    ignores = obj.main_master.CONFIG["spelling"]["ignore"].split(",")
+    #List of issues
+    issues=[]
+    #CLEAR ISSUES
+    obj.tag_delete("spelling")
+
+    for err in chkr:#Checks all of the matches and adds them to issues
+        if err.word not in ignores:
+            suggestions = chkr.suggest(err.word)
+            obj.tag_add("spelling", "0.0 + "+str(err.wordpos-1)+" chars","0.0 + "+str(len(err.word)+err.wordpos-1)+" chars",)
+            new_issue = ["Spelling Issue","Always Ignore",err.word,err.wordpos,len(err.word),suggestions[:5]]#Only get 1st five
+            issues.append(new_issue)
+
+    #Get font size and adjust squiggle XBM
+    squiggles = {"8":"squiggle_small",
+                 "10":"squiggle_small",
+                 "12":"squiggle_small",
+                 "14":"squiggle_mid",
+                 "16":"squiggle_mid",
+                 "18":"squiggle_midsmall",
+                 "20":"squiggle_midsmall",
+                 "22":"squiggle_midsmall",
+                 "24":"squiggle_big",
+                 "26":"squiggle_big",}
+
+    font_size = str(obj.cget("font")[1])#This is font size
+
+    squiggle_file = "@"+os.path.join(os.path.dirname(__file__),"assets/"+squiggles[font_size]+".xbm")
+
+    obj.tag_config("spelling",bgstipple=squiggle_file,background=spell_config["underline"])
+    
+    return issues
+
+    #DONT INCLUDE LAST ONE IF USER STILL TYPING
+    #UNHIGHLIGHT WHEN WORDS ARE FIXED
+    #SEPERATE OUT GRAMMAR AND SPELLING?
+
+
 # Set the initial tkinter theme
 def initial_theme():
-    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/theme.json")):
-        with open(os.path.join(os.path.dirname(__file__),'assets/theme.json'), 'r') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/config.json")):
+        with open(os.path.join(os.path.dirname(__file__),'assets/config.json'), 'r') as file:
             data= json.load(file)
         # Set relevant things here
-        tk.set_appearance_mode(data["theme"])
+        tk.set_appearance_mode(data["appearance"]["theme"])
 
 # Form the objection text using the selected objections
 def get_objection_text(opts,objections,remove_end=False):

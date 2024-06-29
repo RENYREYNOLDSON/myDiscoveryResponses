@@ -407,7 +407,15 @@ def readFormThreaded(file):
 # Get requests and details from a pdf text string
 def filterPDF(data):
     #Search Terms
-    terms=["REQUESTNO.","INTERROGATORYNO.","ANDNO.","ENTSNO.","ONSNO.","TIONNO.","REQUESTFORADMISSION"]
+    terms=["REQUESTNO.",
+           "INTERROGATORYNO.",
+           "ANDNO.",
+           "ENTSNO.",
+           "ONSNO.",
+           "TIONNO.",
+           "REQUESTFORADMISSION",
+           "INTERROGATORYNO"]
+    
     #Found Requests
     reqs=[]
     #Found Keys
@@ -497,11 +505,11 @@ def filterPDF(data):
 
         ##################################### 2. GET ACTUAL REQUESTS
         if not hard_stop:
-            #print("Next")
-            #print(split[i])
+            print("Next")
+            print(split[i])
             if len(split[i].replace(" ",""))<50 and any(t in split[i][:min(len(split[i]),50)].replace(" ","").upper() for t in terms) and (split[i].replace(" ","")[-1] in [":","."] or split[i].replace(" ","")[-1].isdigit()):#       If request term used, must end in a certain character or a number, in case it is in text. Could check split length?
                 #Add the custom key
-                #print(split[i])
+                print(split[i])
                 key_matches =re.findall(r'\d+', split[i][min(10,len(split[i])):])
                 if key_matches:
                     key = key_matches[0]

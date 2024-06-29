@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "myDiscoveryResponses"
-#define MyAppVersion "1.0.3.1"
+#define MyAppVersion "1.0.5"
 #define MyAppExeName "myDiscoveryResponses.exe"
 #define MyAppAssocName MyAppName + " File"
 #define MyAppAssocExt ".discovery"

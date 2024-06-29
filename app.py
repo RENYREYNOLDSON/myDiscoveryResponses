@@ -19,31 +19,35 @@
 import converter as cnv
 from CTkMessagebox import CTkMessagebox
 import customtkinter as tk
-import json,os,copy,sys
+import json,os,copy,sys,time
 import pickle
 from threading import Thread
 import re
 import os
+
 # Frame Imports
 from frames.BarFrame import *
 from frames.LandingFrame import *
 from frames.ObjectionsFrame import *
 from frames.RequestsFrame import *
 from frames.ResponseFrame import *
+from frames.FileDetails import *
+from frames.FirmDetails import *
 # Window Imports
-from windows.Detail import *
 from windows.EditObjections import *
-from windows.FirmDetail import *
 from windows.Hotkeys import *
 from windows.Preview import *
 from windows.PreviewText import *
 from windows.Theme import *
+from windows.Settings import Settings
+from windows.splash import *
 # Object Imports
 from objects.Client import *
 from objects.File import *
 from objects.Objection import *
 from objects.Request import *
 from objects.Save import *
+from objects.SmartToolTip import *
 # Functions
 from functions import *
 
@@ -136,6 +140,7 @@ FROGS = {"1.1":"State the name, ADDRESS, telephone number, and relationship to y
         "20.11":"State the name, ADDRESS, and telephone number of each owner and each PERSON who has had possession since the INCIDENT of each vehicle involved in the INCIDENT."
         }
 
+
 # MAIN WINDOW FRAME
 ############################################################################################################
 
@@ -145,7 +150,7 @@ class App(tk.CTkToplevel):
     def __init__(self,master, **kwargs):
         super().__init__(master, **kwargs)
         ##### VERSION AND USER STUFF
-        self.version="1.0.5"
+        self.version="1.0.6"
 
 
         #####
@@ -163,9 +168,15 @@ class App(tk.CTkToplevel):
         self.previous_objection_text=""
         self.HOTKEYS=open_hotkeys()
         self.RECENTS=get_recents()
+        self.set_config()#CONFIG FILE FOR SOFTWARE!
+
+        #Set spell check
+        self.SPELL_CHECKER = SpellChecker(self.CONFIG["spelling"]["language"])
 
         self.objections = open_objections()#Get the list of objections
         self.win=None#Container for the pop out window
+
+        self.details_frame = None
 
         # WINDOW SETUP
         #self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico"))#Icon
@@ -179,6 +190,7 @@ class App(tk.CTkToplevel):
         self.state("zoomed")
         self.title("myDiscoveryResponses")#Window title
         self.after(100, self.refresher)
+        self.after(30000,self.autosave)
         
         # KEY BINDINGSS
         self.bind("<Up>",self.up_pressed)
@@ -192,9 +204,12 @@ class App(tk.CTkToplevel):
         self.bind("<Control-o>",self.cntrl_o)
         self.bind("<Control-f>",self.cntrl_f)
         self.bind("<Control-s>",self.cntrl_s)
+        self.bind("<Control-e>",self.cntrl_e)
 
         # POPULATE WINDOW WITH OBJECTS
         self.populate_window()
+
+
 
 
         
@@ -225,7 +240,6 @@ class App(tk.CTkToplevel):
 
     # REFRESH WINDOW PERIODICALLY, (MUST BE EFFICIENT FOR PERFORMANCE)
     def refresher(self):
-        self.destroy()
         if self.current_req!=0:
             # 1. UPDATE OBJECTION TEXTBOX
             #Set the current objection parameters
@@ -371,7 +385,14 @@ class App(tk.CTkToplevel):
                     self.requests_frame.update_files(self.current_client.files)
                     self.set_client_unsaved(self.current_client)
 
+
         self.after(100, self.refresher)#REFRESH AGAIN
+
+    #Toggles whether the program is in fullscreen or not
+    def toggle_fullscreen(self):
+        state = not self.attributes('-fullscreen')
+        self.attributes("-fullscreen",state)
+
 
     #Reload the objections for each request! Stops errors when objections changed
     def reload_objections(self):
@@ -386,46 +407,50 @@ class App(tk.CTkToplevel):
 
     # Save details from the details window
     def save_detail_win(self):
-        self.current_client.current_file.details["county"] = self.win.county.get("0.0","end").replace("\n","")
-        self.current_client.current_file.details["case_number"] = self.win.case.get("0.0","end").replace("\n","")
-        self.current_client.current_file.details["document"] = self.win.document.get("0.0","end").replace("\n","")
-        self.current_client.current_file.details["plaintiff"] = self.win.plaintiff.get("0.0","end").replace("\n","")
-        self.current_client.current_file.details["defendant"] = self.win.defendant.get("0.0","end").replace("\n","")
-        self.current_client.current_file.details["propounding_party"] = self.win.propounding_party.get("0.0","end").replace("\n","")
-        self.current_client.current_file.details["responding_party"] = self.win.responding_party.get("0.0","end").replace("\n","")
+        self.current_client.current_file.details["county"] = self.details_frame.county.get("0.0","end").replace("\n","")
+        self.current_client.current_file.details["case_number"] = self.details_frame.case.get("0.0","end").replace("\n","")
+        self.current_client.current_file.details["document"] = self.details_frame.document.get("0.0","end").replace("\n","")
+        self.current_client.current_file.details["plaintiff"] = self.details_frame.plaintiff.get("0.0","end").replace("\n","")
+        self.current_client.current_file.details["defendant"] = self.details_frame.defendant.get("0.0","end").replace("\n","")
+        self.current_client.current_file.details["propounding_party"] = self.details_frame.propounding_party.get("0.0","end").replace("\n","")
+        self.current_client.current_file.details["responding_party"] = self.details_frame.responding_party.get("0.0","end").replace("\n","")
         #Date
-        self.current_client.current_file.details["date"] = self.win.date.get("0.0","end").replace("\n","")
+        self.current_client.current_file.details["date"] = self.details_frame.date.get("0.0","end").replace("\n","")
         #Name
-        self.current_client.current_file.name = self.win.name.get("0.0","end").replace("\n","")
+        self.current_client.current_file.name = self.details_frame.name.get("0.0","end").replace("\n","")
 
         self.requests_frame.show_files(self.current_client.files)
         self.title("myDiscoveryResponses   |   "+str(self.current_client.current_file.name))
         self.set_client_unsaved(self.current_client)
-        self.cancel_win()
+        self.close_details()
         
     def save_firm_detail_win(self):
-        new_details={"firm_name":self.win.name.get("0.0","end-1c"),
-                    "address_line_1":self.win.address_line_1.get("0.0","end-1c"),
-                    "address_line_2":self.win.address_line_2.get("0.0","end-1c"),
-                    "telephone":self.win.telephone.get("0.0","end-1c"),
-                    "facsimile":self.win.facsimile.get("0.0","end-1c"),
-                    "email":self.win.email.get("0.0","end-1c"),
-                    "attorneys":self.win.attorneys.get("0.0","end-1c")}
+        new_details={"firm_name":self.details_frame.name.get("0.0","end-1c"),
+                    "address_line_1":self.details_frame.address_line_1.get("0.0","end-1c"),
+                    "address_line_2":self.details_frame.address_line_2.get("0.0","end-1c"),
+                    "telephone":self.details_frame.telephone.get("0.0","end-1c"),
+                    "facsimile":self.details_frame.facsimile.get("0.0","end-1c"),
+                    "email":self.details_frame.email.get("0.0","end-1c"),
+                    "attorneys":self.details_frame.attorneys.get("0.0","end-1c")}
         
         if self.current_client!="":
             self.set_client_unsaved(self.current_client)
-        if self.current_client!="":
             self.current_client.firm_details = new_details
         else:
             set_firm_details(new_details)
-        self.cancel_win()
+        self.close_details()
 
 
     def client_already_open(self,client_name):
         for client in self.clients:
             if client.name == client_name:
                 #Show a warning
-                CTkMessagebox(title="Error", message="Already have a client open with the name '"+str(client_name)+"' !", icon="cancel",corner_radius=0)
+                CTkMessagebox(title="Error",
+                               message="Already have a client open with the name '"+str(client_name)+"' !", 
+                               icon="cancel",
+                               corner_radius=0,
+                               sound=True,
+                               master=self)
                 #Return 
                 return True
         return False
@@ -440,17 +465,35 @@ class App(tk.CTkToplevel):
 
     # View and edit the details of the document
     def view_details(self):
-        if self.file_open():
-            self.cancel_win()
-            self.win = Detail(self)
-            self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
-            self.win.mainloop()
+        if self.file_open() and self.details_frame==None:
+            #Remove (visibly) response and objection frames
+            self.response_frame.pack_forget()
+            self.objections_frame.pack_forget()
+
+            self.details_frame = File_Details_Frame(master=self)
+            self.details_frame.pack(fill="both",expand=True,padx=20,pady=20)
+
+    def close_details(self):
+        if self.details_frame!=None:
+            self.details_frame.destroy()
+            self.details_frame = None
+            if self.clients==[]:
+                self.landing_frame.pack(padx=100,pady=100,expand=True,side="left",fill="both")
+            else:
+                self.objections_frame.pack(padx=0,pady=0,expand=False,side="right",fill="both")
+                self.response_frame.pack(padx=20,pady=20,expand=True,side="left",fill="both")
+
 
     def view_firm_details(self):
-        self.cancel_win()
-        self.win = FirmDetail(self)
-        self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
-        self.win.mainloop()  
+        if self.details_frame==None:
+            #Remove (visibly) response and objection frames
+            self.response_frame.pack_forget()
+            self.objections_frame.pack_forget()
+            self.landing_frame.pack_forget()
+
+            self.details_frame = Firm_Details_Frame(master=self)
+            self.details_frame.pack(fill="both",expand=True,padx=20,pady=20)
+
 
     # View and edit the OBJECTIONS JSON
     def view_objections(self):
@@ -470,6 +513,13 @@ class App(tk.CTkToplevel):
     def view_theme(self):
         self.cancel_win()
         self.win = Theme(self)
+        self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
+        self.win.mainloop()
+
+    # View and edit the theme of the software
+    def view_settings(self):
+        self.cancel_win()
+        self.win = Settings(self)
         self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
         self.win.mainloop()
 
@@ -509,8 +559,14 @@ class App(tk.CTkToplevel):
             if client.saved==False:
                 unsaved=True
         if unsaved:#Check if the user wants to save without closing!!
-            msg = CTkMessagebox(title="Exit?", message="Are you sure you want to close without saving?",
-                                icon="question", option_1="Cancel", option_3="Yes",corner_radius=0)
+            msg = CTkMessagebox(title="Exit?", 
+                                message="Are you sure you want to close without saving?",
+                                icon="question",
+                                option_1="Cancel", 
+                                option_3="Yes",
+                                corner_radius=0,
+                                sound=True,
+                                master=self)
             if msg.get()!="Yes":
                 return
         self.destroy()
@@ -519,6 +575,10 @@ class App(tk.CTkToplevel):
             c+=1
         if c==0:#Destroy root if no windows left open
             root.destroy()
+
+
+    def update_software(self):
+        pass
 
 
     ### KEY PRESSES
@@ -534,6 +594,8 @@ class App(tk.CTkToplevel):
         self.select_folder()
     def cntrl_s(self,e):
         self.quick_save()
+    def cntrl_e(self,e):
+        self.export_current()
 
     # If up arrow
     def up_pressed(self,e):
@@ -565,7 +627,7 @@ class App(tk.CTkToplevel):
 
     #Get mouse press and set focus!
     def mouse_pressed(self,e):
-        if "ctktextbox" not in str(e.widget) and "ctkentry" not in str(e.widget):
+        if "textbox" not in str(e.widget) and "ctkentry" not in str(e.widget):
             self.focus_set()
 
 
@@ -607,14 +669,19 @@ class App(tk.CTkToplevel):
             ('All files', '*.*')
         )
         filenames = tk.filedialog.askopenfilenames(
-            title='Open PDF file',
+            title='Open file',
             filetypes=filetypes)
 
         for filename in filenames:
             if os.path.exists(filename):
                 if filename[-4:].lower()==".pdf":#PDF
                     if self.current_client=="":# If no client selected
-                        CTkMessagebox(title="Error", message="Must create a client to open Discovery Requests", icon="cancel",corner_radius=0)
+                        CTkMessagebox(title="Error",
+                                       message="Must create a client to open Discovery Requests", 
+                                       icon="cancel",
+                                       corner_radius=0,
+                                       sound=True,
+                                       master=self)
                         return
                     self.title("myDiscoveryResponses   |   "+str(filename.split("/")[-1]))
                     self.open_file(filename)
@@ -638,8 +705,14 @@ class App(tk.CTkToplevel):
             try:
                 reqs,req_type,doc_details,custom_keys = cnv.getRequests(filename)
             except Exception as e:
-                msg = CTkMessagebox(title="Loading Issue", message="The selected file: "+str(filename)+" could not be loaded!\nError Message: "+str(e),
-                                    icon="warning", option_1="Okay",corner_radius=0,width=800)
+                msg = CTkMessagebox(title="Loading Issue", 
+                                    message="The selected file: "+str(filename)+" could not be loaded!\nError Message: "+str(e),
+                                    icon="warning", 
+                                    option_1="Okay",
+                                    corner_radius=0,
+                                    width=800,
+                                    sound=True,
+                                    master=self)
                 return
             self.set_type(req_type)# Sets the current type
             self.reqs=[]
@@ -682,8 +755,13 @@ class App(tk.CTkToplevel):
             save_obj = pickle.load(file)
         except:
             file.close()
-            msg = CTkMessagebox(title="File Corrupted", message="An error has caused this file to become corrupted!",
-                                icon="warning", option_1="Okay",corner_radius=0)
+            msg = CTkMessagebox(title="File Corrupted", 
+                                message="An error has caused this file to become corrupted!",
+                                icon="warning", 
+                                option_1="Okay",
+                                corner_radius=0,
+                                sound=True,
+                                master=self)
             return
         file.close()
         # Get files array
@@ -786,8 +864,12 @@ class App(tk.CTkToplevel):
         except:
             file.close()
             self.current_client.set_master(self)
-            msg = CTkMessagebox(title="Saving Issue", message="The selected file: "+str(filename)+" could not be saved [1]!",
-                                icon="warning", option_1="Okay",corner_radius=0)
+            msg = CTkMessagebox(title="Saving Issue", 
+                                message="The selected file: "+str(filename)+" could not be saved [1]!",
+                                icon="warning", 
+                                option_1="Okay",
+                                corner_radius=0,
+                                sound=True,master=self)
             return 
         file.close()
 
@@ -800,8 +882,13 @@ class App(tk.CTkToplevel):
             os.rename(filename+"TEMPORARY"+".discovery",filename+".discovery")
         except:
             self.current_client.set_master(self)
-            msg = CTkMessagebox(title="Saving Issue", message="The selected file: "+str(filename)+" could not be saved [2]! SAVE UNDER A NEW NAME!",
-                                icon="warning", option_1="Okay",corner_radius=0)
+            msg = CTkMessagebox(title="Saving Issue", 
+                                message="The selected file: "+str(filename)+" could not be saved [2]! SAVE UNDER A NEW NAME!",
+                                icon="warning", 
+                                option_1="Okay",
+                                corner_radius=0,
+                                sound=True,
+                                master=self)
             return 
            
         # Add the master back
@@ -819,38 +906,67 @@ class App(tk.CTkToplevel):
         if self.current_client!="":
             if valid_file_path(self.current_client.save):#If client has a save
                 self.save_client(self.current_client.save.replace(".discovery",""))#Remove file type
+                self.bar_frame.update_autosave_time()
                 return
             else:
                 self.select_save_client()#Save client if nothing else!
+                self.bar_frame.update_autosave_time()
+
+    def autosave(self):
+        #Change to save all valid clients
+        if self.CONFIG["general"]["autosaving"]:
+            if self.current_client!="":#ONLY DO IF THERE IS A VALID SAVE FILE!!!
+                if valid_file_path(self.current_client.save):#If client has a save
+                    self.quick_save()
+        self.after(int(self.CONFIG["general"]["autosave_interval"]),self.autosave)
 
 
     #Close the current file
     def close_file(self):
         if self.file_open():#We know a valid file is open
-            #Get the index of the current file
-            index = self.current_client.files.index(self.current_client.current_file)
-            if index==0:
-                new_index=1
-            else:
-                new_index = index-1
+            msg = CTkMessagebox(title="Close File?", 
+                                message="Are you sure you want to permanently close this file?",
+                                icon="question", 
+                                option_1="Cancel", 
+                                option_3="Yes",
+                                corner_radius=0,
+                                sound=True,
+                                master=self)
+            
+            if msg.get()=="Yes":
+                #Get the index of the current file
+                index = self.current_client.files.index(self.current_client.current_file)
+                if index==0:
+                    new_index=1
+                else:
+                    new_index = index-1
 
-            #Set the new file
-            if new_index<len(self.current_client.files):
-                self.set_file(self.current_client.files[new_index])
-                self.requests_frame.scroll_to_file()
-                self.current_client.files.pop(index)
-            else:
-                self.current_client.current_file=""
-                self.current_client.files=[]
-            self.set_client(self.current_client)
-            #self.requests_frame.show_files(self.current_client.files)
+                #Set the new file
+                if new_index<len(self.current_client.files):
+                    self.set_file(self.current_client.files[new_index])
+                    self.requests_frame.scroll_to_file()
+                    self.current_client.files.pop(index)
+                else:
+                    self.current_client.current_file=""
+                    self.current_client.files=[]
+                self.set_client(self.current_client)
+                #self.requests_frame.show_files(self.current_client.files)
 
     #Close the current open client
     def close_client(self):
         if self.current_client!="":
+            #Close details menu if open!
+            self.close_details()
             if self.current_client.saved==False:
-                msg = CTkMessagebox(title="Close Client?", message="Are you sure you want to close the client without saving?",
-                                    icon="question", option_1="Cancel", option_3="Yes",corner_radius=0)
+                msg = CTkMessagebox(title="Close Client?", 
+                                    message="Are you sure you want to close the client without saving?",
+                                    icon="question", 
+                                    option_1="Cancel", 
+                                    option_3="Yes",
+                                    corner_radius=0,
+                                    sound=True,
+                                    master=self)
+                
                 if msg.get()!="Yes":
                     return
             #Get new index for new selected client
@@ -890,10 +1006,13 @@ class App(tk.CTkToplevel):
         self.response_frame.reset()
         #Reset Objections
         self.objections_frame.reset()
+        #Reset display save time
+        self.bar_frame.reset_autosave_time()
         #Reopen landing page
         self.open_landing_frame()
         #Set window title
         self.title("myDiscoveryResponses")#Window title
+
 
 
     def load_client_feedback(self):
@@ -931,8 +1050,8 @@ class App(tk.CTkToplevel):
         resps=[]
         numbers=[]
         for r in file.reqs:#Get responses and requests
-            #For FROGS, only export submitted values
-            if file.req_type!="FROG" or (file.req_type=="FROG" and r.color=="#50C878"):
+            #Export ALL for FROGS, and submitted for others depending on setting
+            if file.req_type=="FROG" or (file.req_type!="FROG" and r.color=="#50C878") or self.CONFIG["general"]["submitted_only"]==0:
                 #1. ADD REQUESTS
                 reqs.append(r.req)
                 #2. ADD RESPONSES
@@ -940,7 +1059,12 @@ class App(tk.CTkToplevel):
                 resps.append(full_text)
                 #3. ADD NUMBER POINTERS
                 numbers.append(r.custom_key)
-        cnv.updateDOC(reqs,resps,file.details,self.current_client.firm_details,self.req_type,str(filename),numbers)
+        cnv.updateDOC(reqs,resps,file.details,self.current_client.firm_details,file.req_type,str(filename),numbers)
+
+        #Open the word document if setting is selected
+        if self.CONFIG["general"]["open_export"]:
+            filename = str(filename)+".docx"
+            os.system(f'start "" "{filename}"')
 
     # Export all as a folder of DOCX's
     def export_all(self):
@@ -955,13 +1079,16 @@ class App(tk.CTkToplevel):
     def export_current(self):
         #Need to get the correct file location and then save
         if self.current_client!="":
-            filename=tk.filedialog.asksaveasfilename(filetypes=(("DOCX","*.docx"),('All files', '*.*')))
+            filename=tk.filedialog.asksaveasfilename(title="Export Current File as DOCX",
+                                                     filetypes=(("DOCX","*.docx"),('All files', '*.*')))
             self.export(self.current_client.current_file,filename)
 
-    def export_check_with_clients(self):#This outputs all of the check with clients WITHIN the client
+    # This outputs all of the check with clients WITHIN the file!
+    def export_check_with_clients(self):
         if self.file_open():
             # Get all check with clients / red
-            filename=tk.filedialog.asksaveasfilename(filetypes=(("DOCX","*.docx"),('All files', '*.*')))
+            filename=tk.filedialog.asksaveasfilename(title="Export Check with Client",
+                                                     filetypes=(("DOCX","*.docx"),('All files', '*.*')))
             if filename!="":
                 reqs=[]
                 resps=[]
@@ -981,6 +1108,8 @@ class App(tk.CTkToplevel):
                             req_types.append(r.req_type)
                 if len(reqs)>0:
                     cnv.updateDOC(reqs,resps,file.details,self.current_client.firm_details,req_types,str(filename),numbers)
+                    if self.CONFIG["general"]["open_export"]:
+                        os.system("start "+str(filename)+".docx")
 
     ### SETTING AND GETTING OBJECTS
     ########################################################################################################
@@ -1109,6 +1238,8 @@ class App(tk.CTkToplevel):
 
     # Set the current client
     def set_client(self,client):
+        self.bar_frame.reset_autosave_time()
+        self.close_details()
         self.current_client = client
         self.requests_frame.show_clients(self.clients)
         if self.current_client.current_file!="":
@@ -1142,6 +1273,8 @@ class App(tk.CTkToplevel):
         #NEED TO CHANGE THINGS HERE TOO!!!
         self.current_client.current_file = file
         self.reqs = file.reqs
+        #Close the details menu
+        self.close_details()
         # Set is built for a single request type, need to change for files
         self.set_type(file.req_type)# Set first so refresher doesn't overwrite
         self.requests_frame.update_files(self.current_client.files)
@@ -1152,6 +1285,8 @@ class App(tk.CTkToplevel):
 
     # Save request and open a different one
     def set_request(self,req):
+        #Close details menu
+        self.close_details()
         # 1. SAVING PREVIOUS RESPONSE
         if self.current_req!=0:
             # Saving
@@ -1215,6 +1350,52 @@ class App(tk.CTkToplevel):
         #Update the objection special input
         self.objections_frame.update_current(self.current_req.current_objection)
 
+    #Update the config JSON and set the new config
+    def update_config(self):
+        self.win.withdraw()
+        general = self.win.get_general()
+        appearance = self.win.get_appearance()
+        spelling = self.win.get_spelling()
+        details = 1
+        hotkeys = 1
+        other = {"last_updated":"18/06/24"}
+
+        self.CONFIG = {"general":general,
+                       "appearance":appearance,
+                       "spelling":spelling,
+                       "details":details,
+                       "hotkeys":hotkeys,
+                       "other":other}
+        
+        #Save the new config JSON
+        with open(os.path.join(os.path.dirname(__file__),"assets/config.json"), "w") as outfile:
+            json.dump(self.CONFIG, outfile)
+        self.set_config()
+        self.set_theme()
+        self.set_tooltips()
+        self.bar_frame.update_language_text()
+        self.objections_frame.redraw_all()
+        if self.file_open():
+            self.requests_frame.show_files(self.current_client.files)
+        if self.file_open():
+            self.objections_frame.redraw(self.current_req)
+        #Update spell check language
+        self.SPELL_CHECKER = SpellChecker(self.CONFIG["spelling"]["language"])
+        #Destroy Window
+        self.cancel_win()
+
+    #Open and update the config
+    def set_config(self):
+        if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/config.json")):
+            with open(os.path.join(os.path.dirname(__file__),'assets/config.json'), 'r') as file:
+                self.CONFIG = json.load(file)
+
+
+    def add_ignore_word(self,word):
+        self.CONFIG["spelling"]["ignore"] = self.CONFIG["spelling"]["ignore"]+","+word
+        #Save the new config JSON
+        with open(os.path.join(os.path.dirname(__file__),"assets/config.json"), "w") as outfile:
+            json.dump(self.CONFIG, outfile)
 
     # Update the theme JSON and set the new theme
     def update_theme(self):
@@ -1234,21 +1415,24 @@ class App(tk.CTkToplevel):
         self.cancel_win()#Destroy Window
 
     # Open and set the theme
-    def set_theme(self,param="both"):# Return API key from file if possible
-        if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/theme.json")):
-            with open(os.path.join(os.path.dirname(__file__),'assets/theme.json'), 'r') as file:
-                self.theme = json.load(file)
-            # Set relevant things here
-            if param=="theme" or param=="both":
-                tk.set_appearance_mode(self.theme["theme"])
-            if param=="text" or param=="both":
-                # Set all text areas
-                font = (self.theme["text_font"],int(self.theme["text_size"]))
-                self.response_frame.set_theme(font,self.theme["text_color"],self.theme["text_bg"])
-                self.requests_frame.show_clients(self.clients)
-                if self.current_client != "":
-                    self.requests_frame.show_files(self.current_client.files)
-                self.requests_frame.show_list(self.reqs)
+    def set_theme(self,param="both"):
+        theme = self.CONFIG["appearance"]
+        # Set relevant things here
+        if param=="theme" or param=="both":
+            tk.set_appearance_mode(theme["theme"])
+        if param=="text" or param=="both":
+            # Set all text areas
+            font = (theme["text_font"],int(theme["text_size"]))
+            self.response_frame.set_theme(font,theme["text_color"],theme["text_bg"])
+            self.requests_frame.show_clients(self.clients)
+            if self.current_client != "":
+                self.requests_frame.show_files(self.current_client.files)
+            self.requests_frame.show_list(self.reqs)
+
+    def set_tooltips(self):
+        #RESET THE landing frame AND bar frame
+        self.landing_frame.set_tooltips()
+        self.bar_frame.set_tooltips()
 
     def add_blank_frog(self):
         if self.current_client!="":
@@ -1307,7 +1491,7 @@ class App(tk.CTkToplevel):
 
             #If an RFA request then update 17.1 response if needed
             
-            if prev_req.RFA_option!="Admit":
+            if prev_req.RFA_option!="Admit" and self.CONFIG["general"]["auto_FROGS"]==1:#If ADMIT and ADD17.1 CHECKED
                 #If not admit then add the 17.1 response
                 #Find the 17.1
                 self.current_client.add_special_response([prev_req.custom_key,prev_req.RFA_text])
@@ -1399,6 +1583,9 @@ class App(tk.CTkToplevel):
 
 
 
+
+
+
 # WINDOW SPECIFIC FUNTIONS (cannot be elsewhere)
 ############################################################################################################
 
@@ -1423,9 +1610,18 @@ def check_windows_open():
     root.after(10000,check_windows_open)
 
 
+
 if __name__ == "__main__":
     #APPLICATION UTILITY SETUP
     initial_theme()
+    #PROGRAM SPLASH SCREEN
+
+
+    splash_screen = Splash()
+    splash_screen.update()
+    #time.sleep(2)
+    splash_screen.destroy()
+    
     root=tk.CTk()
     root.iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico"))
     root.withdraw()
@@ -1443,36 +1639,120 @@ if __name__ == "__main__":
 
 # CHANGES
 ############################################################################################################
+#DONE FOR NEW UPDATE!:
 
-# SOFTWARE BUGS
-#2 Text preview and exports of objection box
+#Added autosave feature
+#Add SPELL CHECKER
+#Created custom text box
+#Spell checker now works in text boxes
+#Added tooltips for options
+#14/05
+#Added basic splash screen
+#Improved spell checker, much faster with new library!
+#Made spell checker into seprate file
+#Added fullscreen support
+#Added settings menu
+#15/05
+#Made settings menu far better
+#16/05 
+#Working on software settings
+#Working on undo
+#Added info on objection hover
+#09/06
+#Made top level windows sometimes lose top level status
+#Look into best practices for managing big python projects, seperating out systems
+
+#25/06
+#Make FROGs export properly
+#Add automatic open after export
+#Make settings cancel button work
+#Make settings menu work with other theme
+#Stop settings menu flashing on apply
+#Add options for this in the menu, language, number of options, colour, rules etc
+#Fix highlighting of spelling
+
+#28/06
+#Make all of settings menu work
+#Add language to bar frame
+#Stopped title being selected as a spell check correction
+#Added warning for close file button
+#Redo file and firm details
+#Made options for RFP and RFA look nicer
+#Fixed export all, this was causing errors
+#Make Martha's SPROG work
+#Added message box sounds
+#Try and centre popups when they open, also for windows
+#Make firm details submit
+#Add tooltips all over
+#Fixed objections and shortcuts menu opening
+#Renamed 'hotkeys' to 'shortcuts'
+#Fix theme buttons
+#Create a virtual environment for distribution, compare file sizes!
+#Stop tooltips if disabled
+#Change titles of exporting windows
+#Add more hotkeys for common commands
+#Fix firm and file details on change of menu
+#fixed indexes of spelling
+
+#29/06 
+#WORKING ON THE STUPID FUCKING REPO, DELETED WORK
+#Add unit tests! Run all these so that I know software works!
+#Added always ignore
+
+
+
+#CURRENT PLAN:
+
+#1. SPELL CHECKING
+#Reset after always ignore
+#Try run from thread
+#Only spell check when changes made
+#dont check current word!
+#Enable this for all needed text boxes, and maybe entries
+#Add spell check button to go through whole document
+#when theme is reset, reset textbox tags
+
+
+#2. UNDO BUTTON
+#ideas
+#retain a stack of previous options
+#each text box keeps it's own undo. Keep action stack
+#Add info about undo commands somewhere
+
+
+#3. OTHER:
+# Create indicator of file details
+# Add clear info about hotkeys etc
+# Make text typed into objection actually work
+# Fix border on fullscreen reset
+# Test splash screen on other displays
+# Create auto updater
+# Run lots of testing on exporting, spelling and details
 
 
 
 
-#To Do:
-# Work on normal files working
-# Add open file and instantly open exported file
-# Add AI integration
-# Make preview a more obvious button
-# Add a seperate tab to preview the original file, maybe cropped versions of the requests
-# Fix theme menu for displays
-# Seperate tabs for details
-# FIX 2022-03-30 KLOTZLE Def RFA, request includes end text too, end of document issue
-
-#DONE:
-#Fix apostrophe going to end of index
-#Seperated plaintiffs,defendents, propounding party, responding party
-#Try fix icon
-#Fix objection issue with the objections not updating properly, update the request!
-    #Did this by changing master.options_frame.objections to master.objections, what it should have been!
-#Fix warning boxes, they don't really need fixing
-#Make the pdfs read info correctly and add to end document
-#Test many files and get details loading AND SAVING well
-#Ensure proper closing on crashes, long wait etc, add regular checker to root. If not windows then quit
+#4. WEBSITE:
+#Make Git Integration Work!!!
+#Create a custom build command
+#Fix website security SSL!
+#Revamp website!!! Add a full documentation page with tabs!
+#Make GitHub really good!
+#CONNECT GITHUB TO THE WEBSITE DIRECTLTY
 
 
-#TODAY:
-#Add details into frogs
 
-    
+#5. RANDOM EXTRAS:
+#Add autosave only save current client?
+#Mac support
+#Add a seperate tab to preview the original file, maybe cropped versions of the requests
+#Add option for blank files and blank requests
+#Fix response preview, keep objections edited
+#Add more small details into pages
+#NOTE HOW TO CREATE THE INSTALLER!
+#See if we can make refresher only run on a change
+#Pitch a youtube tutorial on using the software
+
+
+
+

@@ -9,6 +9,7 @@
 ########################################################################################################
 
 from functions import *
+import numpy
 import PyPDF2 as pdf
 import re,time,random
 import copy

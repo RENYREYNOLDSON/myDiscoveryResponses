@@ -171,7 +171,7 @@ class App(tk.CTkToplevel):
         self.set_config()#CONFIG FILE FOR SOFTWARE!
 
         #Set spell check
-        self.SPELL_CHECKER = SpellChecker(self.CONFIG["spelling"]["language"])
+        #self.SPELL_CHECKER = SpellChecker(self.CONFIG["spelling"]["language"])
 
         self.objections = open_objections()#Get the list of objections
         self.win=None#Container for the pop out window
@@ -1669,7 +1669,7 @@ if __name__ == "__main__":
 
 #28/06
 #Make all of settings menu work
-#Add language to bar frame
+#Add language to bar framep
 #Stopped title being selected as a spell check correction
 #Added warning for close file button
 #Redo file and firm details
@@ -1720,6 +1720,7 @@ if __name__ == "__main__":
 
 
 #3. OTHER:
+# Use rename symbol to change variable names
 # Make about page work
 # Create indicator of file details
 # Make text typed into objection actually work

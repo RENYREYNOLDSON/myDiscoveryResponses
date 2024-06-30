@@ -3,4 +3,5 @@ __all__ = ["Client",
             "Objection",
             "Request",
             "Save",
-            "SmartTextBox"]
+            "SmartTextBox",
+            "SmartToolTip"]

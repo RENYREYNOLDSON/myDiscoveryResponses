@@ -4,4 +4,6 @@ __all__ = ["Detail",
             "Hotkeys",
             "Preview",
             "PreviewText",
-            "Theme"]
+            "Theme",
+            "Settings",
+            "splash"]

@@ -2,4 +2,6 @@ __all__ = ["BarFrame",
             "LandingFrame", 
             "ObjectionsFrame",
             "RequestsFrame",
-            "ResponseFrame"]
+            "ResponseFrame",
+            "FileDetails",
+            "FirmDetails"]

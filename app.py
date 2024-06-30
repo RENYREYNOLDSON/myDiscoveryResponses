@@ -247,7 +247,9 @@ class App(tk.CTkToplevel):
                 self.current_req.current_objection.param = self.objections_frame.objection_input.get()
                 self.current_req.current_objection.additional_param = self.objections_frame.additional_input.get()
 
-            temp = self.response_frame.get_objection()#Get prev text from box
+            #The custom text is the text typed into the box
+            self.current_req.custom_objection_text = self.response_frame.get_objection()#Get prev text from box
+
             remove_end=False
             if not ((self.req_type!="RFP" and len(self.response_frame.get_response())>0) or (self.req_type=="RFP" and len(self.response_frame.get_RFP())>0)):
                 remove_end = True
@@ -256,13 +258,7 @@ class App(tk.CTkToplevel):
             if text!=self.previous_objection_text:#If the text has changed REDRAW
                 self.response_frame.set_objection(text)
                 self.set_client_unsaved(self.current_client)
-            """
-            #If there are new quotes
-            if '"' in temp or "'" in temp:
-                text = curly_convert(temp)
-                self.response_frame.set_objection(text)
-                self.set_client_unsaved(self.current_client)
-            """
+
 
             self.previous_objection_text = text # Save for next time
 
@@ -1698,15 +1694,19 @@ if __name__ == "__main__":
 #WORKING ON THE STUPID FUCKING REPO, DELETED WORK
 #Add unit tests! Run all these so that I know software works!
 #Added always ignore
-
+#Fixed the GitHub
+#Reset after always ignore
+#Only spell check when changes made, better performance
+#Add clear info about hotkeys etc
+#Run lots of testing on exporting, spelling and details
+#Working on reset options
+#Made open install location work
 
 
 #CURRENT PLAN:
 
 #1. SPELL CHECKING
-#Reset after always ignore
 #Try run from thread
-#Only spell check when changes made
 #dont check current word!
 #Enable this for all needed text boxes, and maybe entries
 #Add spell check button to go through whole document
@@ -1714,21 +1714,19 @@ if __name__ == "__main__":
 
 
 #2. UNDO BUTTON
-#ideas
-#retain a stack of previous options
 #each text box keeps it's own undo. Keep action stack
 #Add info about undo commands somewhere
+#Create a list of 'actions' that I can go back through and undo
 
 
 #3. OTHER:
+# Make about page work
 # Create indicator of file details
-# Add clear info about hotkeys etc
 # Make text typed into objection actually work
 # Fix border on fullscreen reset
 # Test splash screen on other displays
 # Create auto updater
-# Run lots of testing on exporting, spelling and details
-
+# Test about page on installed software
 
 
 

@@ -247,7 +247,7 @@ class Spelling(tk.CTkFrame):
         return self.ignore_text.get(0.0,"end-1c")
 
 
-class Saving(tk.CTkFrame):
+class Loading(tk.CTkFrame):
     #Constructor
     def __init__(self,master, **kwargs):
         #FRAME SETUP
@@ -258,6 +258,8 @@ class Saving(tk.CTkFrame):
         #Title
         title = tk.CTkLabel(master=self,text="Loading",font=heading_font,anchor="w")
         title.pack(fill="x",padx=10,pady=5)
+
+
 
 class Objections(tk.CTkFrame):
     #Constructor
@@ -277,6 +279,28 @@ class Hotkeys(tk.CTkFrame):
         title = tk.CTkLabel(master=self,text="Hotkeys",font=heading_font,anchor="w")
         title.pack(fill="x",padx=10,pady=5)
 
+        hotkey_frame = tk.CTkFrame(master=self,fg_color="transparent")
+        hotkey_frame.pack(fill="both",expand=True,padx=20)
+        hotkey_frame.columnconfigure((0,1),weight=1)
+
+        hotkeys={"Up-Arrow":"Move up a request",
+                 "Down-Arrow":"Move down a request",
+                 "Enter":"Submit a request",
+                 "Escape":"Escape a text box",
+                 "Ctrl+N":"Create new client",
+                 "Ctrl+O":"Open a file",
+                 "Ctrl+F":"Open a folder",
+                 "Ctrl+S":"Save current client",
+                 "Ctrl+E":"Export current file"}
+
+        c=0
+        for h in hotkeys.keys():
+            hotkey_text = tk.CTkLabel(master=hotkey_frame,text=h)
+            hotkey_text.grid(row=c,column=0)
+            hotkey_text = tk.CTkLabel(master=hotkey_frame,text=hotkeys[h],text_color="grey")
+            hotkey_text.grid(row=c,column=1)
+            c+=1
+
 class About(tk.CTkFrame):
     #Constructor
     def __init__(self,master, **kwargs):
@@ -285,12 +309,47 @@ class About(tk.CTkFrame):
         #Title
         title = tk.CTkLabel(master=self,text="About",font=heading_font,anchor="w")
         title.pack(fill="x",padx=10,pady=5)
+
+        #Last updated
+        text = tk.CTkLabel(master=self,text="Last Updated:",anchor="w")
+        text.pack(fill="x",padx=10,pady=(5,0))
         #Version number
-        #Uninstall
+        text = tk.CTkLabel(master=self,text="Current version:  "+str(self.master.master.master.version),anchor="w")
+        text.pack(fill="x",padx=10,pady=(5,0))
+        #Report an issue
+        text = tk.CTkLabel(master=self,text="Report any issues to:  reynoldson2002@gmail.com",anchor="w")
+        text.pack(fill="x",padx=10,pady=(5,0))
+
         #Go to file location
+        reset_shortcuts_text = tk.CTkLabel(master=self,text="Open myDiscoveryResponses install location",anchor="w")
+        reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
+        reset_shortcuts = tk.CTkButton(master=self,text="📂 Open file location",command=open_install_location)
+        reset_shortcuts.pack(anchor="w",padx=10,pady=(5,20))
+
+        title = tk.CTkLabel(master=self,text="Reset",font=heading_font,anchor="w")
+        title.pack(fill="x",padx=10,pady=5)
+
+
+        #Reset objections 
+        reset_shortcuts_text = tk.CTkLabel(master=self,text="Reset Objections",anchor="w")
+        reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
+        reset_shortcuts = tk.CTkButton(master=self,text="Reset",fg_color="#404040")
+        reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
         #Reset all settings
-        #Reset hotkeys
-        #Reset objections etc
+        reset_shortcuts_text = tk.CTkLabel(master=self,text="Reset Settings",anchor="w")
+        reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
+        reset_shortcuts = tk.CTkButton(master=self,text="Reset",fg_color="#404040")
+        reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
+        #Reset all
+        reset_shortcuts_text = tk.CTkLabel(master=self,text="Fully reset the software",anchor="w")
+        reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
+        reset_shortcuts = tk.CTkButton(master=self,text="Reset",fg_color="#404040")
+        reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
+        #Uninstall
+        reset_shortcuts_text = tk.CTkLabel(master=self,text="Uninstall myDiscoveryResponses",anchor="w")
+        reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
+        reset_shortcuts = tk.CTkButton(master=self,text="Uninstall",fg_color="red")
+        reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
 
 class Update(tk.CTkFrame):
     #Constructor
@@ -388,7 +447,7 @@ class Settings(tk.CTkToplevel):
         self.objections_frame = Objections(master=self.main_frame,fg_color="transparent")
 
         #HOTKEYS
-        self.hotkeys_button = tk.CTkButton(master=self.menu_frame,state="disabled",text=" ↔  Hotkeys",corner_radius=0,width=200,fg_color="transparent",hover=False,anchor="w",command=self.set_hotkeys,text_color=("black","white"))
+        self.hotkeys_button = tk.CTkButton(master=self.menu_frame,text=" ↔  Hotkeys",corner_radius=0,width=200,fg_color="transparent",hover=False,anchor="w",command=self.set_hotkeys,text_color=("black","white"))
         self.hotkeys_button.pack()
         self.hotkeys_frame = Hotkeys(master=self.main_frame,fg_color="transparent")
 

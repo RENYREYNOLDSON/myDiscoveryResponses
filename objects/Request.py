@@ -35,6 +35,7 @@ class Request:
         else:
             self.custom_key = no+1
         self.current_objection = ""
+        self.custom_objection_text = ""
 
     # Set self.master to a value (for saving)
     def set_master(self,val):

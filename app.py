@@ -24,6 +24,7 @@ import pickle
 from threading import Thread
 import re
 import os
+from enchant import list_languages
 
 # Frame Imports
 from frames.BarFrame import *
@@ -149,11 +150,11 @@ class App(tk.CTkToplevel):
     #CONSTRUCTOR 
     def __init__(self,master, **kwargs):
         super().__init__(master, **kwargs)
+
         ##### VERSION AND USER STUFF
         self.version="1.0.6"
-
-
         #####
+
         # CLASS ATTRIBUTES
         self.master=master#Master is root of the program (Top level tk)
         master.call()
@@ -171,16 +172,13 @@ class App(tk.CTkToplevel):
         self.set_config()#CONFIG FILE FOR SOFTWARE!
 
         #Set spell check
-        #self.SPELL_CHECKER = SpellChecker(self.CONFIG["spelling"]["language"])
+        self.SPELL_CHECKER = SpellChecker(self.CONFIG["spelling"]["language"])
 
         self.objections = open_objections()#Get the list of objections
         self.win=None#Container for the pop out window
-
         self.details_frame = None
 
         # WINDOW SETUP
-        #self.wm_iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico"))#Icon
-        #self.iconbitmap(default=os.path.join(os.path.dirname(__file__),"assets/icon.ico"))
 
         self.after(200, lambda: self.iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico")))
 
@@ -1721,6 +1719,7 @@ if __name__ == "__main__":
 
 #3. OTHER:
 # Use rename symbol to change variable names
+# Update version
 # Make about page work
 # Create indicator of file details
 # Make text typed into objection actually work

@@ -39,7 +39,6 @@ from windows.EditObjections import *
 from windows.Hotkeys import *
 from windows.Preview import *
 from windows.PreviewText import *
-from windows.Theme import *
 from windows.Settings import Settings
 from windows.splash import *
 # Object Imports
@@ -152,7 +151,7 @@ class App(tk.CTkToplevel):
         super().__init__(master, **kwargs)
 
         ##### VERSION AND USER STUFF
-        self.version="1.0.6"
+        self.version="1.0.7"
         #####
 
         # CLASS ATTRIBUTES
@@ -1362,7 +1361,7 @@ class App(tk.CTkToplevel):
                        "other":other}
         
         #Save the new config JSON
-        with open(os.path.join(os.path.dirname(__file__),"assets/config.json"), "w") as outfile:
+        with open(os.path.join(os.path.dirname(__file__),"config/config.json"), "w") as outfile:
             json.dump(self.CONFIG, outfile)
         self.set_config()
         self.set_theme()
@@ -1380,33 +1379,16 @@ class App(tk.CTkToplevel):
 
     #Open and update the config
     def set_config(self):
-        if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/config.json")):
-            with open(os.path.join(os.path.dirname(__file__),'assets/config.json'), 'r') as file:
+        if os.path.exists(os.path.join(os.path.dirname(__file__),"config/config.json")):
+            with open(os.path.join(os.path.dirname(__file__),'config/config.json'), 'r') as file:
                 self.CONFIG = json.load(file)
 
 
     def add_ignore_word(self,word):
         self.CONFIG["spelling"]["ignore"] = self.CONFIG["spelling"]["ignore"]+","+word
         #Save the new config JSON
-        with open(os.path.join(os.path.dirname(__file__),"assets/config.json"), "w") as outfile:
+        with open(os.path.join(os.path.dirname(__file__),"config/config.json"), "w") as outfile:
             json.dump(self.CONFIG, outfile)
-
-    # Update the theme JSON and set the new theme
-    def update_theme(self):
-        # Save new theme then use set_theme
-        self.win.withdraw()
-        self.theme={
-            "text_size":self.win.size_entry.get(),
-            "text_color":self.win.text_picker.cget("text"),
-            "text_bg":self.win.bg_picker.cget("text"),
-            "text_font":self.win.font_entry.get(),
-            "theme":self.win.theme,
-            "layout":["Requests","Responses","Objections"]
-        }
-        with open(os.path.join(os.path.dirname(__file__),"assets/theme.json"), "w") as outfile:#Save the new theme JSON
-            json.dump(self.theme, outfile)
-        self.set_theme()
-        self.cancel_win()#Destroy Window
 
     # Open and set the theme
     def set_theme(self,param="both"):
@@ -1718,8 +1700,8 @@ if __name__ == "__main__":
 
 
 #3. OTHER:
+# Add one unsaved text
 # Use rename symbol to change variable names
-# Update version
 # Make about page work
 # Create indicator of file details
 # Make text typed into objection actually work
@@ -1727,7 +1709,7 @@ if __name__ == "__main__":
 # Test splash screen on other displays
 # Create auto updater
 # Test about page on installed software
-
+# Get windows developer signer
 
 
 #4. WEBSITE:

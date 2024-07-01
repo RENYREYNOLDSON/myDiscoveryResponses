@@ -30,6 +30,8 @@ class Requests_Frame(tk.CTkFrame):
         add_button = tk.CTkButton(master=client_title_frame,width=20,height=10,font=("arial",20),text="+",fg_color="transparent",text_color=("black","white"),hover=False,command=master.new_client)
         add_button.pack(side="left")
         add_tooltip(add_button,"Create a blank client document")
+        self.unsaved_text = tk.CTkLabel(master=client_title_frame,text="",anchor="w")
+        self.unsaved_text.pack(side="left",fill="both",padx=10)
         self.clients_frame = tk.CTkScrollableFrame(master=self,corner_radius=0,fg_color="transparent")
         self.clients_frame.pack(padx=0,pady=0,fill="x")
 
@@ -57,6 +59,7 @@ class Requests_Frame(tk.CTkFrame):
             w.destroy()
         self.client_buttons=[]
         c=1
+        unsaved=0
         for i in clients:
             fg_color="transparent"
             if i==self.master.current_client:
@@ -65,23 +68,40 @@ class Requests_Frame(tk.CTkFrame):
             saved_bit=""
             if i.saved==False:
                 saved_bit="⦁ "
+                unsaved+=1
             button = tk.CTkButton(master=self.clients_frame,image=CLIENT_ICON,anchor="w",text=saved_bit+get_name(i.name,22),hover=False,corner_radius=0,fg_color=fg_color,command=i.set,text_color=i.color)
             button.pack(fill="x",side="top")
             self.client_buttons.append(button)
             c+=1
 
+        self.set_unsaved_text(unsaved)
+        
+
     #Update the client button colours
     def update_clients(self,clients):
         c=0
+        unsaved = 0
         for i in clients:
             saved_bit=""
             if i.saved==False:
                 saved_bit="• "
+                unsaved+=1
             if i==self.master.current_client:
                 self.client_buttons[c].configure(fg_color='#144870',text_color=i.color,text=saved_bit+get_name(i.name,22))
             else:
                 self.client_buttons[c].configure(fg_color="transparent",text_color=i.color,text=saved_bit+get_name(i.name,22))
             c+=1
+
+        self.set_unsaved_text(unsaved)
+
+    def set_unsaved_text(self,unsaved):
+        #Update the unsaved text
+        if unsaved==0:
+            self.unsaved_text.configure(text="")
+        else:
+            #Show the number of unsaved clients
+            self.unsaved_text.configure(text=str(unsaved)+" unsaved")
+
 
     #Show all of the open file buttons
     def show_files(self,files):

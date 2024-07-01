@@ -73,7 +73,7 @@ def get_name(name,length):
 #GETTERS AND SETTERS FOR RECENT FILES
 def get_recents():
     #Open the recent files list
-    with open(os.path.join(os.path.dirname(__file__),"assets/recents"), "rb") as fp:   # Unpickling
+    with open(os.path.join(os.path.dirname(__file__),"config/recents"), "rb") as fp:   # Unpickling
         lst = pickle.load(fp)
     new=[]
     for file in lst:
@@ -82,40 +82,40 @@ def get_recents():
     return new
 
 def set_recents(lst):
-    with open(os.path.join(os.path.dirname(__file__),"assets/recents"), "wb") as fp:   #Pickling
+    with open(os.path.join(os.path.dirname(__file__),"config/recents"), "wb") as fp:   #Pickling
         pickle.dump(lst, fp)
 
 #GETTERS AND SETTERS FOR FIRM DETAILS
 def get_firm_details():
-    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/firm_details.json")):
-        with open(os.path.join(os.path.dirname(__file__),"assets/firm_details.json"),"r") as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/firm_details.json")):
+        with open(os.path.join(os.path.dirname(__file__),"config/firm_details.json"),"r") as file:
             data = json.load(file)
         return data
     return None
 
 def set_firm_details(data):
-    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/firm_details.json")):
-        with open(os.path.join(os.path.dirname(__file__),'assets/firm_details.json'), 'w') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/firm_details.json")):
+        with open(os.path.join(os.path.dirname(__file__),'config/firm_details.json'), 'w') as file:
             json.dump(data,file)
     
 # Open the hotkeys
 def open_hotkeys():
-    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/hotkeys.json")):
-        with open(os.path.join(os.path.dirname(__file__),"assets/hotkeys.json"),"r") as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/hotkeys.json")):
+        with open(os.path.join(os.path.dirname(__file__),"config/hotkeys.json"),"r") as file:
             data = json.load(file)
         return data
     return None
 
 # Save the new hotkeys file
 def save_hotkeys(data):
-    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/hotkeys.json")):
-        with open(os.path.join(os.path.dirname(__file__),'assets/hotkeys.json'), 'w') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/hotkeys.json")):
+        with open(os.path.join(os.path.dirname(__file__),'config/hotkeys.json'), 'w') as file:
             json.dump(data,file)
 
 # Opens the objections file
 def open_objections():# Return API key from file if possible
-    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/objections.json")):
-        with open(os.path.join(os.path.dirname(__file__),'assets/objections.json'), 'r') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/objections.json")):
+        with open(os.path.join(os.path.dirname(__file__),'config/objections.json'), 'r') as file:
             data = json.load(file)
         return data
     return None
@@ -130,8 +130,8 @@ def open_objections_backup():# Return API key from file if possible
 
 # Save the new objections file
 def save_objections(data):
-    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/objections.json")):
-        with open(os.path.join(os.path.dirname(__file__),'assets/objections.json'), 'w') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/objections.json")):
+        with open(os.path.join(os.path.dirname(__file__),'config/objections.json'), 'w') as file:
             json.dump(data,file)
 
 # Find all instances of keywords [start,end]
@@ -212,8 +212,8 @@ def spellcheck(obj,text):
 
 # Set the initial tkinter theme
 def initial_theme():
-    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/config.json")):
-        with open(os.path.join(os.path.dirname(__file__),'assets/config.json'), 'r') as file:
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/config.json")):
+        with open(os.path.join(os.path.dirname(__file__),'config/config.json'), 'r') as file:
             data= json.load(file)
         # Set relevant things here
         tk.set_appearance_mode(data["appearance"]["theme"])

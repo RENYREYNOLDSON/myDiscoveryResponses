@@ -503,13 +503,6 @@ class App(tk.CTkToplevel):
         self.win.mainloop()
 
     # View and edit the theme of the software
-    def view_theme(self):
-        self.cancel_win()
-        self.win = Theme(self)
-        self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
-        self.win.mainloop()
-
-    # View and edit the theme of the software
     def view_settings(self):
         self.cancel_win()
         self.win = Settings(self)
@@ -1156,7 +1149,7 @@ class App(tk.CTkToplevel):
 
     #Box to add a new client!
     def new_client(self):
-        dialog = tk.CTkInputDialog(text="Enter new client name:", title="New Client",)
+        dialog = tk.CTkInputDialog(text="Enter new client name:", title="New Client")
         text = dialog.get_input()  # waits for input
         if self.client_already_open(text):
             return
@@ -1683,6 +1676,11 @@ if __name__ == "__main__":
 #Made open install location work
 
 
+# Add one unsaved text
+# Added uninstall
+# Test about page on installed software
+
+
 #CURRENT PLAN:
 
 #1. SPELL CHECKING
@@ -1700,36 +1698,33 @@ if __name__ == "__main__":
 
 
 #3. OTHER:
-# Add one unsaved text
+#Update readme with developer info
 # Use rename symbol to change variable names
+# Add tooltips to clients
 # Make about page work
 # Create indicator of file details
 # Make text typed into objection actually work
 # Fix border on fullscreen reset
 # Test splash screen on other displays
 # Create auto updater
-# Test about page on installed software
 # Get windows developer signer
 
 
 #4. WEBSITE:
-#Make Git Integration Work!!!
-#Create a custom build command
+#Create a custom build command, use docker! Run pyinstaller and then inno compiler
 #Fix website security SSL!
 #Revamp website!!! Add a full documentation page with tabs!
 #Make GitHub really good!
 #CONNECT GITHUB TO THE WEBSITE DIRECTLTY
 
 
-
-#5. RANDOM EXTRAS:
+#5. Next:
+#IMPROVE READING OF DETAILS! ESPECIALLY FROGS!
 #Add autosave only save current client?
 #Mac support
 #Add a seperate tab to preview the original file, maybe cropped versions of the requests
 #Add option for blank files and blank requests
 #Fix response preview, keep objections edited
-#Add more small details into pages
-#NOTE HOW TO CREATE THE INSTALLER!
 #See if we can make refresher only run on a change
 #Pitch a youtube tutorial on using the software
 

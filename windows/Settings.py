@@ -66,7 +66,7 @@ class General(tk.CTkFrame):
         self.export_switch.pack(fill="x",padx=10,pady=(0,5))
 
         #Open Export
-        export_label = tk.CTkLabel(master=self,text="Open Exported File",anchor="w")
+        export_label = tk.CTkLabel(master=self,text="Open exported file",anchor="w")
         export_label.pack(fill="x",padx=10,pady=(5,0))
         self.open_export_switch = tk.CTkSwitch(master=self,text="")
         set_switch(self.open_export_switch,self.master.master.CONFIG["general"]["open_export"])
@@ -90,15 +90,6 @@ class Theme(tk.CTkFrame):
         self.window_frame = tk.CTkFrame(master=self,fg_color="transparent")
         self.window_frame.grid_columnconfigure((0,1),weight=1)
         self.window_frame.pack(anchor="w",fill="both")
-
-        """
-        img = os.path.join(os.path.dirname(__file__),"../assets/dark_mode.png")
-        img = Image.open(img)
-        w,h = img.size
-        new_w = 300
-        img = img.resize((new_w,int((h/w)*new_w)))
-        dark_mode_image= ImageTk.PhotoImage(img)
-        """
 
         dark_mode_image = PhotoImage(master=self.window_frame,file=os.path.join(os.path.dirname(__file__),"../assets/dark_mode.png"))
         self.dark_mode_button = tk.CTkButton(master=self.window_frame,image=dark_mode_image,text="",hover=False,fg_color="transparent",command=self.set_dark)
@@ -291,7 +282,9 @@ class Hotkeys(tk.CTkFrame):
                  "Ctrl+O":"Open a file",
                  "Ctrl+F":"Open a folder",
                  "Ctrl+S":"Save current client",
-                 "Ctrl+E":"Export current file"}
+                 "Ctrl+E":"Export current file",
+                 "Ctrl+Z":"Undo in textbox",
+                 "Ctrl+Y":"Redo in textbox"}
 
         c=0
         for h in hotkeys.keys():
@@ -331,24 +324,26 @@ class About(tk.CTkFrame):
 
 
         #Reset objections 
+        """
         reset_shortcuts_text = tk.CTkLabel(master=self,text="Reset Objections",anchor="w")
         reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
         reset_shortcuts = tk.CTkButton(master=self,text="Reset",fg_color="#404040")
         reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
+        """
         #Reset all settings
-        reset_shortcuts_text = tk.CTkLabel(master=self,text="Reset Settings",anchor="w")
+        reset_shortcuts_text = tk.CTkLabel(master=self,text="Reset settings to default",anchor="w")
         reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
         reset_shortcuts = tk.CTkButton(master=self,text="Reset",fg_color="#404040")
         reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
         #Reset all
-        reset_shortcuts_text = tk.CTkLabel(master=self,text="Fully reset the software",anchor="w")
+        reset_shortcuts_text = tk.CTkLabel(master=self,text="Fully reset myDiscoveryResponses to default",anchor="w")
         reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
         reset_shortcuts = tk.CTkButton(master=self,text="Reset",fg_color="#404040")
         reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
         #Uninstall
         reset_shortcuts_text = tk.CTkLabel(master=self,text="Uninstall myDiscoveryResponses",anchor="w")
         reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
-        reset_shortcuts = tk.CTkButton(master=self,text="Uninstall",fg_color="red")
+        reset_shortcuts = tk.CTkButton(master=self,text="Uninstall",fg_color="red",command=uninstall)
         reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
 
 class Update(tk.CTkFrame):

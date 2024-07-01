@@ -9,7 +9,7 @@
 ############################################################################################################
 
 import customtkinter as tk
-import json,os,pickle,webbrowser,re
+import json,os,pickle,webbrowser,re,subprocess
 from enchant.checker import SpellChecker
 from objects.SmartToolTip import *
 import urllib.request
@@ -23,14 +23,20 @@ HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage
 # FUNCTIONS 
 ############################################################################################################
 
+
+#Uninstalls myDiscoveryResponses from computer
+def uninstall():
+    try:
+        uninstall_exe = os.path.join(os.path.dirname(__file__),"unins000.exe")
+        subprocess.run(uninstall_exe)
+    except Exception as e:
+        print(e)
+    
+
 #Open the software install location
 def open_install_location():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     os.startfile(dir_path)
-
-
-
-
 
 #Check for updates of software
 def check_for_update():

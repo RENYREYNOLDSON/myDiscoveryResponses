@@ -333,12 +333,12 @@ class About(tk.CTkFrame):
         #Reset all settings
         reset_shortcuts_text = tk.CTkLabel(master=self,text="Reset settings to default",anchor="w")
         reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
-        reset_shortcuts = tk.CTkButton(master=self,text="Reset",fg_color="#404040")
+        reset_shortcuts = tk.CTkButton(master=self,text="Reset",fg_color="#404040",command=master.master.master.reset_config)
         reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
         #Reset all
         reset_shortcuts_text = tk.CTkLabel(master=self,text="Fully reset myDiscoveryResponses to default",anchor="w")
         reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
-        reset_shortcuts = tk.CTkButton(master=self,text="Reset",fg_color="#404040")
+        reset_shortcuts = tk.CTkButton(master=self,text="Reset",fg_color="#404040",command=master.master.master.reset_all)
         reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
         #Uninstall
         reset_shortcuts_text = tk.CTkLabel(master=self,text="Uninstall myDiscoveryResponses",anchor="w")

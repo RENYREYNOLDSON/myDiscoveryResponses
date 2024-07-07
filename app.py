@@ -15,10 +15,22 @@
 # IMPORTS
 ############################################################################################################
 
+#Import minimum things here
+import customtkinter as tk
+from windows.splash import *
+# Functions
+from functions import *
+
+# Open splash window here!
+if __name__=="__main__":
+    initial_theme()
+    #PROGRAM SPLASH SCREEN
+    splash_screen = Splash()
+    splash_screen.update()
+
 # Main Imports
 import converter as cnv
 from CTkMessagebox import CTkMessagebox
-import customtkinter as tk
 import json,os,copy,sys,time
 import pickle
 from threading import Thread
@@ -40,7 +52,6 @@ from windows.Hotkeys import *
 from windows.Preview import *
 from windows.PreviewText import *
 from windows.Settings import Settings
-from windows.splash import *
 # Object Imports
 from objects.Client import *
 from objects.File import *
@@ -48,8 +59,7 @@ from objects.Objection import *
 from objects.Request import *
 from objects.Save import *
 from objects.SmartToolTip import *
-# Functions
-from functions import *
+
 
 # CONSTANTS
 ############################################################################################################
@@ -906,6 +916,70 @@ class App(tk.CTkToplevel):
                     self.quick_save()
         self.after(int(self.CONFIG["general"]["autosave_interval"]),self.autosave)
 
+    #RESET COMMANDS
+    #Reset the config.json
+    def reset_config(self):
+        request = CTkMessagebox(title="Reset Settings", 
+                                message="Are you sure you want to reset the settings?",
+                                icon="warning", 
+                                option_1="Cancel", 
+                                option_3="Yes",
+                                corner_radius=0,
+                                sound=True,
+                                master=self)
+        if request.get()=="Yes":
+            #Reset Settings
+            #Load backup
+            backup = open_config_backup()
+            self.CONFIG = backup
+            self.update_config(read_settings=False)
+
+
+    #Reset all of software to defaults
+    def reset_all(self):
+        request = CTkMessagebox(title="Reset myDiscoveryResponses", 
+                                message="Are you sure you want to reset to defaults?",
+                                icon="warning", 
+                                option_1="Cancel", 
+                                option_3="Yes",
+                                corner_radius=0,
+                                sound=True,
+                                master=self)
+        
+        if request.get()=="Yes":
+            #Settings
+            config_backup = open_config_backup()
+            self.CONFIG = config_backup
+            self.update_config(read_settings=False)
+
+            #Hotkeys
+            hotkeys_backup = open_hotkeys_backup()
+            save_hotkeys(hotkeys_backup)
+            self.HOTKEYS = open_hotkeys()
+
+            #Objections
+            objections_backup = open_objections_backup()
+            save_objections(objections_backup)
+            #Update main window objections
+            self.objections = open_objections()
+            #Reload objections into files
+            self.reload_objections()
+
+            #Firm Details
+            firm_backup = open_firm_details_backup()
+            set_firm_details(firm_backup)
+    
+            #Recents
+            self.RECENTS = []
+            set_recents(self.RECENTS)
+            self.RECENTS = get_recents()
+            # Update menu
+            self.bar_frame.update_recents(self.RECENTS)
+            # Update landing frame
+            self.landing_frame.update_recents(self.RECENTS)
+
+            #Destroy Window
+            self.cancel_win()
 
     #Close the current file
     def close_file(self):
@@ -1337,22 +1411,23 @@ class App(tk.CTkToplevel):
         self.objections_frame.update_current(self.current_req.current_objection)
 
     #Update the config JSON and set the new config
-    def update_config(self):
-        self.win.withdraw()
-        general = self.win.get_general()
-        appearance = self.win.get_appearance()
-        spelling = self.win.get_spelling()
-        details = 1
-        hotkeys = 1
-        other = {"last_updated":"18/06/24"}
+    def update_config(self,read_settings=True):
+        if read_settings:
+            self.win.withdraw()
+            general = self.win.get_general()
+            appearance = self.win.get_appearance()
+            spelling = self.win.get_spelling()
+            details = 1
+            hotkeys = 1
+            other = {"last_updated":"18/06/24"}
 
-        self.CONFIG = {"general":general,
-                       "appearance":appearance,
-                       "spelling":spelling,
-                       "details":details,
-                       "hotkeys":hotkeys,
-                       "other":other}
-        
+            self.CONFIG = {"general":general,
+                        "appearance":appearance,
+                        "spelling":spelling,
+                        "details":details,
+                        "hotkeys":hotkeys,
+                        "other":other}
+            
         #Save the new config JSON
         with open(os.path.join(os.path.dirname(__file__),"config/config.json"), "w") as outfile:
             json.dump(self.CONFIG, outfile)
@@ -1582,15 +1657,7 @@ def check_windows_open():
 
 if __name__ == "__main__":
     #APPLICATION UTILITY SETUP
-    initial_theme()
-    #PROGRAM SPLASH SCREEN
-
-
-    splash_screen = Splash()
-    splash_screen.update()
-    time.sleep(1)
     splash_screen.destroy()
-    
     root=tk.CTk()
     root.iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico"))
     root.withdraw()
@@ -1674,11 +1741,14 @@ if __name__ == "__main__":
 #Run lots of testing on exporting, spelling and details
 #Working on reset options
 #Made open install location work
+#Add one unsaved text
+#Added uninstall
+#Test about page on installed software
 
-
-# Add one unsaved text
-# Added uninstall
-# Test about page on installed software
+#07/07
+#Made splash screen efficient and software open faster
+#Made about menu fully work with resets
+#Add tooltips to clients
 
 
 #CURRENT PLAN:
@@ -1698,10 +1768,9 @@ if __name__ == "__main__":
 
 
 #3. OTHER:
-#Update readme with developer info
+# ADD METHOD TO ADD MISSING FILES IN THE CONFIG!!! If starting up and items missing then fill from default
+# Update readme with developer info
 # Use rename symbol to change variable names
-# Add tooltips to clients
-# Make about page work
 # Create indicator of file details
 # Make text typed into objection actually work
 # Fix border on fullscreen reset
@@ -1714,8 +1783,6 @@ if __name__ == "__main__":
 #Create a custom build command, use docker! Run pyinstaller and then inno compiler
 #Fix website security SSL!
 #Revamp website!!! Add a full documentation page with tabs!
-#Make GitHub really good!
-#CONNECT GITHUB TO THE WEBSITE DIRECTLTY
 
 
 #5. Next:

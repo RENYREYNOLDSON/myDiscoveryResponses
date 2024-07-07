@@ -134,6 +134,30 @@ def open_objections_backup():# Return API key from file if possible
         return data
     return None
 
+# Opens the hotkeys backup file
+def open_hotkeys_backup():
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/hotkeys_backup.json")):
+        with open(os.path.join(os.path.dirname(__file__),'assets/hotkeys_backup.json'), 'r') as file:
+            data = json.load(file)
+        return data
+    return None
+
+# Opens the config backup file
+def open_config_backup():
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/config_backup.json")):
+        with open(os.path.join(os.path.dirname(__file__),'assets/config_backup.json'), 'r') as file:
+            data = json.load(file)
+        return data
+    return None
+
+# Opens the firm details backup file
+def open_firm_details_backup():
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"assets/firm_details_backup.json")):
+        with open(os.path.join(os.path.dirname(__file__),'assets/firm_details_backup.json'), 'r') as file:
+            data = json.load(file)
+        return data
+    return None
+
 # Save the new objections file
 def save_objections(data):
     if os.path.exists(os.path.join(os.path.dirname(__file__),"config/objections.json")):

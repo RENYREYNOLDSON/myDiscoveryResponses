@@ -71,6 +71,8 @@ class Requests_Frame(tk.CTkFrame):
                 unsaved+=1
             button = tk.CTkButton(master=self.clients_frame,image=CLIENT_ICON,anchor="w",text=saved_bit+get_name(i.name,22),hover=False,corner_radius=0,fg_color=fg_color,command=i.set,text_color=i.color)
             button.pack(fill="x",side="top")
+            if self.master.CONFIG["general"]["hover_tooltips"]:
+                add_tooltip(button,i.name,wraplength=2000)
             self.client_buttons.append(button)
             c+=1
 

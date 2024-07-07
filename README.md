@@ -36,7 +36,8 @@ python app.py
 ```
 
 ## Website
-https://github.com/RENYREYNOLDSON/myDiscoveryResponses-site.git
+Available documentation at:
+  https://github.com/RENYREYNOLDSON/myDiscoveryResponses-site.git
 
 ## User Guide
 ### Software Overview

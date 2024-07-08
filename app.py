@@ -1727,43 +1727,14 @@ if __name__ == "__main__":
 
 #CURRENT PLAN:
 
-#1. SPELL CHECKING
-#Try run from thread
-#dont check current word!
-#Enable this for all needed text boxes, and maybe entries
-#Add spell check button to go through whole document
-
-
-#2. UNDO BUTTON
+#THIS BRANCH IS ADDING THE UNDO BUTTON!!!!
 #each text box keeps it's own undo. Keep action stack
 #Add info about undo commands somewhere
 #Create a list of 'actions' that I can go back through and undo
 
 
-#3. OTHER:
-# ADD METHOD TO ADD MISSING FILES IN THE CONFIG!!! If starting up and items missing then fill from default,
-#essentially, if I add a new setting or something I want to keep their settings but add this in!
-#Go through backups and if anything missing then add it in validate_integrity_of_config_file
-
-# Update readme with developer info
-# Make text typed into objection actually work
-# Get windows developer signer
-# Organise and order code
-# Add autosave only save current client?
 
 
-#4. WEBSITE:
-#Fix website security SSL!
-#Revamp website!!! Add a full documentation page with tabs!
-
-
-#5. Next:
-#IMPROVE READING OF DETAILS! ESPECIALLY FROGS!
-#Mac support
-#Add a seperate tab to preview the original file, maybe cropped versions of the requests
-#Add option for blank files and blank requests
-#Fix response preview, keep objections edited
-#See if we can make refresher only run on a change
 
 
 

@@ -31,7 +31,7 @@ if __name__=="__main__":
 # Main Imports
 import converter as cnv
 from CTkMessagebox import CTkMessagebox
-import json,os,copy,sys,time
+import json,os,copy,sys,time,subprocess
 import pickle
 from threading import Thread
 import re
@@ -395,7 +395,8 @@ class App(tk.CTkToplevel):
     def toggle_fullscreen(self):
         state = not self.attributes('-fullscreen')
         self.attributes("-fullscreen",state)
-
+        self.set_theme("theme")
+        self.win
 
     #Reload the objections for each request! Stops errors when objections changed
     def reload_objections(self):
@@ -572,9 +573,39 @@ class App(tk.CTkToplevel):
         if c==0:#Destroy root if no windows left open
             root.destroy()
 
+    #Check for updates of software
+    def check_for_update(self):
+        #Use test function for now
+        #urllib.request.urlretrieve("https://mydiscoveryresponses.com/myDiscoveryResponsesInstaller.zip","myDiscoveryResponsesInstaller.zip")
+        update_available = True
+        if update_available:
+            #Check that they are sure
+            update_check = CTkMessagebox(title="Update myDiscoveryResponses?",
+                                       message="A new version is available! Would you like to update now?", 
+                                       icon="info",
+                                       option_1="Cancel", 
+                                       option_3="Yes",
+                                       corner_radius=0,
+                                       sound=True,
+                                       master=self)
+            
+            if update_check.get()=="Yes":
+                #Download new file
 
-    def update_software(self):
-        pass
+                #Ask if they want to update and show version number
+                dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"myDiscoveryResponses_Installer.exe")
+
+
+                subprocess.Popen(["cmd","/c","start","",dir_path],
+                                        stdout=subprocess.DEVNULL,  # Redirect output to avoid hanging on pipes
+                                        stderr=subprocess.DEVNULL,
+                                        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_BREAKAWAY_FROM_JOB,
+                                        close_fds=True)
+
+
+                self.destroy()
+                root.destroy()
+
 
 
     ### KEY PRESSES
@@ -1758,7 +1789,6 @@ if __name__ == "__main__":
 #dont check current word!
 #Enable this for all needed text boxes, and maybe entries
 #Add spell check button to go through whole document
-#when theme is reset, reset textbox tags
 
 
 #2. UNDO BUTTON
@@ -1770,30 +1800,25 @@ if __name__ == "__main__":
 #3. OTHER:
 # ADD METHOD TO ADD MISSING FILES IN THE CONFIG!!! If starting up and items missing then fill from default
 # Update readme with developer info
-# Use rename symbol to change variable names
-# Create indicator of file details
 # Make text typed into objection actually work
-# Fix border on fullscreen reset
-# Test splash screen on other displays
 # Create auto updater
 # Get windows developer signer
+# Organise and order code
+# Add autosave only save current client?
 
 
 #4. WEBSITE:
-#Create a custom build command, use docker! Run pyinstaller and then inno compiler
 #Fix website security SSL!
 #Revamp website!!! Add a full documentation page with tabs!
 
 
 #5. Next:
 #IMPROVE READING OF DETAILS! ESPECIALLY FROGS!
-#Add autosave only save current client?
 #Mac support
 #Add a seperate tab to preview the original file, maybe cropped versions of the requests
 #Add option for blank files and blank requests
 #Fix response preview, keep objections edited
 #See if we can make refresher only run on a change
-#Pitch a youtube tutorial on using the software
 
 
 

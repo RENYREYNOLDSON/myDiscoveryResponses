@@ -38,9 +38,7 @@ def open_install_location():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     os.startfile(dir_path)
 
-#Check for updates of software
-def check_for_update():
-    urllib.request.urlretrieve("https://mydiscoveryresponses.com/myDiscoveryResponsesInstaller.zip","myDiscoveryResponsesInstaller.zip")
+
 
 
 #Add a tooltip to an object

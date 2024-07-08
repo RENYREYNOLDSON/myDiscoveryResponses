@@ -357,7 +357,7 @@ class Update(tk.CTkFrame):
 
 
         #Last Updated: x
-        check_button = tk.CTkButton(master=self,text="Check for Updates",command=check_for_update)
+        check_button = tk.CTkButton(master=self,text="Check for Updates",command=master.master.master.check_for_update)
         check_button.pack()
 
         #Last Updated

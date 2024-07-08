@@ -12731,3 +12731,4 @@ dist/myDiscoveryResponses/win32/win32pdh.pyd
 dist/myDiscoveryResponses/win32/win32trace.pyd
 dist/myDiscoveryResponses/win32com/shell/shell.pyd
 dist/myDiscoveryResponses/yaml/_yaml.cp312-win_amd64.pyd
+myDiscoveryResponses_Installer.exe

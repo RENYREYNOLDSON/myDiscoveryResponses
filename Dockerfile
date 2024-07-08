@@ -1,4 +1,4 @@
-FROM python:3.12.2
+FROM python:3.11
 
 WORKDIR /app
 
@@ -6,9 +6,7 @@ COPY requirements.txt /app/
 
 # Install any dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Install PyInstaller
-#RUN pip install pyinstaller
+RUN pip uninstall pathlib --yes
 
 # Copy the rest of your app's source code into the container at /app
 COPY . /app/
@@ -17,10 +15,10 @@ COPY . /app/
 RUN pyinstaller app.spec
 
 # Make your compile script executable
-COPY Compiler_Script.iss /app/
+#COPY Compiler_Script.iss /app/
 
 # Make your compile script executable
-RUN chmod +x compile.sh
+#RUN chmod +x compile.sh
 
 # Run the compile script
-CMD ["./compile.sh"]
+#CMD ["./compile.sh"]

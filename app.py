@@ -59,6 +59,7 @@ from objects.Objection import *
 from objects.Request import *
 from objects.Save import *
 from objects.SmartToolTip import *
+from objects.Action import *
 
 
 # CONSTANTS
@@ -184,6 +185,10 @@ class App(tk.CTkToplevel):
         self.previous_objection_text=""
         #Same container for all of the pop out windows, only one open at once!
         self.win=None
+        #Contains a stack of all of the previous actions, maximum size can be defined in settings
+        #Default maximum size of 100
+        self.ACTION_STACK = []
+        self.REDO_ACTION_STACK = []
 
         ##### LOAD ATTRIBUTES FROM METHODS
         #Opens the shortcuts
@@ -676,7 +681,51 @@ class App(tk.CTkToplevel):
             self.focus_set()
 
 
+    #Add an action to the undo action stack
+    def add_action_to_stack(self,new_action):
+        #Reset redos as now out of date
+        self.REDO_ACTION_STACK = []
+        self.bar_frame.disable_redo()
+        #Add to the action stack
+        self.ACTION_STACK.append(new_action)
+        #If only one item then enable the undo button again
+        if len(self.ACTION_STACK)==1:
+            self.bar_frame.enable_undo()
 
+        self.print_stacks()
+
+    #Undo the previous action and remove it from the stack (put on redo stack)
+    def undo_action(self):
+        action = self.ACTION_STACK.pop()
+        action.undo()
+        self.REDO_ACTION_STACK.append(action)
+        #IF EMPTY then disable the undo button
+        if len(self.ACTION_STACK)==0:
+            self.bar_frame.disable_undo()
+
+        #If redo now has one then enable
+        if len(self.REDO_ACTION_STACK)==1:
+            self.bar_frame.enable_redo()
+
+        self.print_stacks()
+
+    #Redo an action which was undone, when action stack added to then the redo stack will clear
+    def redo_action(self):
+        action = self.REDO_ACTION_STACK.pop()
+        action.redo()
+        self.ACTION_STACK.append(action)
+        #IF EMPTY then disable the redo button
+        if len(self.REDO_ACTION_STACK)==0:
+            self.bar_frame.disable_redo()
+
+        #If only one item then enable the undo button again
+        if len(self.ACTION_STACK)==1:
+            self.bar_frame.enable_undo()
+
+        self.print_stacks()
+
+    def print_stacks(self):
+        print("ACTION STACK: "+str(len(self.ACTION_STACK))+"  REDO STACK: "+str(len(self.REDO_ACTION_STACK)))
 
     ### SAVING AND LOADING OF FILES & FOLDERS
     ########################################################################################################
@@ -1288,15 +1337,20 @@ class App(tk.CTkToplevel):
 
 
     #Change an objection buttons state, and if request then update this
-    def toggle_objection(self,obj):
+    def toggle_objection(self,obj,undo_command=False):
         if self.current_req!=0:
             # Update current request objection
             for o in self.current_req.opts:
                 if o.key == obj:
                     o.toggle()
                     self.current_req.current_objection = o
-                    self.objections_frame.update_current(o)
                     #Set the objection input area to this objection
+                    self.objections_frame.update_current(o)
+                    #UNDO functionality
+                    if not undo_command:
+                        self.add_action_to_stack(ActionToggleObjection(self,
+                                                                       self.current_client,
+                                                                       o.key))
 
             # Update buttons
             self.objections_frame.toggle_button(obj)#TOGGLE THE COLOUR OF THIS BUTTON!
@@ -1725,13 +1779,25 @@ if __name__ == "__main__":
 # CHANGES
 ############################################################################################################
 
-#CURRENT PLAN:
+#DONE:
+#Added undo and redo objections
+#Added hotkeys
 
+
+#CURRENT PLAN:
 #THIS BRANCH IS ADDING THE UNDO BUTTON!!!!
 #each text box keeps it's own undo. Keep action stack
-#Add info about undo commands somewhere
-#Create a list of 'actions' that I can go back through and undo
 
+#Create a list of 'actions' that I can go back through and undo
+#Possible actions:
+#Clear
+#Add/remove objection
+#Select response option
+#Submit
+#Check with clients
+#Delete file
+#Change client, request, file
+#Add text to text box (track which box then use that boxes undo)
 
 
 

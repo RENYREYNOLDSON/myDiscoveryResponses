@@ -62,6 +62,20 @@ class ActionCheck(Action):
 
 ################################ UNFINISHED / UNTESTED METHODS 
 
+class ActionTextBox(Action):
+    def undo_function(self):
+        #Access the relevant smart textbox and trigger undo command
+        #self.obj.edit_undo()
+        print("UNDO")
+    
+    def redo_function(self):
+        #Access the relevant smart textbox and trigger redo command
+        self.obj.edit_redo()
+        print("UNDO")
+
+
+
+
 class ActionClear(Action):
     def undo_function(self):
         pass

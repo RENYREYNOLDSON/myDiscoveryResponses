@@ -1799,7 +1799,7 @@ if __name__ == "__main__":
 
 
 #CURRENT PLAN:
-#Make undo only apply once! 
+#Make undo only apply once! ie when in text box don't do both
 
 #Create a list of 'actions' that I can go back through and undo
 #Possible actions:
@@ -1815,7 +1815,7 @@ if __name__ == "__main__":
 #Add text to text box (track which box then use that boxes undo), spelling etc. If text box undo list grows then add.
 #each request must persist? Try access part of the text box when it updates
 #Fix undo of these text boxes as the history needs resting when a request is changed
-
+# LOOK INTO AUTOSEPERATORS FOR THIS
 
 
 

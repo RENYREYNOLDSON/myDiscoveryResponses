@@ -1,5 +1,6 @@
 # IMPORTS
 from functions import *
+from objects.Action import *
 import customtkinter as tk
 from customtkinter.windows.widgets.core_widget_classes.dropdown_menu import DropdownMenu
 
@@ -8,7 +9,7 @@ class SmartTextbox(tk.CTkTextbox):
     #Constructor 
     def __init__(self,master,main_master,**kwargs):
         #FRAME SETUP
-        super().__init__(master,undo=True,maxundo=-1, **kwargs)
+        super().__init__(master,undo=True,maxundo=-1,autoseparators=True, **kwargs)
 
         self.main_master = main_master
         #This is the previous text in the box
@@ -19,6 +20,22 @@ class SmartTextbox(tk.CTkTextbox):
         self.bind("<Button-3>",self.popup)
         self.after(int(self.main_master.CONFIG["spelling"]["spellcheck_interval"]),self.spellcheck)
 
+        #Bind a function for when this is modified
+        self.bind("<<Modified>>",self.modified)
+
+        #NEED TO UNBIND HERE!
+        self.unbind_all("<control-z>")
+
+
+
+    #Runs when text is inserted or deleted
+    def modified(self,e):
+        print(e)
+        print("Modified")
+        self.edit_modified(False)
+        #Add this onto undo stack -> Then access the box when an undo is needed
+        self.main_master.add_action_to_stack(ActionTextBox(self.main_master,self))
+    
 
     def spellcheck(self):
         #DO SPELLCHECKING!

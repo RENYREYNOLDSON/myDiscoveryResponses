@@ -17,7 +17,8 @@ class SmartTextbox(tk.CTkTextbox):
         self.istart,self.iend=0,0#Start and end of selected spellings
         self.pop = DropdownMenu(self,values=["init"])
         self.bind("<Button-3>",self.popup)
-        self.after(2000,self.spellcheck)
+        self.after(int(self.main_master.CONFIG["spelling"]["spellcheck_interval"]),self.spellcheck)
+
 
     def spellcheck(self):
         #DO SPELLCHECKING!

@@ -234,6 +234,9 @@ class App(tk.CTkToplevel):
         self.bind("<Control-f>",self.cntrl_f)
         self.bind("<Control-s>",self.cntrl_s)
         self.bind("<Control-e>",self.cntrl_e)
+        #Undo and Redo
+        self.bind("<Control-z>",self.cntrl_z)
+        self.bind("<Control-y>",self.cntrl_y)
 
         ##### POPULATE WINDOW WITH OBJECTS
         self.populate_window()
@@ -646,6 +649,10 @@ class App(tk.CTkToplevel):
         self.quick_save()
     def cntrl_e(self,e):
         self.export_current()
+    def cntrl_z(self,e):
+        self.undo_action()
+    def cntrl_y(self,e):
+        self.redo_action()
 
     # If up arrow
     def up_pressed(self,e):
@@ -696,33 +703,35 @@ class App(tk.CTkToplevel):
 
     #Undo the previous action and remove it from the stack (put on redo stack)
     def undo_action(self):
-        action = self.ACTION_STACK.pop()
-        action.undo()
-        self.REDO_ACTION_STACK.append(action)
-        #IF EMPTY then disable the undo button
-        if len(self.ACTION_STACK)==0:
-            self.bar_frame.disable_undo()
+        if len(self.ACTION_STACK)>0:
+            action = self.ACTION_STACK.pop()
+            action.undo()
+            self.REDO_ACTION_STACK.append(action)
+            #IF EMPTY then disable the undo button
+            if len(self.ACTION_STACK)==0:
+                self.bar_frame.disable_undo()
 
-        #If redo now has one then enable
-        if len(self.REDO_ACTION_STACK)==1:
-            self.bar_frame.enable_redo()
+            #If redo now has one then enable
+            if len(self.REDO_ACTION_STACK)==1:
+                self.bar_frame.enable_redo()
 
-        self.print_stacks()
+            self.print_stacks()
 
     #Redo an action which was undone, when action stack added to then the redo stack will clear
     def redo_action(self):
-        action = self.REDO_ACTION_STACK.pop()
-        action.redo()
-        self.ACTION_STACK.append(action)
-        #IF EMPTY then disable the redo button
-        if len(self.REDO_ACTION_STACK)==0:
-            self.bar_frame.disable_redo()
+        if len(self.REDO_ACTION_STACK)>0:
+            action = self.REDO_ACTION_STACK.pop()
+            action.redo()
+            self.ACTION_STACK.append(action)
+            #IF EMPTY then disable the redo button
+            if len(self.REDO_ACTION_STACK)==0:
+                self.bar_frame.disable_redo()
 
-        #If only one item then enable the undo button again
-        if len(self.ACTION_STACK)==1:
-            self.bar_frame.enable_undo()
+            #If only one item then enable the undo button again
+            if len(self.ACTION_STACK)==1:
+                self.bar_frame.enable_undo()
 
-        self.print_stacks()
+            self.print_stacks()
 
     def print_stacks(self):
         print("ACTION STACK: "+str(len(self.ACTION_STACK))+"  REDO STACK: "+str(len(self.REDO_ACTION_STACK)))
@@ -1348,9 +1357,7 @@ class App(tk.CTkToplevel):
                     self.objections_frame.update_current(o)
                     #UNDO functionality
                     if not undo_command:
-                        self.add_action_to_stack(ActionToggleObjection(self,
-                                                                       self.current_client,
-                                                                       o.key))
+                        self.add_action_to_stack(ActionToggleObjection(self,o.key))
 
             # Update buttons
             self.objections_frame.toggle_button(obj)#TOGGLE THE COLOUR OF THIS BUTTON!
@@ -1617,8 +1624,10 @@ class App(tk.CTkToplevel):
     ########################################################################################################
 
     # Set a request to submitted
-    def submit(self):
+    def submit(self,undo_command=False):
         if self.current_req!=0:
+            if not undo_command:
+                self.add_action_to_stack(ActionSubmit(self,"Submit"))
             self.set_client_unsaved(self.current_client)
             #Update autos
             self.set_auto_objections()
@@ -1652,7 +1661,8 @@ class App(tk.CTkToplevel):
                                     frog.resp+=(str(texts[1])+"\n")#Add new text to 17.1
             
             #Scroll to this request
-            self.requests_frame.scroll_to()
+            if not undo_command:
+                self.requests_frame.scroll_to()
             # If all are green set file green!
             for req in self.reqs:
                 if req.color!="#50C878":
@@ -1664,8 +1674,10 @@ class App(tk.CTkToplevel):
 
 
     # Set as Check with client
-    def check(self):
+    def check(self,undo_command=False):
         if self.current_req!=0:
+            if not undo_command:
+                self.add_action_to_stack(ActionCheck(self,"Check"))
             if self.current_req.color=="#FF0000":
                 self.current_req.color="grey"#set grey
             else:
@@ -1678,7 +1690,8 @@ class App(tk.CTkToplevel):
             if index<len(self.reqs)-1:
                 self.set_request(self.reqs[index+1])
             #Scroll to this
-            self.requests_frame.scroll_to()
+            if not undo_command:#This line makes run better
+                self.requests_frame.scroll_to()
 
 
     # Copy objections from the previous request
@@ -1782,22 +1795,26 @@ if __name__ == "__main__":
 #DONE:
 #Added undo and redo objections
 #Added hotkeys
+#Improved performance loads
 
 
 #CURRENT PLAN:
-#THIS BRANCH IS ADDING THE UNDO BUTTON!!!!
-#each text box keeps it's own undo. Keep action stack
+#Make undo only apply once! 
 
 #Create a list of 'actions' that I can go back through and undo
 #Possible actions:
+#Add/remove objection DONE
+#Submit DONE
+#Check with clients DONE
+#Create client
+#Delete client
 #Clear
-#Add/remove objection
 #Select response option
-#Submit
-#Check with clients
 #Delete file
-#Change client, request, file
-#Add text to text box (track which box then use that boxes undo)
+#Upload file
+#Add text to text box (track which box then use that boxes undo), spelling etc. If text box undo list grows then add.
+#each request must persist? Try access part of the text box when it updates
+#Fix undo of these text boxes as the history needs resting when a request is changed
 
 
 

@@ -62,14 +62,14 @@ class Bar_Frame(tk.CTkFrame):
         self.details.pack(side="left")
         self.details_tooltip = add_tooltip(self.details,"Edit this files details")
 
-        #Undo and Redo Buttons⎌
-        self.undo = tk.CTkButton(master=self,text="←",fg_color="transparent",width=40,command=self.master.undo_action,corner_radius=0)
+        arrow_font = tk.CTkFont("Arial",20,underline=False,weight="bold")
+        #Undo and Redo Buttons
+        self.undo = tk.CTkButton(master=self,text="←",fg_color="transparent",font=arrow_font,width=40,command=self.master.undo_action,corner_radius=0)
         self.undo.pack(side="left")
         self.disable_undo()
         self.undo_tooltip = add_tooltip(self.undo,"Undo change (Ctrl-Z)")
-
-        self.redo = tk.CTkButton(master=self,text="→",fg_color="transparent",width=40,command=self.master.redo_action,corner_radius=0)
-        self.redo.pack(side="left")
+        self.redo = tk.CTkButton(master=self,text="→",fg_color="transparent",font=arrow_font,width=40,command=self.master.redo_action,corner_radius=0)
+        self.redo.pack(side="left",padx=(0,5))
         self.disable_redo()
         self.redo_tooltip = add_tooltip(self.redo,"Redo change (Ctrl-Y)")
 

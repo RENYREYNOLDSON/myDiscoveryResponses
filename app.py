@@ -160,63 +160,80 @@ class App(tk.CTkToplevel):
     def __init__(self,master, **kwargs):
         super().__init__(master, **kwargs)
 
-        ##### VERSION AND USER STUFF
-        self.version="1.0.7"
-        #####
+        ##### VERSION NUMBER
+        self.version="1.1.0"
 
-        # CLASS ATTRIBUTES
+        ##### CLASS ATTRIBUTES
         self.master=master#Master is root of the program (Top level tk)
         master.call()
+        #A list of all the open client objects
         self.clients=[]
-        self.reqs=[]#Holds all requests in the selected file
-
+        #Holds all requests in the currently selected file
+        self.reqs=[]
+        #Denotes the current client object
         self.current_client = ""
-        self.current_file = ""#Current selected file
-        self.req_type=""#Type of the current request
-        self.prev_type=""#Type of the previous request
-        self.current_req=0#Currently selected request
+        #Current selected file object
+        self.current_file = ""
+        #The currently selected request
+        self.current_req=0
+        #Request type of the current file
+        self.req_type=""
+        #Previous request type, using for managing window
+        self.prev_type=""
+        #The previous objection text
         self.previous_objection_text=""
+        #Same container for all of the pop out windows, only one open at once!
+        self.win=None
+
+        ##### LOAD ATTRIBUTES FROM METHODS
+        #Opens the shortcuts
         self.HOTKEYS=open_hotkeys()
+        #Opens the recent files json
         self.RECENTS=get_recents()
-        self.set_config()#CONFIG FILE FOR SOFTWARE!
-
-        #Set spell check
+        #Repairs the config file if new items have been added
+        validate_integrity_of_config_file()
+        #Loads the config file (software settings)
+        self.set_config()
+        #Initialises the spell checker with the current language
         self.SPELL_CHECKER = SpellChecker(self.CONFIG["spelling"]["language"])
+        #Get the list of objections
+        self.objections = open_objections()
 
-        self.objections = open_objections()#Get the list of objections
-        self.win=None#Container for the pop out window
-        self.details_frame = None
 
-        # WINDOW SETUP
-
+        ##### WINDOW SETUP
+        #Set the icon after a delay (otherwise overwritten by ctk)
         self.after(200, lambda: self.iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico")))
-
-        self.minsize(1050,720)#Min Size
-        self.geometry("1050x720")#Start size
-        
+        #Set minimum size of window
+        self.minsize(1050,720)
+        #Set the starting size of the window, but then set to zoomed
+        self.geometry("1050x720")
         self.state("zoomed")
+        #Set the title of the main window
         self.title("myDiscoveryResponses")#Window title
+
+        ##### BEGIN REGULAR INTERVAL FUNCTIONS
+        #Refresher updates text and software as the user interacts
         self.after(100, self.refresher)
-        self.after(30000,self.autosave)
+        #Autosave will trigger the save function at regular intervals
+        self.after(int(self.CONFIG["general"]["autosave_interval"]),self.autosave)
         
-        # KEY BINDINGSS
+        ##### KEY BINDINGS
         self.bind("<Up>",self.up_pressed)
         self.bind("<Down>",self.down_pressed)
         self.bind("<Return>",self.enter_pressed)
         self.bind("<Escape>",self.escape_pressed)
         self.bind("<Button-1>",self.mouse_pressed)
         self.protocol("WM_DELETE_WINDOW", self.exit_window)
-        # MENU HOTKEYS
         self.bind("<Control-n>",self.cntrl_n)
         self.bind("<Control-o>",self.cntrl_o)
         self.bind("<Control-f>",self.cntrl_f)
         self.bind("<Control-s>",self.cntrl_s)
         self.bind("<Control-e>",self.cntrl_e)
 
-        # POPULATE WINDOW WITH OBJECTS
+        ##### POPULATE WINDOW WITH OBJECTS
         self.populate_window()
 
-
+        return
 
 
         
@@ -240,6 +257,8 @@ class App(tk.CTkToplevel):
         # Response Frame
         self.response_frame = Response_Frame(master=self)
         self.set_theme("text")#Set theme just for text, as main theme loaded at start
+        #Additional frame used for editing file and firm details
+        self.details_frame = None
         
     # Create a new MAIN window
     def create_window(self):
@@ -583,7 +602,7 @@ class App(tk.CTkToplevel):
             update_check = CTkMessagebox(title="Update myDiscoveryResponses?",
                                        message="A new version is available! Would you like to update now?", 
                                        icon="info",
-                                       option_1="Cancel", 
+                                       option_1="No", 
                                        option_3="Yes",
                                        corner_radius=0,
                                        sound=True,
@@ -591,18 +610,17 @@ class App(tk.CTkToplevel):
             
             if update_check.get()=="Yes":
                 #Download new file
-
                 #Ask if they want to update and show version number
                 dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"myDiscoveryResponses_Installer.exe")
 
-
+                #Open installer
                 subprocess.Popen(["cmd","/c","start","",dir_path],
                                         stdout=subprocess.DEVNULL,  # Redirect output to avoid hanging on pipes
                                         stderr=subprocess.DEVNULL,
                                         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_BREAKAWAY_FROM_JOB,
                                         close_fds=True)
 
-
+                #Destroy this application
                 self.destroy()
                 root.destroy()
 
@@ -1706,81 +1724,6 @@ if __name__ == "__main__":
 
 # CHANGES
 ############################################################################################################
-#DONE FOR NEW UPDATE!:
-
-#Added autosave feature
-#Add SPELL CHECKER
-#Created custom text box
-#Spell checker now works in text boxes
-#Added tooltips for options
-#14/05
-#Added basic splash screen
-#Improved spell checker, much faster with new library!
-#Made spell checker into seprate file
-#Added fullscreen support
-#Added settings menu
-#15/05
-#Made settings menu far better
-#16/05 
-#Working on software settings
-#Working on undo
-#Added info on objection hover
-#09/06
-#Made top level windows sometimes lose top level status
-#Look into best practices for managing big python projects, seperating out systems
-
-#25/06
-#Make FROGs export properly
-#Add automatic open after export
-#Make settings cancel button work
-#Make settings menu work with other theme
-#Stop settings menu flashing on apply
-#Add options for this in the menu, language, number of options, colour, rules etc
-#Fix highlighting of spelling
-
-#28/06
-#Make all of settings menu work
-#Add language to bar framep
-#Stopped title being selected as a spell check correction
-#Added warning for close file button
-#Redo file and firm details
-#Made options for RFP and RFA look nicer
-#Fixed export all, this was causing errors
-#Make Martha's SPROG work
-#Added message box sounds
-#Try and centre popups when they open, also for windows
-#Make firm details submit
-#Add tooltips all over
-#Fixed objections and shortcuts menu opening
-#Renamed 'hotkeys' to 'shortcuts'
-#Fix theme buttons
-#Create a virtual environment for distribution, compare file sizes!
-#Stop tooltips if disabled
-#Change titles of exporting windows
-#Add more hotkeys for common commands
-#Fix firm and file details on change of menu
-#fixed indexes of spelling
-
-#29/06 
-#WORKING ON THE STUPID FUCKING REPO, DELETED WORK
-#Add unit tests! Run all these so that I know software works!
-#Added always ignore
-#Fixed the GitHub
-#Reset after always ignore
-#Only spell check when changes made, better performance
-#Add clear info about hotkeys etc
-#Run lots of testing on exporting, spelling and details
-#Working on reset options
-#Made open install location work
-#Add one unsaved text
-#Added uninstall
-#Test about page on installed software
-
-#07/07
-#Made splash screen efficient and software open faster
-#Made about menu fully work with resets
-#Add tooltips to clients
-
 
 #CURRENT PLAN:
 
@@ -1798,10 +1741,12 @@ if __name__ == "__main__":
 
 
 #3. OTHER:
-# ADD METHOD TO ADD MISSING FILES IN THE CONFIG!!! If starting up and items missing then fill from default
+# ADD METHOD TO ADD MISSING FILES IN THE CONFIG!!! If starting up and items missing then fill from default,
+#essentially, if I add a new setting or something I want to keep their settings but add this in!
+#Go through backups and if anything missing then add it in validate_integrity_of_config_file
+
 # Update readme with developer info
 # Make text typed into objection actually work
-# Create auto updater
 # Get windows developer signer
 # Organise and order code
 # Add autosave only save current client?

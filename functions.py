@@ -162,6 +162,40 @@ def save_objections(data):
         with open(os.path.join(os.path.dirname(__file__),'config/objections.json'), 'w') as file:
             json.dump(data,file)
 
+# Validate the integrity of the config file, if there are any details missing then add them from the backup
+def validate_integrity_of_config_file():#Run this function on start
+    #Get backup config
+    backup = open_config_backup()
+
+    #Get current config
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/config.json")):
+        with open(os.path.join(os.path.dirname(__file__),'config/config.json'), 'r') as file:
+            config = json.load(file)
+
+    #Compare the backup and the config
+    fixed = False
+    for i in backup:
+        if i not in config:
+            config[i] = backup[i]
+            print(backup[i])
+            fixed = True
+        else:
+            if backup[i]!=1:
+                #Check all inside
+                for i2 in backup[i]:
+                    if i2 not in config[i]:
+                        #Add the new dictionary item here
+                        config[i][i2] = backup[i][i2]
+                        print(i2)
+                        fixed = True
+
+    #If fixed then save config file
+    if fixed:
+        with open(os.path.join(os.path.dirname(__file__),"config/config.json"), "w") as outfile:
+            json.dump(config, outfile)
+
+    return
+
 # Find all instances of keywords [start,end]
 def find_all(string,sub):
     indices=[]
@@ -354,3 +388,7 @@ def curly_convert(text):
                 single_state="open"
     """
     return text
+
+
+if __name__=="__main__":
+    validate_integrity_of_config_file()

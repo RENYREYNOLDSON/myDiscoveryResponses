@@ -38,7 +38,7 @@ class Bar_Frame(tk.CTkFrame):
         self.file._dropdown_menu.add_command(label="Preview DOCX", command=self.master.view_preview)
         self.file._dropdown_menu.add_command(label="Close File", command=self.master.close_file)
         self.file._dropdown_menu.add_command(label="Close Client", command=self.master.close_client)
-        self.file._dropdown_menu.add_command(label="Check for Updates")
+        self.file._dropdown_menu.add_command(label="Check for Updates",command=self.master.check_for_update)
         self.file._dropdown_menu.add_command(label="Exit", command=self.master.exit_window)
 
 

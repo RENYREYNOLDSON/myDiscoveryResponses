@@ -35,6 +35,10 @@ pip install requirements.txt
 python app.py
 ```
 
+## Website
+Available documentation at:
+  https://github.com/RENYREYNOLDSON/myDiscoveryResponses-site.git
+
 ## User Guide
 ### Software Overview
 ![Example Screenshot](./Images/USER_GUIDE_IMAGE.png)

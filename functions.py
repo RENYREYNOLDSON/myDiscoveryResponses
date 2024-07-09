@@ -20,8 +20,35 @@ import urllib.request
 
 HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage","lost wages","injury","injuries"]
 
+
+# WINDOW SPECIFIC FUNTIONS (cannot be elsewhere)
+############################################################################################################
+
+
+
+#ROOT UTILITY FUNCTION
+def check_windows_open():
+    c=0
+    for w in root.winfo_children():
+        c+=1
+    if c==0:#Destroy root if no windows left open
+        print("ROOT CLOSED AS NO WINDOWS DETECTED")
+        root.destroy()
+    root.after(10000,check_windows_open)
+
+
+
+
+
+
+
+
+
+
 # FUNCTIONS 
 ############################################################################################################
+
+
 
 
 #Uninstalls myDiscoveryResponses from computer
@@ -147,6 +174,21 @@ def open_config_backup():
             data = json.load(file)
         return data
     return None
+
+# Opens the config backup file
+def open_config():
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/config.json")):
+        with open(os.path.join(os.path.dirname(__file__),'config/config.json'), 'r') as file:
+            data = json.load(file)
+        return data
+    return None
+
+# Save the new hotkeys file
+def save_config(data):
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/config.json")):
+        with open(os.path.join(os.path.dirname(__file__),'config/config.json'), 'w') as file:
+            json.dump(data,file)
+
 
 # Opens the firm details backup file
 def open_firm_details_backup():

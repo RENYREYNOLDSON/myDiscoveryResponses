@@ -687,6 +687,14 @@ class App(tk.CTkToplevel):
         if "textbox" not in str(e.widget) and "ctkentry" not in str(e.widget):
             self.focus_set()
 
+    #Reset both of the undo stacks
+    def reset_undo_stacks(self):
+        #Reset both undo stacks
+        self.ACTION_STACK = []
+        self.REDO_ACTION_STACK = []
+        self.bar_frame.disable_undo()
+        self.bar_frame.disable_redo()
+
     #Reverts the stack back to a particular action! Usefuly for clear etc
     def revert_undo_stack(self,action):
         self.ACTION_STACK = self.ACTION_STACK[:self.ACTION_STACK.index(action)+1]
@@ -1580,6 +1588,8 @@ class App(tk.CTkToplevel):
         self.SPELL_CHECKER = SpellChecker(self.CONFIG["spelling"]["language"])
         #Destroy Window
         self.cancel_win()
+        #Reset the undo stack
+        self.reset_undo_stacks()
 
     #Open and update the config
     def set_config(self):
@@ -1841,12 +1851,13 @@ if __name__ == "__main__":
 #CURRENT PLAN:
 
 #ISSUE: Text not resetting when undoing from a different request etc
+#ISSUE: Clear not working when on another request
 #ISSUE: Submits seem to stay green on undo with check with client
 #ISSUE: Reset undo if shortcuts, objections or settings changed
 #ISSUE: First text put into the text box has no separator, when it's empty and gets added to we should add a seperator
 # also often it says nothing to undo! I'm trying to undo when not enough separators!
 #ISSUE: Change the undo arrow styles
-#ISSUE: Clear not working when on another request
+
 
 #Add if an undo fails delete and undo prev
 

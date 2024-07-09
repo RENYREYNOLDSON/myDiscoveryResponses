@@ -1812,6 +1812,7 @@ if __name__ == "__main__":
 #Select response option
 #Delete file
 #Upload file
+#Add ignore word
 #Add text to text box (track which box then use that boxes undo), spelling etc. If text box undo list grows then add.
 #each request must persist? Try access part of the text box when it updates
 #Fix undo of these text boxes as the history needs resting when a request is changed

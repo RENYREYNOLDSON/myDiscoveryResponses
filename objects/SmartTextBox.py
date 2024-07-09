@@ -23,9 +23,9 @@ class SmartTextbox(tk.CTkTextbox):
         #Bind a function for when this is modified
         self.bind("<<Modified>>",self.modified)
 
-        #NEED TO UNBIND HERE!
-        self.unbind_all("<control-z>")
-
+        #THIS UNBINDS THE UNDO AND REDO!
+        self._textbox.event_delete("<<Undo>>")
+        self._textbox.event_delete("<<Redo>>")
 
 
     #Runs when text is inserted or deleted
@@ -102,3 +102,9 @@ class SmartTextbox(tk.CTkTextbox):
 
         except:
             print("Popup failed")
+
+    def undo(self):#THIS FUNCTION IS NOT USED!
+        self._textbox.edit_undo()
+
+    def redo(self):#THIS FUNCTION IS NOT USED!
+        self._textbox.edit_redo()

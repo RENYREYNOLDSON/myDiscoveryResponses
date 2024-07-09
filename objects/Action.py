@@ -1,6 +1,6 @@
 # IMPORTS
 from functions import *
-
+import copy
 # CLIENT CLASS
 ############################################################################################################
 
@@ -58,45 +58,44 @@ class ActionCheck(Action):
     def redo_function(self):
         self.undo()
 
-
-
-################################ UNFINISHED / UNTESTED METHODS 
-
 class ActionTextBox(Action):
     def undo_function(self):
         #Access the relevant smart textbox and trigger undo command
         self.obj.undo()
-        print("UNDO")
     
     def redo_function(self):
         #Access the relevant smart textbox and trigger redo command
         self.obj.redo()
-        print("REDO")
+
+################################ UNFINISHED / UNTESTED METHODS 
+
 
 
 
 
 class ActionClear(Action):
+    def __init__(self, master, obj):
+        super().__init__(master, obj)
+        self.master.set_request(self.req)
+        self.req.set_master(None)
+        self.deep_req = copy.deepcopy(self.req)#NEEDS SAVING BEFORE IT IS COPIED!!!!!!
+        self.req.set_master(self.master)
+        
     def undo_function(self):
-        pass
-    
-    def redo_function(self):
-        pass
+        #Set the current request to this stored one
+        self.req.opts = self.deep_req.opts
+        self.req.RFP_option = self.deep_req.RFP_option
+        self.req.RFP_text = self.deep_req.RFP_text
+        self.req.RFA_option = self.deep_req.RFA_option
+        self.req.RFA_text = self.deep_req.RFA_text
+        self.req.resp = self.deep_req.resp
+        self.req.custom_objection_text = self.deep_req.custom_objection_text
+        self.req.set_master(self.master)
 
-class ActionDeleteClient(Action):
-    def undo_function(self):
-        #Add the client back into the client list
-        pass
-    
-    def redo_function(self):
-        #Remove the client from the client list
-        pass
+        self.master.set_request(self.req,save_current=False)
 
-class ActionAddClient(Action):
-    def undo_function(self):
-        #Remove client from the client list
-        pass
+        print("CLEAR UNDO")
     
     def redo_function(self):
-        #Add client back to the client list
-        pass
+        self.master.clear(undo_command=True)
+

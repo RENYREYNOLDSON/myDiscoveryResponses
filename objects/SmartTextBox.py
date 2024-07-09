@@ -9,7 +9,7 @@ class SmartTextbox(tk.CTkTextbox):
     #Constructor 
     def __init__(self,master,main_master,**kwargs):
         #FRAME SETUP
-        super().__init__(master,undo=True,maxundo=-1,autoseparators=True, **kwargs)
+        super().__init__(master,undo=True,maxundo=100,autoseparators=False, **kwargs)
 
         self.main_master = main_master
         #This is the previous text in the box
@@ -21,7 +21,10 @@ class SmartTextbox(tk.CTkTextbox):
         self.after(int(self.main_master.CONFIG["spelling"]["spellcheck_interval"]),self.spellcheck)
 
         #Bind a function for when this is modified
-        self.bind("<<Modified>>",self.modified)
+        autoseparator_bindings = ["<BackSpace>","<Delete>","<Return>","<<Cut>>","<<Paste>>","<<Clear>>",
+                                  "<<PasteSelection>>","<space>"]
+        for bind in autoseparator_bindings:
+            self.bind(bind,self.modified)
 
         #THIS UNBINDS THE UNDO AND REDO!
         self._textbox.event_delete("<<Undo>>")
@@ -30,9 +33,8 @@ class SmartTextbox(tk.CTkTextbox):
 
     #Runs when text is inserted or deleted
     def modified(self,e):
-        print(e)
-        print("Modified")
-        self.edit_modified(False)
+        #ADD AN AUTOSEPERATOR:
+        self.edit_separator()
         #Add this onto undo stack -> Then access the box when an undo is needed
         self.main_master.add_action_to_stack(ActionTextBox(self.main_master,self))
     
@@ -62,6 +64,7 @@ class SmartTextbox(tk.CTkTextbox):
         else:
             self.delete(self.istart,self.iend)
             self.insert(self.istart,v)
+            self.modified(None)
 
     def popup(self,event):
         try:
@@ -108,3 +111,8 @@ class SmartTextbox(tk.CTkTextbox):
 
     def redo(self):#THIS FUNCTION IS NOT USED!
         self._textbox.edit_redo()
+
+    def insert(self, index, text, tags=None):
+        #self.modified(None)#Modify the autoseparators when inserted to
+        return super().insert(index, text, tags)
+        

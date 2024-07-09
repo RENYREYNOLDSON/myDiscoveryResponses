@@ -38,7 +38,13 @@ class General(tk.CTkFrame):
         set_switch(self.seventeen_switch,self.master.master.CONFIG["general"]["auto_FROGS"])
         self.seventeen_switch.pack(fill="x",padx=10,pady=(0,0))
 
-
+        #Undo Stack
+        value = int(self.master.master.CONFIG["general"]["undo_stack"])
+        self.undo_label = tk.CTkLabel(master=self,text="Maximum actions in the Undo list ("+str(value)+")",anchor="w")
+        self.undo_label.pack(fill="x",padx=10,pady=(5,0))
+        self.undo_stack = tk.CTkSlider(master=self,from_= 5,to=100,command=self.update_undo_stack_label,number_of_steps=94)
+        self.undo_stack.set(self.master.master.CONFIG["general"]["undo_stack"])
+        self.undo_stack.pack(fill="x",padx=(10,300),pady=(0,5))
 
         title = tk.CTkLabel(master=self,text="Saving",font=heading_font,anchor="w")
         title.pack(fill="x",padx=10,pady=(20,5))
@@ -72,9 +78,15 @@ class General(tk.CTkFrame):
         set_switch(self.open_export_switch,self.master.master.CONFIG["general"]["open_export"])
         self.open_export_switch.pack(fill="x",padx=10,pady=(0,5))
 
+
+
     def update_autosave_label(self,val):
         value = int(val//1000)
         self.autosave_label.configure(text="Autosave interval in seconds ("+str(value)+"s)")
+
+    def update_undo_stack_label(self,val):
+        value = int(val)
+        self.undo_label.configure(text="Maximum actions in the Undo list ("+str(value)+")")
 
 
 class Theme(tk.CTkFrame):
@@ -511,7 +523,8 @@ class Settings(tk.CTkToplevel):
             "autosaving":self.general_frame.autosave_checkbox.get(),
             "autosave_interval":self.general_frame.autosave_interval.get(),
             "submitted_only":self.general_frame.export_switch.get(),
-            "open_export":self.general_frame.open_export_switch.get()}
+            "open_export":self.general_frame.open_export_switch.get(),
+            "undo_stack":self.general_frame.undo_stack.get()}
         return general
     
     def get_appearance(self):

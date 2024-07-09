@@ -687,9 +687,22 @@ class App(tk.CTkToplevel):
         if "textbox" not in str(e.widget) and "ctkentry" not in str(e.widget):
             self.focus_set()
 
+    #Reverts the stack back to a particular action! Usefuly for clear etc
+    def revert_undo_stack(self,action):
+        self.ACTION_STACK = self.ACTION_STACK[:self.ACTION_STACK.index(action)+1]
+
+
+    #Ensure both stacks are below the config undo length
+    def validate_action_stacks(self):
+        maximum = int(self.CONFIG["general"]["undo_stack"])
+        if len(self.ACTION_STACK)>maximum:
+            self.ACTION_STACK = self.ACTION_STACK[-maximum:]
+        if len(self.REDO_ACTION_STACK)>maximum:
+            self.REDO_ACTION_STACK = self.REDO_ACTION_STACK[-maximum:]
 
     #Add an action to the undo action stack
     def add_action_to_stack(self,new_action):
+        print(new_action)
         #Reset redos as now out of date
         self.REDO_ACTION_STACK = []
         self.bar_frame.disable_redo()
@@ -701,9 +714,13 @@ class App(tk.CTkToplevel):
 
         self.print_stacks()
 
+        #Ensure both stacks are below the config undo length
+        self.validate_action_stacks()
+
     #Undo the previous action and remove it from the stack (put on redo stack)
     def undo_action(self):
         if len(self.ACTION_STACK)>0:
+            print("UNDO!!!")
             action = self.ACTION_STACK.pop()
             action.undo()
             self.REDO_ACTION_STACK.append(action)
@@ -716,6 +733,9 @@ class App(tk.CTkToplevel):
                 self.bar_frame.enable_redo()
 
             self.print_stacks()
+
+            #Ensure both stacks are below the config undo length
+            self.validate_action_stacks()
 
     #Redo an action which was undone, when action stack added to then the redo stack will clear
     def redo_action(self):
@@ -732,6 +752,9 @@ class App(tk.CTkToplevel):
                 self.bar_frame.enable_undo()
 
             self.print_stacks()
+
+            #Ensure both stacks are below the config undo length
+            self.validate_action_stacks()
 
     def print_stacks(self):
         print("ACTION STACK: "+str(len(self.ACTION_STACK))+"  REDO STACK: "+str(len(self.REDO_ACTION_STACK)))
@@ -1454,38 +1477,39 @@ class App(tk.CTkToplevel):
         self.title("myDiscoveryResponses   |   "+str(file.name.split("/")[-1]))
 
     # Save request and open a different one
-    def set_request(self,req):
+    def set_request(self,req,save_current=True):
         #Close details menu
         self.close_details()
         # 1. SAVING PREVIOUS RESPONSE
         if self.current_req!=0:
             # Saving
-            self.current_req.resp = self.response_frame.get_response()
-            #GET RFP data
-            if self.prev_type=="RFP":
-                self.current_req.RFP_option=self.response_frame.get_RFP()
-                self.current_req.RFP_text=self.response_frame.get_RFP_text()
-            elif self.prev_type=="RFA":
-                self.current_req.RFA_option=self.response_frame.get_RFA()
-                self.current_req.RFA_text=self.response_frame.get_RFA_text()
-            #COLOR#########################################
-            grey=False
-            if self.current_req.resp.replace("\n","")!="" and self.req_type!="RFP":
-                grey=True
-            elif (self.current_req.RFP_option!="Available" or len(self.current_req.RFP_text)>0):
-                grey=True
+            if save_current:
+                self.current_req.resp = self.response_frame.get_response()
+                #GET RFP data
+                if self.prev_type=="RFP":
+                    self.current_req.RFP_option=self.response_frame.get_RFP()
+                    self.current_req.RFP_text=self.response_frame.get_RFP_text()
+                elif self.prev_type=="RFA":
+                    self.current_req.RFA_option=self.response_frame.get_RFA()
+                    self.current_req.RFA_text=self.response_frame.get_RFA_text()
+                #COLOR#########################################
+                grey=False
+                if self.current_req.resp.replace("\n","")!="" and self.req_type!="RFP":
+                    grey=True
+                elif (self.current_req.RFP_option!="Available" or len(self.current_req.RFP_text)>0):
+                    grey=True
 
-            if self.current_req.color!="#FF0000" and self.current_req.color!="#50C878":
-                if grey:
-                    self.current_req.color="grey" 
-                else:
-                    self.current_req.color=("black","white")
-            ################################################
+                if self.current_req.color!="#FF0000" and self.current_req.color!="#50C878":
+                    if grey:
+                        self.current_req.color="grey" 
+                    else:
+                        self.current_req.color=("black","white")
+                ################################################
             
         # 2. ENTERING NEW RESPONSE INTO FRAME
         self.response_frame.redraw(req.req_type)
         #If set to itself then return
-        if self.current_req==req:
+        if self.current_req==req and save_current:
             return
         #SET THE NEW REQ
         self.current_req=req
@@ -1501,6 +1525,8 @@ class App(tk.CTkToplevel):
             text = req.no+1
         self.response_frame.request_label.configure(text=self.req_type+" NO. "+str(text)+":")
         #Set the response textbox
+        print("HERE?")
+        print(req.resp)
         self.response_frame.set_response(req.resp)
         #RFP & RFA Options and labels
         if self.req_type=="RFP":
@@ -1713,8 +1739,12 @@ class App(tk.CTkToplevel):
                     return
 
     # Clear a full request
-    def clear(self):
+    def clear(self,undo_command=False):
         if self.current_req!=0:
+            if not undo_command:
+                #Add to undo queue
+                undo_action = ActionClear(self,"Clear")
+                self.add_action_to_stack(undo_action)
             #Reset Color
             self.current_req.color=("black","white")
             self.current_client.current_file.color=("black","white")
@@ -1727,6 +1757,7 @@ class App(tk.CTkToplevel):
                 i.param=""
             #Reset boxes
             self.response_frame.set_response("")
+
             self.objections_frame.redraw(self.current_req)
             self.requests_frame.update_list(self.reqs)
             #Reset RFP
@@ -1735,6 +1766,9 @@ class App(tk.CTkToplevel):
                 self.response_frame.set_RFP_text("")
             elif self.req_type=="RFA":
                 self.response_frame.set_RFA("Admit")
+
+            if not undo_command:
+                self.revert_undo_stack(undo_action)
             self.update()
 
 
@@ -1796,27 +1830,42 @@ if __name__ == "__main__":
 #Added undo and redo objections
 #Added hotkeys
 #Improved performance loads
+#Got the textboxes unbounded and semi-working
+#Make undo only apply once! ie when in text box don't do both
+#LOOK INTO AUTOSEPERATORS FOR THIS, now works fully
 
+#Added the setting for undo stack length
+#Fixed the clear undo not resetting objections
+#Finally found the bug making clear not work!
 
 #CURRENT PLAN:
-#Make undo only apply once! ie when in text box don't do both
 
-#Create a list of 'actions' that I can go back through and undo
+#ISSUE: Text not resetting when undoing from a different request etc
+#ISSUE: Submits seem to stay green on undo with check with client
+#ISSUE: Reset undo if shortcuts, objections or settings changed
+#ISSUE: First text put into the text box has no separator, when it's empty and gets added to we should add a seperator
+# also often it says nothing to undo! I'm trying to undo when not enough separators!
+#ISSUE: Change the undo arrow styles
+#ISSUE: Clear not working when on another request
+
+#Add if an undo fails delete and undo prev
+
 #Possible actions:
 #Add/remove objection DONE
 #Submit DONE
 #Check with clients DONE
-#Create client
-#Delete client
-#Clear
+#Smart TextBox undo DONE
+#Clear DONE
+
+
+#Delete file - copy class
+#Upload file - copy class
+
 #Select response option
-#Delete file
-#Upload file
-#Add ignore word
-#Add text to text box (track which box then use that boxes undo), spelling etc. If text box undo list grows then add.
-#each request must persist? Try access part of the text box when it updates
-#Fix undo of these text boxes as the history needs resting when a request is changed
-# LOOK INTO AUTOSEPERATORS FOR THIS
+
+#Entries
+
+
 
 
 

@@ -36,7 +36,7 @@ class Bar_Frame(tk.CTkFrame):
         self.file._dropdown_menu.add_command(label="Export Client as DOCX", command=self.master.export_all)
         self.file._dropdown_menu.add_command(label="Export Check With Client", command=self.master.export_check_with_clients)
         self.file._dropdown_menu.add_command(label="Preview DOCX", command=self.master.view_preview)
-        self.file._dropdown_menu.add_command(label="Close File", command=self.master.close_file)
+        self.file._dropdown_menu.add_command(label="Delete File", command=self.master.close_file)
         self.file._dropdown_menu.add_command(label="Close Client", command=self.master.close_client)
         self.file._dropdown_menu.add_command(label="Check for Updates",command=self.master.check_for_update)
         self.file._dropdown_menu.add_command(label="Exit", command=self.master.exit_window)
@@ -62,7 +62,7 @@ class Bar_Frame(tk.CTkFrame):
         self.details.pack(side="left")
         self.details_tooltip = add_tooltip(self.details,"Edit this files details")
 
-        arrow_font = tk.CTkFont("Arial",20,underline=False,weight="bold")
+        arrow_font = tk.CTkFont("Arial",18,underline=False,weight="bold")
         #Undo and Redo Buttons
         self.undo = tk.CTkButton(master=self,text="←",fg_color="transparent",font=arrow_font,width=40,command=self.master.undo_action,corner_radius=0)
         self.undo.pack(side="left")

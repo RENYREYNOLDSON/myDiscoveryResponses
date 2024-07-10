@@ -48,6 +48,23 @@ class WindowUtility:
     ### WINDOW UTILITY
     ########################################################################################################
 
+    #Setup key and exit bindings for the main windows
+    def setup_bindings(self):
+        self.bind("<Up>",self.up_pressed)
+        self.bind("<Down>",self.down_pressed)
+        self.bind("<Return>",self.enter_pressed)
+        self.bind("<Escape>",self.escape_pressed)
+        self.bind("<Button-1>",self.mouse_pressed)
+        self.protocol("WM_DELETE_WINDOW", self.exit_window)
+        self.bind("<Control-n>",self.cntrl_n)
+        self.bind("<Control-o>",self.cntrl_o)
+        self.bind("<Control-f>",self.cntrl_f)
+        self.bind("<Control-s>",self.cntrl_s)
+        self.bind("<Control-e>",self.cntrl_e)
+        #Undo and Redo
+        self.bind("<Control-z>",self.cntrl_z)
+        self.bind("<Control-y>",self.cntrl_y)
+        
     #Add Frames to the window
     def populate_window(self):
         # Navigation Bar Frame
@@ -394,10 +411,10 @@ class WindowUtility:
                 return
         self.destroy()
         c=0
-        for w in root.winfo_children():
+        for w in self.root.winfo_children():
             c+=1
         if c==0:#Destroy root if no windows left open
-            root.destroy()
+            self.root.destroy()
 
     ### KEY PRESSES
     ########################################################################################################

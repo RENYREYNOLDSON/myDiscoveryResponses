@@ -1,78 +1,34 @@
-###### APP
-###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023
+######
+###### MYDISCOVERYRESPONSES
+###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023-2024
 ###### Uses converter.py to open discovery request PDF's in order to respond
 ###### Provides a Windows GUI tool for opening files and saving as DOCX
-###### Version 4.0 | 05/09/2023
+###### myDiscoveryResponses.com
+###### Version 1.1.0 | 09/07/2024
+######
 
-# Rules for clean code space
-# 1. Use snake_case unless a class name (then camel case)
-# 2. Comment everything!
-# 3. If possible make something a simple & standard function
-# 4. Break everything down into small components and files
-# 5. ROOT->Main Windows->Each can have 1 sub window
-
+###### Rules for clean code space
+###### 1. Use snake_case unless a class name (then camel case)
+###### 2. Comment everything!
+###### 3. If possible make something a simple & standard function
+###### 4. Break everything down into small components and files
+###### 5. ROOT->Main Windows->Each can have 1 sub window
 
 # IMPORTS
 ############################################################################################################
-
-#Import minimum things here
 import customtkinter as tk
 from windows.splash import *
-# Functions
 from functions import *
-
-# Open splash window here!
+##### Open splash screen before large module imports
 if __name__=="__main__":
     initial_theme()
-    #PROGRAM SPLASH SCREEN
     splash_screen = Splash()
     splash_screen.update()
-
-# Main Imports
-import converter as cnv
-from CTkMessagebox import CTkMessagebox
-import json,os,copy,sys,time,subprocess
-import pickle
-from threading import Thread
-import re
-import os
-from enchant import list_languages
-# Main Class Inheritance Imports
-from main_class.Saving import *
-from main_class.WindowUtility import *
-from main_class.Config import *
-from main_class.Undo import *
-from main_class.Export import *
-from main_class.Requests import *
-# Frame Imports
-from frames.BarFrame import *
-from frames.LandingFrame import *
-from frames.ObjectionsFrame import *
-from frames.RequestsFrame import *
-from frames.ResponseFrame import *
-from frames.FileDetails import *
-from frames.FirmDetails import *
-# Window Imports
-from windows.EditObjections import *
-from windows.Hotkeys import *
-from windows.Preview import *
-from windows.PreviewText import *
-from windows.Settings import *
-# Object Imports
-from objects.Client import *
-from objects.File import *
-from objects.Objection import *
-from objects.Request import *
-from objects.Save import *
-from objects.SmartToolTip import *
-from objects.Action import *
-
-
-
-# MAIN WINDOW FRAME
-############################################################################################################
+##### Run the script to import modules
+from __modules__ import *
 
 # MAIN WINDOW CLASS
+############################################################################################################
 class App(tk.CTkToplevel,Saving,WindowUtility,Config,Undo,Export,Requests):
     #CONSTRUCTOR 
     def __init__(self,master, **kwargs):
@@ -80,10 +36,11 @@ class App(tk.CTkToplevel,Saving,WindowUtility,Config,Undo,Export,Requests):
 
         ##### VERSION NUMBER
         self.version="1.1.0"
+        #####
 
         ##### CLASS ATTRIBUTES
-        self.master=master#Master is root of the program (Top level tk)
-        master.call()
+        self.root=root#Master is root of the program (Top level tk)
+        root.call()
         #A list of all the open client objects
         self.clients=[]
         #Holds all requests in the currently selected file
@@ -92,7 +49,7 @@ class App(tk.CTkToplevel,Saving,WindowUtility,Config,Undo,Export,Requests):
         self.current_client = ""
         #Current selected file object
         self.current_file = ""
-        #The currently selected request
+        #Pointer to the currently selected request
         self.current_req=0
         #Request type of the current file
         self.req_type=""
@@ -113,25 +70,23 @@ class App(tk.CTkToplevel,Saving,WindowUtility,Config,Undo,Export,Requests):
         #Opens the recent files json
         self.RECENTS=get_recents()
         #Repairs the config file if new items have been added
-        validate_integrity_of_config_file()
         #Loads the config file (software settings)
+        validate_integrity_of_config_file()
         self.set_config()
         #Initialises the spell checker with the current language
         self.SPELL_CHECKER = SpellChecker(self.CONFIG["spelling"]["language"])
         #Get the list of objections
         self.objections = open_objections()
 
-
         ##### WINDOW SETUP
         #Set the icon after a delay (otherwise overwritten by ctk)
         self.after(200, lambda: self.iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico")))
         #Set minimum size of window
         self.minsize(1050,720)
-        #Set the starting size of the window, but then set to zoomed
-        self.geometry("1050x720")
+        #Set to be fullscreened
         self.state("zoomed")
         #Set the title of the main window
-        self.title("myDiscoveryResponses")#Window title
+        self.title("myDiscoveryResponses")
 
         ##### BEGIN REGULAR INTERVAL FUNCTIONS
         #Refresher updates text and software as the user interacts
@@ -140,24 +95,14 @@ class App(tk.CTkToplevel,Saving,WindowUtility,Config,Undo,Export,Requests):
         self.after(int(self.CONFIG["general"]["autosave_interval"]),self.autosave)
         
         ##### KEY BINDINGS
-        self.bind("<Up>",self.up_pressed)
-        self.bind("<Down>",self.down_pressed)
-        self.bind("<Return>",self.enter_pressed)
-        self.bind("<Escape>",self.escape_pressed)
-        self.bind("<Button-1>",self.mouse_pressed)
-        self.protocol("WM_DELETE_WINDOW", self.exit_window)
-        self.bind("<Control-n>",self.cntrl_n)
-        self.bind("<Control-o>",self.cntrl_o)
-        self.bind("<Control-f>",self.cntrl_f)
-        self.bind("<Control-s>",self.cntrl_s)
-        self.bind("<Control-e>",self.cntrl_e)
-        #Undo and Redo
-        self.bind("<Control-z>",self.cntrl_z)
-        self.bind("<Control-y>",self.cntrl_y)
+        self.setup_bindings()
 
         ##### POPULATE WINDOW WITH OBJECTS
         self.populate_window()
         
+
+# ROOT FUNCTIONS
+############################################################################################################
 # Create a new window with root as parent
 def create_window(root,from_file="file which will not exist on anybody's file path"):
     if os.path.exists(from_file.replace("\\","/")):
@@ -165,72 +110,32 @@ def create_window(root,from_file="file which will not exist on anybody's file pa
     else:
         App(root)
 
+#ROOT UTILITY FUNCTION
+def check_windows_open():
+    if len(root.winfo_children())==0:#Destroy root if no windows left open
+        print("ROOT CLOSED AS NO WINDOWS DETECTED")
+        root.destroy()
+    root.after(10000,check_windows_open)
 
 # MAIN LOOP
 ############################################################################################################
 
 if __name__ == "__main__":
-    #APPLICATION UTILITY SETUP
     splash_screen.destroy()
     root=tk.CTk()
-    root.iconbitmap(os.path.join(os.path.dirname(__file__),"assets/icon.ico"))
     root.withdraw()
-    ##CHECK if file has been opened from a saved client
-    print(sys.argv)
+    #CHECK if file has been opened from a saved client
+    #sys.argv are the arguments such as opening a file!
     if len(sys.argv)>1:
         create_window(root,sys.argv[-1])
     else:
         create_window(root)
     root.after(10000,check_windows_open)
+    #Run program mainloop
     root.mainloop()
 
 
 
-
-# CHANGES
-############################################################################################################
-
-#DONE:
-#Added undo and redo objections
-#Added hotkeys
-#Improved performance loads
-#Got the textboxes unbounded and semi-working
-#Make undo only apply once! ie when in text box don't do both
-#LOOK INTO AUTOSEPERATORS FOR THIS, now works fully
-
-#Added the setting for undo stack length
-#Fixed the clear undo not resetting objections
-#Finally found the bug making clear not work!
-
-#CURRENT PLAN:
-
-#ISSUE: Text not resetting when undoing from a different request etc
-#ISSUE: Clear not working when on another request
-#ISSUE: Submits seem to stay green on undo with check with client
-#ISSUE: Reset undo if shortcuts, objections or settings changed
-#ISSUE: First text put into the text box has no separator, when it's empty and gets added to we should add a seperator
-# also often it says nothing to undo! I'm trying to undo when not enough separators!
-#ISSUE: Change the undo arrow styles
-
-#FIX GLOBAL VARIABLES e.g root not working
-#Check that undo is correct
-
-#Add if an undo fails delete and undo prev
-
-#Possible actions:
-#Add/remove objection DONE
-#Submit DONE
-#Check with clients DONE
-#Smart TextBox undo DONE
-#Clear DONE
-
-
-#Delete file - copy class
-#Upload file - copy class
-
-#Select response option
-
-#Entries
 
 
 

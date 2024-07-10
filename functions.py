@@ -26,15 +26,7 @@ HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage
 
 
 
-#ROOT UTILITY FUNCTION
-def check_windows_open():
-    c=0
-    for w in root.winfo_children():
-        c+=1
-    if c==0:#Destroy root if no windows left open
-        print("ROOT CLOSED AS NO WINDOWS DETECTED")
-        root.destroy()
-    root.after(10000,check_windows_open)
+
 
 
 

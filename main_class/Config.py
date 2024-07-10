@@ -52,7 +52,16 @@ class Config:
             if update_check.get()=="Yes":
                 #Download new file
                 #Ask if they want to update and show version number
+
+                #THIS SHOULD BE A PATH TO DOWNLOADED FILE!!!
+                
+                #
+                #
+                #
                 dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"myDiscoveryResponses_Installer.exe")
+                #
+                #
+                #
 
                 #Open installer
                 subprocess.Popen(["cmd","/c","start","",dir_path],
@@ -63,7 +72,7 @@ class Config:
 
                 #Destroy this application
                 self.destroy()
-                #root.destroy()
+                self.root.destroy()
 
     #RESET COMMANDS
     #Reset the config.json

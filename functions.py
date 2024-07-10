@@ -1,9 +1,11 @@
-###### FUNCTIONS
-###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023
 ######
-###### General functions usable by any program
+###### MYDISCOVERYRESPONSES
+###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023-2024
+###### Uses converter.py to open discovery request PDF's in order to respond
+###### Provides a Windows GUI tool for opening files and saving as DOCX
+###### myDiscoveryResponses.com
+###### Version 1.1.0 | 09/07/2024
 ######
-
 
 # IMPORTS
 ############################################################################################################
@@ -21,25 +23,10 @@ import urllib.request
 HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage","lost wages","injury","injuries"]
 
 
-# WINDOW SPECIFIC FUNTIONS (cannot be elsewhere)
-############################################################################################################
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # FUNCTIONS 
 ############################################################################################################
-
 
 
 

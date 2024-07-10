@@ -1,4 +1,9 @@
+
+
 # Main Imports
+import customtkinter as tk
+from windows.splash import *
+from functions import *
 import converter as cnv
 from CTkMessagebox import CTkMessagebox
 import json,os,copy,sys,time,subprocess
@@ -7,8 +12,6 @@ from threading import Thread
 import re
 import os
 from enchant import list_languages
-# Main Class Inheritance Imports
-from main_class.Saving import *
 # Frame Imports
 from frames.BarFrame import *
 from frames.LandingFrame import *
@@ -64,7 +67,7 @@ class WindowUtility:
         #Undo and Redo
         self.bind("<Control-z>",self.cntrl_z)
         self.bind("<Control-y>",self.cntrl_y)
-        
+
     #Add Frames to the window
     def populate_window(self):
         # Navigation Bar Frame
@@ -313,11 +316,10 @@ class WindowUtility:
     # View and edit the details of the document
     def view_details(self):
         if self.file_open() and self.details_frame==None:
+            self.details_frame = File_Details_Frame(master=self)
             #Remove (visibly) response and objection frames
             self.response_frame.pack_forget()
             self.objections_frame.pack_forget()
-
-            self.details_frame = File_Details_Frame(master=self)
             self.details_frame.pack(fill="both",expand=True,padx=20,pady=20)
 
     def close_details(self):

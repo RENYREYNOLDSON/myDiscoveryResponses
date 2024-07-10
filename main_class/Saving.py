@@ -7,8 +7,6 @@ from threading import Thread
 import re
 import os
 from enchant import list_languages
-# Main Class Inheritance Imports
-from main_class.Saving import *
 # Frame Imports
 from frames.BarFrame import *
 from frames.LandingFrame import *

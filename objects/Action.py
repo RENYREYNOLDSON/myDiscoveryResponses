@@ -45,18 +45,30 @@ class ActionToggleObjection(Action):
         self.undo()###### TURN THIS INTO A NICE BASE CLASS TO BASE THE OTHERS OFF OF, THIS METHOD WILL WORK WELL!
 
 class ActionSubmit(Action):
+    def __init__(self, master, obj):
+        super().__init__(master, obj)
+        self.prev_color = self.req.color
     def undo_function(self):
-        self.master.submit(undo_command=True)
+        if self.prev_color == "#FF0000":
+            self.master.check(undo_command=True)#If was red then check
+        else:
+            self.master.submit(undo_command=True)#Otherwise submit
 
     def redo_function(self):
-        self.undo()
+        self.master.submit(undo_command=True)#Always submit
 
 class ActionCheck(Action):
+    def __init__(self, master, obj):
+        super().__init__(master, obj)
+        self.prev_color = self.req.color
     def undo_function(self):
-        self.master.check(undo_command=True)
+        if self.prev_color == "#50C878":
+            self.master.submit(undo_command=True)#Otherwise submit
+        else:
+            self.master.check(undo_command=True)#If was red then check
 
     def redo_function(self):
-        self.undo()
+        self.master.check(undo_command=True)#Always check
 
 class ActionTextBox(Action):
     def undo_function(self):

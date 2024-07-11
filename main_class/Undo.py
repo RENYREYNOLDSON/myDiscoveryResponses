@@ -54,7 +54,6 @@ class Undo:
 
     #Add an action to the undo action stack
     def add_action_to_stack(self,new_action):
-        print(new_action)
         #Reset redos as now out of date
         self.REDO_ACTION_STACK = []
         self.bar_frame.disable_redo()
@@ -72,7 +71,6 @@ class Undo:
     #Undo the previous action and remove it from the stack (put on redo stack)
     def undo_action(self):
         if len(self.ACTION_STACK)>0:
-            print("UNDO!!!")
             action = self.ACTION_STACK.pop()
             action.undo()
             self.REDO_ACTION_STACK.append(action)

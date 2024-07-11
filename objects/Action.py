@@ -83,7 +83,7 @@ class ActionClear(Action):
         
     def undo_function(self):
         #Set the current request to this stored one
-        self.req.opts = self.deep_req.opts
+        self.req.opts = copy.deepcopy(self.deep_req.opts)
         self.req.RFP_option = self.deep_req.RFP_option
         self.req.RFP_text = self.deep_req.RFP_text
         self.req.RFA_option = self.deep_req.RFA_option
@@ -93,6 +93,10 @@ class ActionClear(Action):
         self.req.set_master(self.master)
 
         self.master.set_request(self.req,save_current=False)
+        self.master.toggle_selected_objection(str(self.req.opts[0].key),None)
+
+        
+
 
         print("CLEAR UNDO")
     

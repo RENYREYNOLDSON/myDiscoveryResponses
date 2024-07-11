@@ -197,7 +197,6 @@ class Requests:
                 if o.key == obj:
                     self.current_req.current_objection = o
                     self.objections_frame.update_current(o)
-
                     #Set the objection input area to this objection
 
 
@@ -329,8 +328,6 @@ class Requests:
             text = req.no+1
         self.response_frame.request_label.configure(text=self.req_type+" NO. "+str(text)+":")
         #Set the response textbox
-        print("HERE?")
-        print(req.resp)
         self.response_frame.set_response(req.resp)
         #RFP & RFA Options and labels
         if self.req_type=="RFP":

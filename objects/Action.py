@@ -1,10 +1,11 @@
 # IMPORTS
 from functions import *
 import copy
-# CLIENT CLASS
+
+# ACTION CLASSES
 ############################################################################################################
 
-class Action:
+class Action:#Action base class
     def __init__(self,master,obj):
         self.master = master
         self.client = master.current_client
@@ -35,14 +36,14 @@ class Action:
 
     def redo(self):#Redo function, goes to request and then calls
         self.navigate_to_request()
-        self.redo_function()###### TURN THIS INTO A NICE BASE CLASS TO BASE THE OTHERS OFF OF, THIS METHOD WILL WORK WELL!
+        self.redo_function()
 
 class ActionToggleObjection(Action):
     def undo_function(self):
         self.master.toggle_objection(self.obj,undo_command=True)
 
     def redo_function(self):
-        self.undo()###### TURN THIS INTO A NICE BASE CLASS TO BASE THE OTHERS OFF OF, THIS METHOD WILL WORK WELL!
+        self.undo()
 
 class ActionSubmit(Action):
     def __init__(self, master, obj):
@@ -107,11 +108,59 @@ class ActionClear(Action):
         self.master.set_request(self.req,save_current=False)
         self.master.toggle_selected_objection(str(self.req.opts[0].key),None)
 
-        
-
-
-        print("CLEAR UNDO")
     
     def redo_function(self):
         self.master.clear(undo_command=True)
+
+
+class ActionCopyPrevious(Action):
+    def __init__(self, master, obj):
+        super().__init__(master, obj)
+        self.master.set_request(self.req)
+        self.req.set_master(None)
+        self.deep_req = copy.deepcopy(self.req)#NEEDS SAVING BEFORE IT IS COPIED!!!!!!
+        self.req.set_master(self.master)
+        
+    def undo_function(self):
+        #Set the current request to this stored one
+        self.req.opts = copy.deepcopy(self.deep_req.opts)
+        self.req.RFP_option = self.deep_req.RFP_option
+        self.req.RFP_text = self.deep_req.RFP_text
+        self.req.RFA_option = self.deep_req.RFA_option
+        self.req.RFA_text = self.deep_req.RFA_text
+        self.req.resp = self.deep_req.resp
+        self.req.custom_objection_text = self.deep_req.custom_objection_text
+        self.req.set_master(self.master)
+
+        self.master.set_request(self.req,save_current=False)
+        self.master.toggle_selected_objection(str(self.req.opts[0].key),None)
+
+    
+    def redo_function(self):
+        self.master.copy_previous(undo_command=True)
+
+#Sets the RFA entry button
+class ActionRFAEntry(Action):
+    def undo_function(self):
+        #Set the button to the relevant value
+        self.master.response_frame.set_RFA(self.obj[0],undo_command=True)
+    def redo_function(self):
+        #Set the button to the relevant value
+        self.master.response_frame.set_RFA(self.obj[1],undo_command=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -208,6 +208,9 @@ class Requests:
 
     #Allow for custom response when 'Custom' selected RFA
     def setRFA(self,value):
+        #print("set")#
+        #print(self.response_frame.get_RFA())
+        #self.master.add_RFA_option_action(self.get_RFA(),value)#Pass current and new 
         if value=="Custom":
             self.response_frame.current_frame.response_text.configure(state="normal")
             self.response_frame.current_frame.response_text.delete("0.0","end")
@@ -456,7 +459,9 @@ class Requests:
 
 
     # Copy objections from the previous request
-    def copy_previous(self):
+    def copy_previous(self,undo_command=False):
+        if not undo_command:#Add the undo action
+            self.add_action_to_stack(ActionCopyPrevious(master=self,obj="Copy"))
         #Copy the previous opts list, use copy maybe
         for i in range(len(self.reqs)):
             if self.reqs[i]==self.current_req:

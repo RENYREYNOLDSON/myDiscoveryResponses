@@ -26,6 +26,8 @@ class SmartTextbox(tk.CTkTextbox):
         for bind in autoseparator_bindings:
             self.bind(bind,self.modified)
 
+        self.bind("<KeyPress>",self.check_if_start)
+
         #THIS UNBINDS THE UNDO AND REDO!
         self._textbox.event_delete("<<Undo>>")
         self._textbox.event_delete("<<Redo>>")
@@ -37,6 +39,13 @@ class SmartTextbox(tk.CTkTextbox):
         self.edit_separator()
         #Add this onto undo stack -> Then access the box when an undo is needed
         self.main_master.add_action_to_stack(ActionTextBox(self.main_master,self))
+
+    #If the text is empty then add a separator
+    def check_if_start(self,e):
+        if self.get(0.0,"end-1c") == "":
+            self.modified(None)
+
+
     
 
     def spellcheck(self):

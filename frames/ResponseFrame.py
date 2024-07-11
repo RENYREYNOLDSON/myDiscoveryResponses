@@ -167,6 +167,7 @@ class Response_Frame(tk.CTkFrame):
         self.objection_text.delete("0.0","end")
         self.objection_text.insert("0.0",text)
         self.objection_text.configure(state="normal")
+
     #Response
     def get_response(self):
         return self.current_frame.response_text.get("0.0","end-1c")
@@ -176,6 +177,7 @@ class Response_Frame(tk.CTkFrame):
         self.current_frame.response_text.delete("0.0","end")
         self.current_frame.response_text.insert("0.0",text)
         self.current_frame.response_text.configure(state=state)
+
     #RFP Text
     def get_RFP_text(self):
         return self.RFP_frame.RFP_text.get()

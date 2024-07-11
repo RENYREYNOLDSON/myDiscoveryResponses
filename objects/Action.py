@@ -80,6 +80,61 @@ class ActionTextBox(Action):
         #Access the relevant smart textbox and trigger redo command
         self.obj.redo()
 
+#Sets the RFA entry button
+class ActionRFAEntry(Action):
+    def undo_function(self):
+        #obj[0] is previous, obj[1] is new value
+        #Set the button to the relevant value
+        self.master.response_frame.set_RFA(self.obj[0])
+        self.master.setRFA(self.obj[0],undo_command=True)
+    def redo_function(self):
+        #Set the button to the relevant value
+        self.master.response_frame.set_RFA(self.obj[1])
+        self.master.setRFA(self.obj[1],undo_command=True)
+
+#Sets the RFP entry button
+class ActionRFPEntry(Action):
+    def undo_function(self):
+        #Set the button to the relevant value
+        self.master.response_frame.set_RFP(self.obj[0])
+        self.master.setRFP(self.obj[0],undo_command=True)
+    def redo_function(self):
+        #Set the button to the relevant value
+        self.master.response_frame.set_RFP(self.obj[1])
+        self.master.setRFP(self.obj[1],undo_command=True)
+
+
+#Action of deleting a file from a client
+class ActionDeleteFile(Action):
+    #The obj is a index to be revived to - no need for deepcopy as it stays stored
+    def undo_function(self):
+        #Add the file back in
+        self.master.revive_file(self.file,self.obj)
+    
+    def redo_function(self):
+        #Delete the file again, already navigated to this
+        self.master.delete_file(undo_command=True)
+
+
+#Action of loading a pdf into the client through the converter
+class ActionReadFile(Action):
+    def __init__(self,master,obj):
+        self.master = master
+        self.client = master.current_client
+        self.file = obj
+        self.req = self.file.current_req
+        self.obj = obj
+    #The obj is a index to be revived to - no need for deepcopy as it stays stored
+    def undo_function(self):
+        #Delete the file from the client
+        self.master.delete_file(undo_command=True)
+    
+    def redo_function(self):
+        #Add the file back in
+        self.master.revive_file(self.file,-1)#Revive at -1 as always end of file list
+
+
+
 ################################ UNFINISHED / UNTESTED METHODS 
 
 
@@ -138,16 +193,6 @@ class ActionCopyPrevious(Action):
     
     def redo_function(self):
         self.master.copy_previous(undo_command=True)
-
-#Sets the RFA entry button
-class ActionRFAEntry(Action):
-    def undo_function(self):
-        #Set the button to the relevant value
-        self.master.response_frame.set_RFA(self.obj[0],undo_command=True)
-    def redo_function(self):
-        #Set the button to the relevant value
-        self.master.response_frame.set_RFA(self.obj[1],undo_command=True)
-
 
 
 

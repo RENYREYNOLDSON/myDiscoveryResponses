@@ -295,8 +295,8 @@ class Hotkeys(tk.CTkFrame):
                  "Ctrl+F":"Open a folder",
                  "Ctrl+S":"Save current client",
                  "Ctrl+E":"Export current file",
-                 "Ctrl+Z":"Undo in textbox",
-                 "Ctrl+Y":"Redo in textbox"}
+                 "Ctrl+Z":"Undo action",
+                 "Ctrl+Y":"Redo action"}
 
         c=0
         for h in hotkeys.keys():

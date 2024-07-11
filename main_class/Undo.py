@@ -72,7 +72,11 @@ class Undo:
     def undo_action(self):
         if len(self.ACTION_STACK)>0:
             action = self.ACTION_STACK.pop()
+
+            ## UNDO ACTION HERE
             action.undo()
+            ## 
+
             self.REDO_ACTION_STACK.append(action)
             #IF EMPTY then disable the undo button
             if len(self.ACTION_STACK)==0:
@@ -91,7 +95,11 @@ class Undo:
     def redo_action(self):
         if len(self.REDO_ACTION_STACK)>0:
             action = self.REDO_ACTION_STACK.pop()
+
+            ## REDO ACTION HERE
             action.redo()
+            ## 
+            
             self.ACTION_STACK.append(action)
             #IF EMPTY then disable the redo button
             if len(self.REDO_ACTION_STACK)==0:
@@ -108,8 +116,3 @@ class Undo:
 
     def print_stacks(self):
         print("ACTION STACK: "+str(len(self.ACTION_STACK))+"  REDO STACK: "+str(len(self.REDO_ACTION_STACK)))
-
-    def add_RFA_option_action(self,old_value,new_value):
-        #Add rfa option to the stack
-        self.add_action_to_stack(ActionRFAEntry(master=self,obj=(old_value,new_value)))
-    

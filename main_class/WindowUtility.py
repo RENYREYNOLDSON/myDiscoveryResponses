@@ -87,10 +87,6 @@ class WindowUtility:
         #Additional frame used for editing file and firm details
         self.details_frame = None
         
-    # Create a new MAIN window
-    def create_window(self):
-        create_window(self.master)
-
     # REFRESH WINDOW PERIODICALLY, (MUST BE EFFICIENT FOR PERFORMANCE)
     def refresher(self):
         if self.current_req!=0:
@@ -239,6 +235,7 @@ class WindowUtility:
 
     #Toggles whether the program is in fullscreen or not
     def toggle_fullscreen(self):
+        self.state("zoomed")#Ensure that we are maximized first!
         state = not self.attributes('-fullscreen')
         self.attributes("-fullscreen",state)
         self.set_theme("theme")

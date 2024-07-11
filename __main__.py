@@ -100,6 +100,10 @@ class App(tk.CTkToplevel,Saving,WindowUtility,Config,Undo,Export,Requests):
         ##### POPULATE WINDOW WITH OBJECTS
         self.populate_window()
         
+    # Create a new MAIN window, must be here
+    def create_window(self):
+        create_window(self.master)
+
 
 # ROOT FUNCTIONS
 ############################################################################################################

@@ -27,6 +27,9 @@ class Response_Frame(tk.CTkFrame):
 
         self.current_frame=self.default_frame#This keeps track of current open frame
 
+        #Previous option - Used to track RFA and RFP options
+        self.previous_option = None
+
         #1. STANDARD REQUEST AND OBJECTION
         # Request Body
         self.request_label=tk.CTkLabel(master=self,text="REQUEST:",font=label_font)
@@ -193,9 +196,15 @@ class Response_Frame(tk.CTkFrame):
     #Buttons
     def set_RFA(self,val):
         self.RFA_frame.RFA_option.set(val)
+        self.previous_option = val
     def get_RFA(self):
         return self.RFA_frame.RFA_option.get()
     def set_RFP(self,val):
         self.RFP_frame.RFP_option.set(val)
+        self.previous_option = val
     def get_RFP(self):
         return self.RFP_frame.RFP_option.get()
+    def get_previous_option(self):
+        return self.previous_option
+    def set_previous_option(self,val):
+        self.previous_option = val

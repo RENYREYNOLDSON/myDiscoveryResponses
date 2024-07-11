@@ -201,16 +201,22 @@ class Requests:
 
 
     #Allow for custom response when 'Custom' selected RFP
-    def setRFP(self,value):
+    def setRFP(self,value,undo_command=False):
+        #Add an undo option here!
+        print(value)
+        if not undo_command:
+            self.add_action_to_stack(ActionRFPEntry(master=self,obj=(self.response_frame.previous_option,value)))#Pass current and new 
+        self.response_frame.set_previous_option(value)
         if value=="Custom":
             self.response_frame.current_frame.response_text.configure(state="normal")
             self.response_frame.current_frame.response_text.delete("0.0","end")
 
     #Allow for custom response when 'Custom' selected RFA
-    def setRFA(self,value):
-        #print("set")#
-        #print(self.response_frame.get_RFA())
-        #self.master.add_RFA_option_action(self.get_RFA(),value)#Pass current and new 
+    def setRFA(self,value,undo_command=False):
+        #Add an undo option here!
+        if not undo_command:
+            self.add_action_to_stack(ActionRFAEntry(master=self,obj=(self.response_frame.previous_option,value)))#Pass current and new 
+        self.response_frame.set_previous_option(value)
         if value=="Custom":
             self.response_frame.current_frame.response_text.configure(state="normal")
             self.response_frame.current_frame.response_text.delete("0.0","end")

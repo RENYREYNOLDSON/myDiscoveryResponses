@@ -36,7 +36,7 @@ class Export:
 
     
     # Export a file as DOCX
-    def export(self,file,filename):
+    def export(self,file,filename,preview_mode=False):
         reqs=[]
         resps=[]
         numbers=[]
@@ -53,7 +53,7 @@ class Export:
         cnv.updateDOC(reqs,resps,file.details,self.current_client.firm_details,file.req_type,str(filename),numbers)
 
         #Open the word document if setting is selected
-        if self.CONFIG["general"]["open_export"]:
+        if self.CONFIG["general"]["open_export"] and preview_mode==False:
             filename = str(filename)+".docx"
             os.system(f'start "" "{filename}"')
 

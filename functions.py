@@ -95,6 +95,10 @@ def set_recents(lst):
     with open(os.path.join(os.path.dirname(__file__),"config/recents"), "wb") as fp:   #Pickling
         pickle.dump(lst, fp)
 
+#Get the path for temp
+def get_temp_path():
+    return os.path.join(os.path.dirname(__file__),"assets/temp")
+
 #GETTERS AND SETTERS FOR FIRM DETAILS
 def get_firm_details():
     if os.path.exists(os.path.join(os.path.dirname(__file__),"config/firm_details.json")):

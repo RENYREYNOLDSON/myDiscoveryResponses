@@ -367,7 +367,7 @@ class WindowUtility:
         if self.file_open():
             self.cancel_win()
             # Create a temporary docx
-            self.export(self.current_client.current_file,os.path.join(os.path.dirname(__file__),"assets/temp"))
+            self.export(self.current_client.current_file,get_temp_path(),preview_mode=True)
             self.win = Preview(self)
             self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
             self.win.mainloop()

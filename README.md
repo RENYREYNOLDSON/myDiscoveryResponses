@@ -1,5 +1,7 @@
 <div align="center">
-![Example Screenshot](./Images/TITLE_IMAGE.PNG)
+  <picture>
+      <img src="./Images/TITLE_IMAGE.PNG">
+    </picture>
 <br />
 
 

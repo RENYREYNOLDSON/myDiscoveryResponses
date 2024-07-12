@@ -29,11 +29,11 @@ Once loaded, you can move between each request and check off objections; in addi
 2. Download all of the relevant project files
 3. Install the required Python packages using:
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
-4. Run the app.py program using:
+4. Run the __main__.py program using:
 ```
-python app.py
+python __main__.py
 ```
 
 ## Website

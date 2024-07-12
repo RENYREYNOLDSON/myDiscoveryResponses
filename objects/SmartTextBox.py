@@ -37,12 +37,15 @@ class SmartTextbox(tk.CTkTextbox):
             self._textbox.event_delete("<<Redo>>")
 
     def backspace(self,e):
-        return
-        if self.previous_text[-1]==" ":
-            #ADD AN AUTOSEPERATOR:
-            self.edit_separator()
-            #Add this onto undo stack -> Then access the box when an undo is needed
-            self.main_master.add_action_to_stack(ActionTextBox(self.main_master,self))
+        try:
+            #If final letter space, then add a separator
+            if self.get(0.0,"end-1c")[-1]==" ":
+                #ADD AN AUTOSEPERATOR:
+                self.edit_separator()
+                #Add this onto undo stack -> Then access the box when an undo is needed
+                self.main_master.add_action_to_stack(ActionTextBox(self.main_master,self))
+        except:
+            pass
 
     #Runs when text is inserted or deleted
     def modified(self,e):

@@ -56,7 +56,10 @@ class WindowUtility:
     # REFRESH WINDOW PERIODICALLY, (MUST BE EFFICIENT FOR PERFORMANCE)
     def refresher(self):
         if self.current_req!=0:
+
             # 1. UPDATE OBJECTION TEXTBOX
+            ###################################################################
+
             #Set the current objection parameters
             if self.current_req.current_objection!="":
                 self.current_req.current_objection.param = self.objections_frame.objection_input.get()
@@ -68,7 +71,7 @@ class WindowUtility:
             remove_end=False
             if not ((self.req_type!="RFP" and len(self.response_frame.get_response())>0) or (self.req_type=="RFP" and len(self.response_frame.get_RFP())>0)):
                 remove_end = True
-            text = get_objection_text(self.current_req.opts,self.objections,remove_end)#Get objections with no end if text in response
+            text = get_objection_text(self.current_req,self.objections,remove_end)#Get objections with no end if text in response
             #Check if any of the objections or params have changed
             if text!=self.previous_objection_text:#If the text has changed REDRAW
                 self.response_frame.set_objection(text)
@@ -77,11 +80,10 @@ class WindowUtility:
             self.previous_objection_text = text # Save for next time
 
             # 2. UPDATE RESPONSE TEXTBOX
+            ###################################################################
+
             if self.req_type=="RFA":
                 option = self.response_frame.get_RFA()
-                insert_index = self.response_frame.current_frame.RFA_text.index(tk.INSERT)#Current index
-                resp = " "+self.response_frame.get_RFA_text()#Current response text
- 
             else:
                 option = self.response_frame.get_RFP()
             
@@ -102,6 +104,7 @@ class WindowUtility:
                     self.requests_frame.update_files(self.current_client.files)
             # RFA
             elif self.req_type=="RFA" and option!="Custom":
+                resp = " "+self.response_frame.get_RFA_text()#Current response text
                 temp = self.response_frame.get_response()#Get prev text from box
                 text = RFA_responses[option]
                 if text!=temp.replace("\n",""):#If the text has changed REDRAW
@@ -112,9 +115,8 @@ class WindowUtility:
                     self.current_req.color="grey"
                     self.current_client.current_file.color=("black","white")
                     self.requests_frame.update_files(self.current_client.files)
-
             # NORMAL
-            else:#If NOT RFP               
+            else:#If NOT RFP or RFA custom      
                 insert_index = self.response_frame.current_frame.response_text.index(tk.INSERT)#Current index
                 resp = " "+self.response_frame.get_response()#Current response text
                 #DO CURCLY QUOTES HERE!

@@ -99,7 +99,7 @@ class Request:
                 return
     #Get the full response text
     def get_full_resp(self):
-        full_text = get_objection_text(self.opts,self.master.objections,False)
+        full_text = get_objection_text2(self,self.master.objections,False)
         #Add response to the end
         if self.req_type == "RFP":
             option = self.RFP_option

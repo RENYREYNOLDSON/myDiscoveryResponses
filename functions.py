@@ -304,11 +304,35 @@ def initial_theme():
         # Set relevant things here
         tk.set_appearance_mode(data["appearance"]["theme"])
 
+#Adds the additiol text to an objection text if needed
+def add_extra_objection_text(full_text,objs):
+    #Default values here
+    final_text = "Notwithstanding the foregoing objections and subject thereto, Responding Party responds as follows: "
+    extra = ""
+    #Change these values if certain objections selected
+    for obj in objs:
+        #Change Scope
+        if obj.alter_scope:
+            final_text = "Notwithstanding the foregoing objections and subject thereto, and as Responding Party understands the proper scope and/or meaning of this request, Responding Party responds as follows: "
+        #Add Extra Text
+        text=obj.additional_text
+        if text!="":
+            if obj.additional_param=="":
+                text = text.replace("[VAR]","")# Replace [VAR]
+            else:
+                text = text.replace("[VAR]"," "+obj.additional_param)# Replace [VAR]
+            extra = extra+str(text)+". "#Add new text!
+            
+    full_text = full_text + final_text + extra
+    return full_text
+
 # Form the objection text using the selected objections
-def get_objection_text(opts,objections,remove_end=False):
+def get_objection_text(req,objections,remove_end=False):
     full_text = "Objection. "
     # 1. GET ALL SELECTED OBJECTIONS
     objs=[]
+    opts = req.opts
+
     for obj in opts:
         if obj.selected==1:
             objs.append(obj)
@@ -348,29 +372,29 @@ def get_objection_text(opts,objections,remove_end=False):
 
         # 3. ADD FINAL OBJECTION IF REQUESTED AND VALID
         if full_text!="" and remove_end==False:#Response and not RFP. Resp and RFP
-            #Default values here
-            final_text = "Notwithstanding the foregoing objections and subject thereto, Responding Party responds as follows: "
-            extra = ""
-            #Change these values if certain objections selected
-            for obj in objs:
-                #Change Scope
-                if obj.alter_scope:
-                    print("alter")
-                    final_text = "Notwithstanding the foregoing objections and subject thereto, and as Responding Party understands the proper scope and/or meaning of this request, Responding Party responds as follows: "
-                
-                #Add Extra Text
-                text=obj.additional_text
-                if text!="":
-                    if obj.additional_param=="":
-                        text = text.replace("[VAR]","")# Replace [VAR]
-                    else:
-                        text = text.replace("[VAR]"," "+obj.additional_param)# Replace [VAR]
-                    extra = extra+str(text)+". "#Add new text!
-                    
-            full_text = full_text + final_text + extra
-
+            add_extra_objection_text(full_text,objs)
         return full_text
     return ""
+
+
+
+def get_objection_text2(req,objections,remove_end=False):
+    # 1. GET ALL SELECTED OBJECTIONS
+    objs=[]
+    opts = req.opts
+    for obj in opts:
+        if obj.selected==1:
+            objs.append(obj)
+
+    # 2. USE CURRENT TEXT ATTRIBUTE
+    if len(objs)>0:
+        full_text = req.custom_objection_text+" "
+        # 3. ADD FINAL OBJECTION IF REQUESTED AND VALID
+        if full_text!="" and remove_end==False:#Response and not RFP. Resp and RFP
+            add_extra_objection_text(full_text,objs)
+        return full_text
+    return ""
+
 
 
 #Convert text with " and ' to curly

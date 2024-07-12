@@ -1,7 +1,5 @@
-# IMPORTS
-from functions import *
-import customtkinter as tk
-from tkinter import *
+# Main Imports
+from windows.__modules__ import *
 
 # PREVIEW TEXT WINDOW
 ############################################################################################################

@@ -1,7 +1,5 @@
-# IMPORTS
-from functions import *
-import customtkinter as tk
-from tkinter import *
+# Main Imports
+from windows.__modules__ import *
 from docx2pdf import convert
 import fitz,io,sys
 from PIL import Image

@@ -1,8 +1,5 @@
-# IMPORTS
-from functions import *
-import customtkinter as tk
-from tkinter import *
-from functools import partial
+# Main Imports
+from windows.__modules__ import *
 
 # EDIT OBJECTIONS WINDOW
 ############################################################################################################
@@ -207,6 +204,8 @@ class EditObjections(tk.CTkToplevel):
         if self.master.current_req!=0:#Reset all selected objections
             self.master.objections_frame.redraw(self.master.current_req)
         self.master.cancel_win()
+        #Reset the undo stacks
+        self.master.reset_undo_stacks()
 
     #Create a blank new objection
     def new(self):

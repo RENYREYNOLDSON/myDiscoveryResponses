@@ -1,16 +1,17 @@
-###### FUNCTIONS
-###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023
 ######
-###### General functions usable by any program
+###### MYDISCOVERYRESPONSES
+###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023-2024
+###### Uses converter.py to open discovery request PDF's in order to respond
+###### Provides a Windows GUI tool for opening files and saving as DOCX
+###### myDiscoveryResponses.com
+###### Version 1.1.0 | 09/07/2024
 ######
-
 
 # IMPORTS
 ############################################################################################################
 
 import customtkinter as tk
 import json,os,pickle,webbrowser,re,subprocess
-from enchant.checker import SpellChecker
 from objects.SmartToolTip import *
 import urllib.request
 
@@ -20,8 +21,12 @@ import urllib.request
 
 HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage","lost wages","injury","injuries"]
 
+
+
+
 # FUNCTIONS 
 ############################################################################################################
+
 
 
 #Uninstalls myDiscoveryResponses from computer
@@ -89,6 +94,10 @@ def set_recents(lst):
     with open(os.path.join(os.path.dirname(__file__),"config/recents"), "wb") as fp:   #Pickling
         pickle.dump(lst, fp)
 
+#Get the path for temp
+def get_temp_path():
+    return os.path.join(os.path.dirname(__file__),"assets/temp")
+
 #GETTERS AND SETTERS FOR FIRM DETAILS
 def get_firm_details():
     if os.path.exists(os.path.join(os.path.dirname(__file__),"config/firm_details.json")):
@@ -147,6 +156,21 @@ def open_config_backup():
             data = json.load(file)
         return data
     return None
+
+# Opens the config backup file
+def open_config():
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/config.json")):
+        with open(os.path.join(os.path.dirname(__file__),'config/config.json'), 'r') as file:
+            data = json.load(file)
+        return data
+    return None
+
+# Save the new hotkeys file
+def save_config(data):
+    if os.path.exists(os.path.join(os.path.dirname(__file__),"config/config.json")):
+        with open(os.path.join(os.path.dirname(__file__),'config/config.json'), 'w') as file:
+            json.dump(data,file)
+
 
 # Opens the firm details backup file
 def open_firm_details_backup():

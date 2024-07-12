@@ -1,7 +1,7 @@
-# IMPORTS
+# Main Imports
+from objects.__modules__ import *
+from objects.Objection import *
 from functions import *
-from .Objection import *
-import copy
 # REQUEST CLASS
 ############################################################################################################
 # Class for each request/response

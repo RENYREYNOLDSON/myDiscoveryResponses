@@ -1,11 +1,5 @@
-# IMPORTS
-from functions import *
-import customtkinter as tk
-from PIL import Image
-from functools import partial
-import tkinter
-from objects.SmartTextBox import *
-
+# Main Imports
+from frames.__modules__ import *
 
 # RESPONSE FRAME 
 ############################################################################################################
@@ -26,6 +20,9 @@ class Response_Frame(tk.CTkFrame):
         self.RFP_frame=tk.CTkFrame(master=self,fg_color="transparent")
 
         self.current_frame=self.default_frame#This keeps track of current open frame
+
+        #Previous option - Used to track RFA and RFP options
+        self.previous_option = None
 
         #1. STANDARD REQUEST AND OBJECTION
         # Request Body
@@ -167,6 +164,7 @@ class Response_Frame(tk.CTkFrame):
         self.objection_text.delete("0.0","end")
         self.objection_text.insert("0.0",text)
         self.objection_text.configure(state="normal")
+
     #Response
     def get_response(self):
         return self.current_frame.response_text.get("0.0","end-1c")
@@ -176,6 +174,7 @@ class Response_Frame(tk.CTkFrame):
         self.current_frame.response_text.delete("0.0","end")
         self.current_frame.response_text.insert("0.0",text)
         self.current_frame.response_text.configure(state=state)
+
     #RFP Text
     def get_RFP_text(self):
         return self.RFP_frame.RFP_text.get()
@@ -191,9 +190,15 @@ class Response_Frame(tk.CTkFrame):
     #Buttons
     def set_RFA(self,val):
         self.RFA_frame.RFA_option.set(val)
+        self.previous_option = val
     def get_RFA(self):
         return self.RFA_frame.RFA_option.get()
     def set_RFP(self,val):
         self.RFP_frame.RFP_option.set(val)
+        self.previous_option = val
     def get_RFP(self):
         return self.RFP_frame.RFP_option.get()
+    def get_previous_option(self):
+        return self.previous_option
+    def set_previous_option(self,val):
+        self.previous_option = val

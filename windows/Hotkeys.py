@@ -1,8 +1,5 @@
-# IMPORTS
-from functions import *
-import customtkinter as tk
-from tkinter import *
-from functools import partial
+# Main Imports
+from windows.__modules__ import *
 
 # HOTKEYS WINDOW
 ############################################################################################################

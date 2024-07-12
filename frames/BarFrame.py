@@ -1,11 +1,5 @@
-# IMPORTS
-from functions import *
-import customtkinter as tk
-from PIL import Image
-from functools import partial
-import tkinter
-import datetime
-from customtkinter.windows.widgets.core_widget_classes.dropdown_menu import DropdownMenu
+# Main Imports
+from frames.__modules__ import *
 
 # BAR FRAME 
 ############################################################################################################
@@ -36,7 +30,7 @@ class Bar_Frame(tk.CTkFrame):
         self.file._dropdown_menu.add_command(label="Export Client as DOCX", command=self.master.export_all)
         self.file._dropdown_menu.add_command(label="Export Check With Client", command=self.master.export_check_with_clients)
         self.file._dropdown_menu.add_command(label="Preview DOCX", command=self.master.view_preview)
-        self.file._dropdown_menu.add_command(label="Close File", command=self.master.close_file)
+        self.file._dropdown_menu.add_command(label="Delete File", command=self.master.close_file)
         self.file._dropdown_menu.add_command(label="Close Client", command=self.master.close_client)
         self.file._dropdown_menu.add_command(label="Check for Updates",command=self.master.check_for_update)
         self.file._dropdown_menu.add_command(label="Exit", command=self.master.exit_window)
@@ -61,6 +55,17 @@ class Bar_Frame(tk.CTkFrame):
         self.details = tk.CTkButton(master=self,text="File Details",fg_color="transparent",width=100,command=self.master.view_details,corner_radius=0)
         self.details.pack(side="left")
         self.details_tooltip = add_tooltip(self.details,"Edit this files details")
+
+        arrow_font = tk.CTkFont("Arial",20,underline=False,weight="bold")
+        #Undo and Redo Buttons
+        self.undo = tk.CTkButton(master=self,text="🡐",fg_color="transparent",font=arrow_font,width=40,command=self.master.undo_action,corner_radius=0)
+        self.undo.pack(side="left")
+        self.disable_undo()
+        self.undo_tooltip = add_tooltip(self.undo,"Undo change (Ctrl-Z)")
+        self.redo = tk.CTkButton(master=self,text="🡒",fg_color="transparent",font=arrow_font,width=40,command=self.master.redo_action,corner_radius=0)
+        self.redo.pack(side="left",padx=(0,10))
+        self.disable_redo()
+        self.redo_tooltip = add_tooltip(self.redo,"Redo change (Ctrl-Y)")
 
         # Save Text
         self.autosave_text = tk.CTkLabel(master=self,text="",width=100,text_color="grey")
@@ -88,7 +93,7 @@ class Bar_Frame(tk.CTkFrame):
         # Save
         self.save = tk.CTkButton(master=self,text="Save",fg_color="transparent",width=100,corner_radius=0,command=self.master.quick_save)
         self.save.pack(side="right")
-        self.save_tooltip = add_tooltip(self.save,"Save the current client")
+        self.save_tooltip = add_tooltip(self.save,"Save the current client (Ctrl-S)")
 
         # Language Text
         self.language_text = tk.CTkLabel(master=self,text=self.master.CONFIG["spelling"]["language"],text_color="grey")
@@ -148,4 +153,17 @@ class Bar_Frame(tk.CTkFrame):
             self.clear_tooltip.disable()
             self.copy_tooltip.disable()
             self.preview_tooltip.disable()
-            self.save_tooltip.disable()
+            self.save_tooltip.disable() 
+
+    #Enable and disable the undo button
+    def disable_undo(self):
+        self.undo.configure(command=None,text_color="grey",hover=False)
+    def enable_undo(self):
+        self.undo.configure(command=self.master.undo_action,text_color="white",hover=True)
+
+
+    #Enable and disable the undo button
+    def disable_redo(self):
+        self.redo.configure(command=None,text_color="grey",hover=False)
+    def enable_redo(self):
+        self.redo.configure(command=self.master.redo_action,text_color="white",hover=True)

@@ -1,7 +1,5 @@
-from functions import *
-import customtkinter as tk
-import tkinter
-from custom_hovertip import CustomTooltipLabel
+# Main Imports
+from frames.__modules__ import *
 
 # OBJECTIONS FRAME 
 ############################################################################################################

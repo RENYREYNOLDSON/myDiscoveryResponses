@@ -1,11 +1,5 @@
-# IMPORTS
-from functions import *
-import customtkinter as tk
-from PIL import Image
-from functools import partial
-import tkinter
-from custom_hovertip import CustomTooltipLabel
-from objects.SmartToolTip import *
+# Main Imports
+from frames.__modules__ import *
 
 # OBJECTIONS FRAME 
 ############################################################################################################

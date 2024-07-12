@@ -1,5 +1,5 @@
-# IMPORTS
-from functions import *
+# Main Imports
+from objects.__modules__ import *
 
 # OBJECTION CLASS
 ############################################################################################################

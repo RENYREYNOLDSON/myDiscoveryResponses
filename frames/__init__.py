@@ -1,4 +1,5 @@
-__all__ = ["BarFrame",
+__all__ = ["__modules__",
+           "BarFrame",
             "LandingFrame", 
             "ObjectionsFrame",
             "RequestsFrame",

@@ -1,7 +1,8 @@
+<div align="center">
 ![Example Screenshot](./Images/TITLE_IMAGE.PNG)
 <br />
 
-<div align="center">
+
 <h3>
 Official website: https://myDiscoveryResponses.com
 </h3>

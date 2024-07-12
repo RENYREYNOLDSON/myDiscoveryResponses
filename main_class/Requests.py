@@ -437,23 +437,24 @@ class Requests:
 
     # Copy objections from the previous request
     def copy_previous(self,undo_command=False):
-        if not undo_command:#Add the undo action
-            self.add_action_to_stack(ActionCopyPrevious(master=self,obj="Copy"))
-        #Copy the previous opts list, use copy maybe
-        for i in range(len(self.reqs)):
-            if self.reqs[i]==self.current_req:
-                if i>=1:
-                    # Copy the previous objections
-                    for o in range(len(self.reqs[i-1].opts)):
-                        #Copy selected
-                        self.current_req.opts[o].selected = self.reqs[i-1].opts[o].selected
-                        #Copy param
-                        self.current_req.opts[o].param = self.reqs[i-1].opts[o].param
-                        self.current_req.opts[o].additional_param = self.reqs[i-1].opts[o].additional_param
-                        #Set these in the GUI
-                        self.objections_frame.redraw(self.current_req)
-                else:
-                    return
+        if self.file_open():
+            if not undo_command:#Add the undo action
+                self.add_action_to_stack(ActionCopyPrevious(master=self,obj="Copy"))
+            #Copy the previous opts list, use copy maybe
+            for i in range(len(self.reqs)):
+                if self.reqs[i]==self.current_req:
+                    if i>=1:
+                        # Copy the previous objections
+                        for o in range(len(self.reqs[i-1].opts)):
+                            #Copy selected
+                            self.current_req.opts[o].selected = self.reqs[i-1].opts[o].selected
+                            #Copy param
+                            self.current_req.opts[o].param = self.reqs[i-1].opts[o].param
+                            self.current_req.opts[o].additional_param = self.reqs[i-1].opts[o].additional_param
+                            #Set these in the GUI
+                            self.objections_frame.redraw(self.current_req)
+                    else:
+                        return
 
     # Clear a full request
     def clear(self,undo_command=False):

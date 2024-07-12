@@ -1,5 +1,6 @@
 # Main Imports
 from objects.__modules__ import *
+from functions import *
 
 # CLIENT CLASS
 ############################################################################################################

@@ -52,7 +52,7 @@ class Requests_Frame(tk.CTkFrame):
     #Show all of the open client buttons
     def show_clients(self,clients):
         for w in self.clients_frame.winfo_children():
-            w.destroy()
+            w.pack_forget()#Destory results in an error so pack forget here, they are overwritten anyway
         self.client_buttons=[]
         c=1
         unsaved=0

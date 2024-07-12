@@ -1,8 +1,18 @@
-###### CONVERTER
-###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023
 ######
-###### Code for reading/saving the 'Discovery Responses'
+###### MYDISCOVERYRESPONSES
+###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2023-2024
+###### Uses converter.py to open discovery request PDF's in order to respond
+###### Provides a Windows GUI tool for opening files and saving as DOCX
+###### myDiscoveryResponses.com
+###### Version 1.1.0 | 09/07/2024
 ######
+
+###### Rules for clean code space
+###### 1. Use snake_case unless a class name (then camel case)
+###### 2. Comment everything!
+###### 3. If possible make something a simple & standard function
+###### 4. Break everything down into small components and files
+###### 5. ROOT->Main Windows->Each can have 1 sub window
 
 
 ### FUNCTIONS
@@ -76,15 +86,6 @@ def readPDF3(file):
     doc = fitz.Document(file)
     text = ""
     for page in doc:
-        """
-        print(page.rect.width)
-        crop_rect = fitz.Rect(300,0,page.rect.width,page.rect.height)
-        page.set_mediabox(crop_rect)
-        page.set_cropbox(crop_rect)
-        page.set_trimbox(crop_rect)
-        print(page)
-        print(page.mediabox)
-        """
         #REMOVE VERTICAL TEXT!!
         for block in page.get_text("dict", flags=fitz.TEXTFLAGS_TEXT)["blocks"]:
             for line in block["lines"]:
@@ -108,144 +109,7 @@ def generate_unique_key():
     return unique_key
 
 
-### READ FROGs FORM
-########################################################################################################
-"""
-def readForm(file):# file, (w,h,ratio,dilation)
-    cfg = config.PipelinesConfig()
-    # important to adjust these values to match the size of boxes on your image
-    cfg.width_range = (9,30)
-    cfg.height_range = (9,30)
-    # the more scaling factors the more accurate the results but also it takes more time to processing
-    # too small scaling factor may cause false positives
-    # too big scaling factor will take a lot of processing time
-    cfg.scaling_factors = [10]
-    # w/h ratio range for boxes/rectangles filtering
-    cfg.wh_ratio_range = (0.8, 2.5)
-    # group_size_range starting from 2 will skip all the groups
-    # with a single box detected inside (like checkboxes)
-    cfg.group_size_range = (1, 1)
-    # num of iterations when running dilation tranformation (to engance the image)
-    cfg.dilation_iterations = 0
 
-    results=[]
-    vals=[]
-    f = fitz.open(file)
-    page_count = 0#Used to add extra results when scanning fails
-    sizes=[]
-    for page in f:
-        img = page.get_pixmap()
-        img.save(os.path.join(os.path.dirname(__file__),"assets/out.png"))
-        #SPLIT INTO COLUMNS
-        img = cv2.imread(os.path.join(os.path.dirname(__file__),"assets/out.png"))
-        height = img.shape[0]
-        width = img.shape[1]
-
-        # Cut the image in half
-        width_cutoff = int(width // 2.2)
-        s1 = img[:, :width_cutoff]
-        s2 = img[:, width_cutoff:]
-        s1 = img[:, :100]
-        s2 = img[:, width_cutoff:width_cutoff+150]
-
-        cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s1.png"), s1)
-        cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s2.png"), s2)
-
-        checkboxes1 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s1.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-        checkboxes2 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s2.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-
-        for checkboxes in [checkboxes1,checkboxes2]:
-            #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
-
-            for check in checkboxes:
-                print("Checkbox bounding rectangle (x,y,width,height): ", check[0])
-                sizes.append(check[0])
-
-                #Get array
-                array = check[2]
-                total=0
-                for row in array[2:-4,2:-4]:
-                    total+=sum(row)/len(row)
-                total = total/len(array[2:-4])
-
-                vals.append(total)
-                
-                if total>=20:
-                    results.append(True)
-                else:
-                    results.append(False)
-        if page_count==0 and len(results)==0:
-            results.append(False)
-    output=[]
-
-    #IF NOT ENOUGH, ENHANCE AND DO AGAIN WITH EXACT SHAPE!
-    if len(results)<90:
-        print(len(results))
-        print("NOT ENOUGH DETECTED: TRYING AGAIN")
-        avg_width = int(sum(item[2] for item in sizes[5:20])/len(sizes[5:20]))
-        avg_height = int(sum(item[3] for item in sizes[5:20])/len(sizes[5:20]))
-        ratio = avg_width/avg_height
-        print(ratio)
-        print(avg_width,avg_height)
-        cfg.width_range = (avg_width-5,avg_width+5)
-        cfg.height_range = (avg_height-5,avg_height+5)
-        cfg.wh_ratio_range = (ratio-0.4, ratio+0.4)
-        cfg.dilation_iterations = 1
-        cfg.scaling_factors=[10]
-
-        results=[]
-        vals=[]
-        f = fitz.open(file)
-        page_count = 0#Used to add extra results when scanning fails
-        sizes=[]
-        for page in f:
-            img = page.get_pixmap()
-            img.save(os.path.join(os.path.dirname(__file__),"assets/out.png"))
-            #SPLIT INTO COLUMNS
-            img = cv2.imread(os.path.join(os.path.dirname(__file__),"assets/out.png"))
-            height = img.shape[0]
-            width = img.shape[1]
-
-            # Cut the image in half
-            width_cutoff = int(width // 2.5)
-            s1 = img[:, :200]
-            s2 = img[:, width_cutoff:width_cutoff+200]
-
-            cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s1.png"), s1)
-            cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/s2.png"), s2)
-
-            checkboxes1 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s1.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-            checkboxes2 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/s2.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
-
-            for checkboxes in [checkboxes1,checkboxes2]:
-                #GET TRUE OF FALSE FOR CHECKBOXES ON THE PAGE
-
-                for check in checkboxes:
-                    sizes.append(check[0])
-
-                    #Get array
-                    array = check[2]
-                    total=0
-                    for row in array[2:-4,2:-4]:
-                        total+=sum(row)/len(row)
-                    total = total/len(array[2:-4])
-
-                    vals.append(total)
-                    
-                    if total>=20:
-                        results.append(True)
-                    else:
-                        results.append(False)
-            if page_count==0 and len(results)==0:
-                results.append(False)
-    
-    print(len(results))
-    results = results[:90]
-    print(len(FORM_VALUES))
-
-
-readForm(str("C:/Users/Adam/Desktop/Freelancing/Darren Reid PDF/Darren Reid PDF/FROGs for Adam/SERVED - Def FROGs (Set 1) to Plf.pdf"))
-"""
 ### READ FROGs FORM THREADED!!!!
 ########################################################################################################
 
@@ -348,8 +212,8 @@ def readFormThreaded(file):
             avg_width = int(sum(item[2] for item in checkbox_sizes[5:20])/len(checkbox_sizes[5:20]))
             avg_height = int(sum(item[3] for item in checkbox_sizes[5:20])/len(checkbox_sizes[5:20]))
             ratio = avg_width/avg_height
-            print(ratio)
-            print(avg_width,avg_height)
+            #print(ratio)
+            #print(avg_width,avg_height)
             cfg.scaling_factors = [10]
 
             #Repeat attempt but with fine tuned parameters
@@ -373,9 +237,9 @@ def readFormThreaded(file):
 
         #4. ONLY TAKE THE FIRST 90 VALUES!!!!
         output=[]
-        print(len(results))
+        #print(len(results))
         results = results[:90]
-        print(len(FORM_VALUES))
+        #print(len(FORM_VALUES))
 
         if len(results)!=len(FORM_VALUES):#IF THE NUMBER OF DETECTED BOXES IS NOT CORRECT
             msg = CTkMessagebox(title="Could not load FROG", message="An incorrect number of FROG's was detected. Defaulted to using all discovery requests.",
@@ -393,8 +257,8 @@ def readFormThreaded(file):
         msg = CTkMessagebox(title="Could not load FROG", message="The FROG file could not be read correctly. Defaulted to using all discovery requests.",
                             icon="warning", option_1="Okay",corner_radius=0)
         output = FORM_VALUES.copy()
-    print("In Form")
-    print(output)
+    #print("In Form")
+    #print(output)
     #6. RETURN THE OUTPUT VALUE!
     return output
 
@@ -470,14 +334,14 @@ def filterPDF(data):
                         c+=1
                 #Ignore couunty if possible
                 elif "Plaintiff" in split[i] and plaintiff=="" and county!="":
-                    print("Founde")
+                    #print("Founde")
                     c=1
                     #Get County until can't
                     while (split[i-c] not in county or len(split[i-c].replace(" ",""))<2) and c<20:
                         plaintiff = split[i-c] + plaintiff
                         c+=1
                 elif "Defendant" in split[i] and defendant=="" and plaintiff!="":
-                    print("def")
+                    #print("def")
                     c=1
                     #Get County until can't
                     isEnd = str(re.sub(r'[^a-zA-Z]', '', str(split[i-c])))
@@ -506,11 +370,11 @@ def filterPDF(data):
 
         ##################################### 2. GET ACTUAL REQUESTS
         if not hard_stop:
-            print("Next")
-            print(split[i])
+            #print("Next")
+            #print(split[i])
             if len(split[i].replace(" ",""))<50 and any(t in split[i][:min(len(split[i]),50)].replace(" ","").upper() for t in terms) and (split[i].replace(" ","")[-1] in [":","."] or split[i].replace(" ","")[-1].isdigit()):#       If request term used, must end in a certain character or a number, in case it is in text. Could check split length?
                 #Add the custom key
-                print(split[i])
+                #print(split[i])
                 key_matches =re.findall(r'\d+', split[i][min(10,len(split[i])):])
                 if key_matches:
                     key = key_matches[0]
@@ -566,7 +430,7 @@ def filterPDF(data):
     propounding_party = " ".join(propounding_party.split()[1:])
     responding_party = " ".join(responding_party.split()[1:])
 
-    print("GOT HERE!")
+    #print("GOT HERE!")
     details = {"case_number":case_number.strip(),
                 "document":document.strip(),
                 "county":county.strip(),

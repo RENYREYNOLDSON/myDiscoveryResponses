@@ -124,6 +124,7 @@ class Response_Frame(tk.CTkFrame):
         self.set_RFA_text("")
         #Reset Request
         self.set_request("")
+        self.redraw("clear")
 
        
     def set_theme(self,font,text_col,fg_col):

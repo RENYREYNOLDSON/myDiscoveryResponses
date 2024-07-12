@@ -21,63 +21,8 @@ import urllib.request
 
 HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage","lost wages","injury","injuries"]
 
-
-
-
-# FUNCTIONS 
+# FILE READING AND WRITING 
 ############################################################################################################
-
-
-
-#Uninstalls myDiscoveryResponses from computer
-def uninstall():
-    try:
-        uninstall_exe = os.path.join(os.path.dirname(__file__),"unins000.exe")
-        subprocess.run(uninstall_exe)
-    except Exception as e:
-        print(e)
-    
-
-#Open the software install location
-def open_install_location():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    os.startfile(dir_path)
-
-
-
-
-#Add a tooltip to an object
-def add_tooltip(obj,text,wraplength=400):
-    return SmartToolTip(anchor_widget = obj,text = text,wraplength=wraplength)
-
-def get_nth_key(dictionary, n=0):
-    if n < 0:
-        n += len(dictionary)
-    for i, key in enumerate(dictionary.keys()):
-        if i == n:
-            return key
-    raise IndexError("dictionary index out of range") 
-
-def valid_file_path(filename):
-    if filename=="":
-        return False
-    if os.path.exists(filename):
-        return True
-    return False
-
-# Open the user guide pdf
-def open_user_guide():
-    webbrowser.open("https://github.com/RENYREYNOLDSON/myDiscoveryResponses")
-
-
-
-
-# Get a name with ... if needed
-def get_name(name,length):
-    text = name[:length]#Only get first n-3 chars
-    if len(name)>length:
-        text = text[:-3] +"..."
-    return text
 
 #GETTERS AND SETTERS FOR RECENT FILES
 def get_recents():
@@ -220,6 +165,34 @@ def validate_integrity_of_config_file():#Run this function on start
 
     return
 
+def valid_file_path(filename):
+    if filename=="":
+        return False
+    if os.path.exists(filename):
+        return True
+    return False
+
+
+# SOFTWARE LOCAL FILES
+############################################################################################################
+
+#Uninstalls myDiscoveryResponses from computer
+def uninstall():
+    try:
+        uninstall_exe = os.path.join(os.path.dirname(__file__),"unins000.exe")
+        subprocess.run(uninstall_exe)
+    except Exception as e:
+        print(e)
+    
+#Open the software install location
+def open_install_location():
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    os.startfile(dir_path)
+
+
+# TEXTBOX FUNCTIONS
+############################################################################################################
+
 # Find all instances of keywords [start,end]
 def find_all(string,sub):
     indices=[]
@@ -248,8 +221,6 @@ def bold_keywords(obj,text):
     #Set them to the tag!
     for i in indices:
         obj.tag_add("red", "0.0 + "+str(i[0])+" chars","0.0 + "+str(i[1])+" chars",)
-
-
 
 # Checks spelling in a textbox, highlights and returns
 def spellcheck(obj,text):
@@ -294,6 +265,35 @@ def spellcheck(obj,text):
     #DONT INCLUDE LAST ONE IF USER STILL TYPING
     #UNHIGHLIGHT WHEN WORDS ARE FIXED
     #SEPERATE OUT GRAMMAR AND SPELLING?
+
+
+# OTHER FUNCTIONS
+############################################################################################################
+
+#Add a tooltip to an object
+def add_tooltip(obj,text,wraplength=400):
+    return SmartToolTip(anchor_widget = obj,text = text,wraplength=wraplength)
+
+def get_nth_key(dictionary, n=0):
+    if n < 0:
+        n += len(dictionary)
+    for i, key in enumerate(dictionary.keys()):
+        if i == n:
+            return key
+    raise IndexError("dictionary index out of range") 
+
+
+# Open the user guide pdf
+def open_user_guide():
+    webbrowser.open("https://github.com/RENYREYNOLDSON/myDiscoveryResponses")
+
+
+# Get a name with ... if needed
+def get_name(name,length):
+    text = name[:length]#Only get first n-3 chars
+    if len(name)>length:
+        text = text[:-3] +"..."
+    return text
 
 
 # Set the initial tkinter theme
@@ -398,19 +398,6 @@ def curly_convert(text):
             else:
                 double_state="open"
 
-    """
-    for i in range(len(text)):
-        if text[i]=="‘":
-            single_state="open"
-        elif text[i]=="’":
-            single_state="closed"
-        elif text[i]=="'":
-            text = text[:i] + singles[single_state] + text[i+1:]
-            if single_state=="open":
-                single_state="closed"
-            else:
-                single_state="open"
-    """
     return text
 
 

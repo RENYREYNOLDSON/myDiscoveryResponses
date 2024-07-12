@@ -12,8 +12,8 @@ RUN pip uninstall pathlib --yes
 COPY . /app/
 
 # Run PyInstaller to compile the spec file
-RUN pyinstaller __main__.spec
-
+#RUN pyinstaller __main__.spec
+CMD ["python","__main__.py"]
 # Make your compile script executable
 #COPY Compiler_Script.iss /app/
 

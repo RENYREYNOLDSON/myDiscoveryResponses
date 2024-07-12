@@ -163,6 +163,9 @@ class ActionClear(Action):
         self.master.set_request(self.req,save_current=False)
         self.master.toggle_selected_objection(str(self.req.opts[0].key),None)
 
+        #Maybe revert here
+        
+
     
     def redo_function(self):
         self.master.clear(undo_command=True)

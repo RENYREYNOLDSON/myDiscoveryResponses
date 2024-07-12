@@ -169,12 +169,14 @@ class Response_Frame(tk.CTkFrame):
     #Response
     def get_response(self):
         return self.current_frame.response_text.get("0.0","end-1c")
-    def set_response(self,text):
+    
+    def set_response(self,text,remove_separator=False):#STOP THIS FROM ADDING INVISIBLE SEPARATORS!
         state=self.current_frame.response_text._textbox.cget("state")
         self.current_frame.response_text.configure(state="normal")
         self.current_frame.response_text.delete("0.0","end")
-        self.current_frame.response_text.insert("0.0",text)
+        self.current_frame.response_text.insert("0.0",text,remove_separator=remove_separator)
         self.current_frame.response_text.configure(state=state)
+
 
     #RFP Text
     def get_RFP_text(self):

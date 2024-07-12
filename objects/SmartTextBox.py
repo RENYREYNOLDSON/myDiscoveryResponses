@@ -22,16 +22,25 @@ class SmartTextbox(tk.CTkTextbox):
 
         if self.undo_enabled:
             #Bind a function for when this is modified
-            autoseparator_bindings = ["<BackSpace>","<Delete>","<Return>","<<Cut>>","<<Paste>>","<<Clear>>",
+            autoseparator_bindings = ["<Delete>","<Return>","<<Cut>>","<<Paste>>","<<Clear>>",
                                     "<<PasteSelection>>","<space>"]
             for bind in autoseparator_bindings:
                 self.bind(bind,self.modified)
 
             self.bind("<KeyPress>",self.check_if_start)
-
+            self.bind("<BackSpace>",self.backspace)#Get's its own function
             #THIS UNBINDS THE UNDO AND REDO!
             self._textbox.event_delete("<<Undo>>")
             self._textbox.event_delete("<<Redo>>")
+
+    def backspace(self,e):
+        print("Skip backspace")
+        return
+        if self.previous_text[-1]==" ":
+            #ADD AN AUTOSEPERATOR:
+            self.edit_separator()
+            #Add this onto undo stack -> Then access the box when an undo is needed
+            self.main_master.add_action_to_stack(ActionTextBox(self.main_master,self))
 
     #Runs when text is inserted or deleted
     def modified(self,e):
@@ -121,7 +130,18 @@ class SmartTextbox(tk.CTkTextbox):
     def redo(self):#THIS FUNCTION IS NOT USED!
         self._textbox.edit_redo()
 
-    def insert(self, index, text, tags=None):
+    def delete(self, index1, index2=None):
+        super().delete(index1, index2)
+        return
+    
+    def insert(self, index, text,remove_separator=False,tags=None):
         #self.modified(None)#Modify the autoseparators when inserted to
-        return super().insert(index, text, tags)
+        super().insert(index, text, tags)
+        if remove_separator:
+            pass#self.undo()
+        return 
+    
+    def edit_separator(self):
+        print("Text seperator added")
+        return super().edit_separator()
         

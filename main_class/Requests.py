@@ -312,7 +312,8 @@ class Requests:
             text = req.no+1
         self.response_frame.request_label.configure(text=self.req_type+" NO. "+str(text)+":")
         #Set the response textbox
-        self.response_frame.set_response(req.resp)
+        remove_separator = not save_current
+        self.response_frame.set_response(req.resp,remove_separator = remove_separator)
         #RFP & RFA Options and labels
         if self.req_type=="RFP":
             self.response_frame.set_RFP(req.RFP_option)
@@ -467,6 +468,7 @@ class Requests:
                 #Add to undo queue
                 undo_action = ActionClear(self,"Clear")
                 self.add_action_to_stack(undo_action)
+
             #Reset Color
             self.current_req.color=("black","white")
             self.current_client.current_file.color=("black","white")
@@ -489,6 +491,6 @@ class Requests:
             elif self.req_type=="RFA":
                 self.response_frame.set_RFA("Admit")
 
-            if not undo_command:
+            if not undo_command:#fix undo stack
                 self.revert_undo_stack(undo_action)
-            self.update()
+                pass

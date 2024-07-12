@@ -43,7 +43,6 @@ class Undo:
     def undo_action(self):
         if len(self.ACTION_STACK)>0:
             action = self.ACTION_STACK.pop()
-
             ## UNDO ACTION HERE
             action.undo()
             ## 

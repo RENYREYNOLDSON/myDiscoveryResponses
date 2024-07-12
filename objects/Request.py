@@ -32,6 +32,7 @@ class Request:
         self.req_type=req_type
         if custom_key!="":
             self.custom_key = custom_key
+            self.RFA_text="(a) "+str(custom_key)+". Responding Party reasserts any and all objections to this request and incorporates them here by reference.\n(b) Facts supporting response\n(c) People with knowledge of facts supporting response\n(d) Documents supporting respsonse"
         else:
             self.custom_key = no+1
         self.current_objection = ""

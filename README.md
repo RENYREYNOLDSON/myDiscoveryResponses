@@ -12,7 +12,7 @@ The bespoke software, myDiscoveryResponses, is designed for the production and e
 These are loaded using natural language processing and OCR techniques, in order to extract the correct requests and file details from the pdf files.
 Once loaded, you can move between each request and check off objections; in addition to adding custom responses. When these responses have been created, the file can then be exported as a response word document (DOCX), or saved for future editing as a .discovery file.
 
-![Example Screenshot](./Images/USER_GUIDE_IMAGE.PNG)
+![Example Screenshot](./Images/USER_GUIDE_IMAGE.png)
 
 ## Installation
 ### Using Windows Installer

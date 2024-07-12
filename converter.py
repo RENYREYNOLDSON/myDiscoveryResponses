@@ -14,46 +14,42 @@
 ###### 4. Break everything down into small components and files
 ###### 5. ROOT->Main Windows->Each can have 1 sub window
 
-
 ### FUNCTIONS
 ########################################################################################################
-
 from functions import *
-import numpy
-import PyPDF2 as pdf
+from CTkMessagebox import CTkMessagebox
 import re,time,random
-import copy
+
+#File Reading
+import PyPDF2 as pdf
+import fitz
+
+#DOCX Reading and Writing
 from docx import Document
 from docx.text.paragraph import Paragraph
 from docx.oxml.parser import OxmlElement
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt
-from pdfminer.high_level import extract_text
-import fitz
-from CTkMessagebox import CTkMessagebox
+
+#OCR FROG Reading
 from boxdetect.pipelines import get_checkboxes
 from boxdetect import config
-from boxdetect.pipelines import get_boxes
 import cv2
 import concurrent.futures
-
 
 ### CONSTANTS
 ########################################################################################################
 
 FORM_VALUES = ["(1)","(2)",'1.1', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.9', '2.10', '2.11', '2.12', '2.13', '3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7', '4.1', '4.2', '6.1', '6.2', '6.3', '6.4', '6.5', '6.6', '6.7', '7.1', '7.2', '7.3', '8.1', '8.2', '8.3', '8.4', '8.5', '8.6', '8.7', '8.8', '9.1', '9.2', '10.1', '10.2', '10.3', '11.1', '11.2', '12.1', '12.2', '12.3', '12.4', '12.5', '12.6', '12.7', '13.1', '13.2', '14.1', '14.2', '15.1', '16.1', '16.2', '16.3', '16.4', '16.5', '16.6', '16.7', '16.8', '16.9','16.10', '17.1', '20.1', '20.2', '20.3', '20.4', '20.5', '20.6', '20.7', '20.8', '20.9','20.10', '20.11', '50.1', '50.2', '50.3', '50.4', '50.5', '50.6']
 
-
 ### FUNCTIONS
 ########################################################################################################
 
-# Adds paragraph after current
+# Adds paragraph after the current one
 def insert_paragraph_after(paragraph, text=None, style=None):
     """Insert a new paragraph after the given paragraph."""
     new_p = OxmlElement("w:p")
-
     paragraph._p.addnext(new_p)
-    
     new_para = Paragraph(new_p, paragraph._parent)
     if text:
         new_para.add_run(text)
@@ -71,32 +67,24 @@ def delete_paragraph(paragraph):
 ### READ THE PDF
 ########################################################################################################
 
-#Reads a pdf use pdfreader
-def readPDF(file):
-    reader = pdf.PdfReader(file)# Create reader object
-    #print(reader.get_fields())
-    text=[]# Get each page
-    for i in reader.pages:
-        text.append(i.extract_text())
-    text = "".join(list(text))
-    return text
-
 #Reads a pdf using fitz
 def readPDF3(file):
+    #Open PDF file
     doc = fitz.Document(file)
+    #Set the full text to empty
     text = ""
+    #For each page in the open document
     for page in doc:
-        #REMOVE VERTICAL TEXT!!
+        #REMOVE all VERTICAL (margin) text
         for block in page.get_text("dict", flags=fitz.TEXTFLAGS_TEXT)["blocks"]:
             for line in block["lines"]:
                 wdir = line["dir"]    # writing direction = (cosine, sine)
                 if wdir[0] == 0:  # either 90° or 270°
                     page.add_redact_annot(line["bbox"])
+        #Remove that vertical text but don't effect images
         page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)  # remove text, but no image
-        
-
+        #Add the new text to the current text
         text+=page.get_text()
-        #print(page.rect.width)
     return text
 
 def generate_unique_key():
@@ -118,21 +106,26 @@ def formThread(page,cfg):
     checkbox_sizes=[]
     tag = str(generate_unique_key())
     local_results=[]
+    #Save page as an image
     img = page.get_pixmap()
     img.save(os.path.join(os.path.dirname(__file__),"assets/"+tag+"out.png"))
 
-    #CUT IMAGE IN HALF
+    #Load page and split in half for each column
     img = cv2.imread(os.path.join(os.path.dirname(__file__),"assets/"+tag+"out.png"))
     height = img.shape[0]
     width = img.shape[1]
     width_cutoff = int(width // 2.5)
     s1 = img[:, :200]
     s2 = img[:, width_cutoff:width_cutoff+200]
+    #Save left half of page as image
     cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/"+tag+"s1.png"), s1)
+    #Save right half of page as image
     cv2.imwrite(os.path.join(os.path.dirname(__file__),"assets/"+tag+"s2.png"), s2)
 
     #GET CHECKBOXES
+    #Scan the left half of the image for checkboxes
     checkboxes1 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/"+tag+"s1.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
+    #Scan the second half of the image for checkboxes
     checkboxes2 = get_checkboxes(os.path.join(os.path.dirname(__file__),"assets/"+tag+"s2.png"), cfg=cfg, px_threshold=0.1, plot=False, verbose=False)
 
     #FILTERING
@@ -147,12 +140,10 @@ def formThread(page,cfg):
             for row in array[2:-4,2:-4]:
                 total+=sum(row)/len(row)
             total = total/len(array[2:-4])
-
             #If above a threshold then True
             if total>=20:
                 local_results.append(True)
             else:
-
                 local_results.append(False)
     
     #DELETE SAVED IMAGES
@@ -162,7 +153,7 @@ def formThread(page,cfg):
     for file in files:
         if os.path.exists(file):
             os.remove(file)
-
+    #Return results
     return local_results,checkbox_sizes
 
 
@@ -186,10 +177,12 @@ def readFormThreaded(file):
         cfg.dilation_iterations = 0
 
         #2. USE THREADING TO FIND CHECKBOXES
+        #Open the file
         f = fitz.open(file)
         futures=[]
         results=[]
         checkbox_sizes=[]
+        #Use threads to read all page checkboxes at once and then join
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for page in f:
                 future = executor.submit(formThread, page,cfg)
@@ -206,7 +199,6 @@ def readFormThreaded(file):
 
 
         #3. IF NOT ENOUGH DETECTED, ENHANCE AND DO AGAIN WITH EXACT SHAPE!
-        
         if len(results)<90:
             print("NOT ENOUGH DETECTED: TRYING AGAIN")
             avg_width = int(sum(item[2] for item in checkbox_sizes[5:20])/len(checkbox_sizes[5:20]))
@@ -257,8 +249,7 @@ def readFormThreaded(file):
         msg = CTkMessagebox(title="Could not load FROG", message="The FROG file could not be read correctly. Defaulted to using all discovery requests.",
                             icon="warning", option_1="Okay",corner_radius=0)
         output = FORM_VALUES.copy()
-    #print("In Form")
-    #print(output)
+
     #6. RETURN THE OUTPUT VALUE!
     return output
 
@@ -271,7 +262,7 @@ def readFormThreaded(file):
 ########################################################################################################
 # Get requests and details from a pdf text string
 def filterPDF(data):
-    #Search Terms
+    #Search Terms for request titles
     terms=["REQUESTNO.",
            "INTERROGATORYNO.",
            "ANDNO.",
@@ -370,11 +361,10 @@ def filterPDF(data):
 
         ##################################### 2. GET ACTUAL REQUESTS
         if not hard_stop:
-            #print("Next")
             #print(split[i])
+            #If could be at a request title:
             if len(split[i].replace(" ",""))<50 and any(t in split[i][:min(len(split[i]),50)].replace(" ","").upper() for t in terms) and (split[i].replace(" ","")[-1] in [":","."] or split[i].replace(" ","")[-1].isdigit()):#       If request term used, must end in a certain character or a number, in case it is in text. Could check split length?
-                #Add the custom key
-                #print(split[i])
+                #Try find a custom key number
                 key_matches =re.findall(r'\d+', split[i][min(10,len(split[i])):])
                 if key_matches:
                     key = key_matches[0]
@@ -389,25 +379,26 @@ def filterPDF(data):
                         reqs=[]
                     term_used=True
 
-                
-            elif "1. "==split[i][:3] and term_used==False:#                                    Restart requests
+            #RESTART REQUESTS
+            elif "1. "==split[i][:3] and term_used==False:
                 reqs=[]
                 adding=True
                 req = split[i].split(".",1)[1]
-            elif str(len(reqs)+check)+"." in split[i][:10] and term_used==False:#            If basic numbering used
+            #IF BASIC NUMBERING IS USED
+            elif str(len(reqs)+check)+"." in split[i][:10] and term_used==False:
                 adding=True
                 if req!="":
                     reqs.append(req.strip())
                 req = split[i].split(".",1)[1]
-            elif adding==True:#                                         Add the request text 
+            #ADD THE REQUEST TEXT IF PART OF THE CURRENT REQUEST
+            elif adding==True:
                 if any(end in split[i].replace(" ","")[:10].upper() for end in ["DATED:","DATEDTHIS"]):
                     adding = False
                     hard_stop=True#Used to stop scanning for reqs
                 elif len(split[i].replace(" ",""))>2 and not(split[i].replace(" ","")==split[i].replace(" ","").upper() and len(split[i].replace(" ",""))>30 and split[i].replace(" ","").strip()[-1] not in [".","?"]):
                     req = req+" "+re.sub(r"-[ 0-9 ]-","",split[i].strip().replace("///",""))
 
-
-    #Add final request
+    #Add final found request
     reqs.append(req.strip())
 
     ##################################### 3. GET TYPE OF DISCOVERY
@@ -461,9 +452,11 @@ def getRequests(file):
                     "date":""}
         keys=[]
         return reqs,reqs_type,details,keys
-    #If a form interrogatory
+    
+    #Read the PDF
     data = readPDF3(file)
-    backup_data = readPDF(file)
+
+    #If a form interrogatory
     if "DISC-001" in data.replace(" ","")[:5000]:
         reqs = readFormThreaded(file)
         reqs_type = "FROG"
@@ -476,14 +469,11 @@ def getRequests(file):
                     "responding_party":"",
                     "date":""}
         keys=[]
+
+    #If a normal discovery file
     else:
         reqs,reqs_type,details,keys = filterPDF(data)
-        """
-        breqs,breqs_type,bdetails,keys = filterPDF(backup_data)
-        for i in range(len(reqs)):
-            if reqs[i]=="":
-                reqs[i]=breqs[i]
-        """
+
     return reqs,reqs_type,details,keys
 
 
@@ -657,6 +647,3 @@ def read_client_feedback(filename):
     return feedback
 
 
-
-
-##SHOULD ADD THREADS FOR BOX DETECT!

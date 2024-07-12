@@ -16,9 +16,7 @@
 
 # IMPORTS
 ############################################################################################################
-import customtkinter as tk
 from windows.splash import *
-from functions import *
 ##### Open splash screen before large module imports
 if __name__=="__main__":
     initial_theme()

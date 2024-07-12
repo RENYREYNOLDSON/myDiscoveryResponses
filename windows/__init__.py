@@ -1,4 +1,5 @@
-__all__ = ["Detail",
+__all__ = ["__modules__",
+           "Detail",
             "EditObjections", 
             "FirmDetails",
             "Hotkeys",

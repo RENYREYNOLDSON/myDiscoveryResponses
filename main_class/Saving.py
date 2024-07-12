@@ -1,34 +1,5 @@
 # Main Imports
-import converter as cnv
-from CTkMessagebox import CTkMessagebox
-import json,os,copy,sys,time,subprocess
-import pickle
-from threading import Thread
-import re
-import os
-from enchant import list_languages
-# Frame Imports
-from frames.BarFrame import *
-from frames.LandingFrame import *
-from frames.ObjectionsFrame import *
-from frames.RequestsFrame import *
-from frames.ResponseFrame import *
-from frames.FileDetails import *
-from frames.FirmDetails import *
-# Window Imports
-from windows.EditObjections import *
-from windows.Hotkeys import *
-from windows.Preview import *
-from windows.PreviewText import *
-from windows.Settings import Settings
-# Object Imports
-from objects.Client import *
-from objects.File import *
-from objects.Objection import *
-from objects.Request import *
-from objects.Save import *
-from objects.SmartToolTip import *
-from objects.Action import *
+from main_class.__modules__ import *
 
 FROGS = {"1.1":"State the name, ADDRESS, telephone number, and relationship to you of each PERSON who prepared or assisted in the preparation of the responses to these interrogatories. (Do not identify anyone who simply typed or reproduced the responses.)",
         "2.1":"State:\n(a) your name;\n(b) every name you have used in the past; and\n(c) the dates you used each name.",

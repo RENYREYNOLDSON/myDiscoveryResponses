@@ -12,7 +12,6 @@
 
 import customtkinter as tk
 import json,os,pickle,webbrowser,re,subprocess
-from enchant.checker import SpellChecker
 from objects.SmartToolTip import *
 import urllib.request
 

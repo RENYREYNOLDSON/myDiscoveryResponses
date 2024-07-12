@@ -1,11 +1,5 @@
-# IMPORTS
-from functions import *
-import customtkinter as tk
-from PIL import Image
-from functools import partial
-import tkinter
-import datetime
-from customtkinter.windows.widgets.core_widget_classes.dropdown_menu import DropdownMenu
+# Main Imports
+from frames.__modules__ import *
 
 # BAR FRAME 
 ############################################################################################################

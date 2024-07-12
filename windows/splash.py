@@ -1,6 +1,5 @@
-# IMPORTS
+# Bare Minimum imports as this opens at the start
 from functions import *
-import customtkinter as tk
 from tkinter import *
 
 class Splash(tk.CTk):

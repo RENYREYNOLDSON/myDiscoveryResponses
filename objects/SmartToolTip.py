@@ -1,7 +1,6 @@
-# IMPORTS
-from functions import *
-import customtkinter as tk
-from custom_hovertip import CustomTooltipLabel
+# Main Imports
+from objects.__modules__ import *
+
 
 # CUSTOM SMART TEXT BOX CLASS, BUILT IN SPELL CHECKER
 class SmartToolTip(CustomTooltipLabel):

@@ -1,9 +1,5 @@
-# IMPORTS
-from functions import *
-import customtkinter as tk
-from PIL import Image
-from functools import partial
-import tkinter
+# Main Imports
+from frames.__modules__ import *
 
 # LANDING FRAME 
 ############################################################################################################

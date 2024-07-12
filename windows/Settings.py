@@ -1,12 +1,9 @@
-# IMPORTS
-#from functions import *
-import customtkinter as tk
-from tkinter import *
+# Main Imports
+from windows.__modules__ import *
 from tkinter.colorchooser import askcolor
 import os
 from enchant import list_languages
 from PIL import Image,ImageTk
-from functions import *
 
 heading_font=("Segoe UI",20)
 

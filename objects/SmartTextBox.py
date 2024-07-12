@@ -1,8 +1,7 @@
-# IMPORTS
-from functions import *
+# Main Imports
+from objects.__modules__ import *
 from objects.Action import *
-import customtkinter as tk
-from customtkinter.windows.widgets.core_widget_classes.dropdown_menu import DropdownMenu
+from functions import *
 
 # CUSTOM SMART TEXT BOX CLASS, BUILT IN SPELL CHECKER
 class SmartTextbox(tk.CTkTextbox):

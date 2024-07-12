@@ -1,6 +1,5 @@
-# IMPORTS
-from functions import *
-import copy
+# Main Imports
+from objects.__modules__ import *
 
 # ACTION CLASSES
 ############################################################################################################

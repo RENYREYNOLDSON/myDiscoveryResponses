@@ -11,7 +11,7 @@ class Objections_Frame(tk.CTkFrame):
         #Frame Setup
         self.master=master
 
-
+        self.opts=[]
         #List Frame
         self.list_frame = tk.CTkScrollableFrame(master=self,corner_radius=0,fg_color="transparent")
         self.list_frame.place(relheight=0.85,relwidth=1)
@@ -35,6 +35,10 @@ class Objections_Frame(tk.CTkFrame):
     def redraw_all(self):
         for w in self.list_frame.winfo_children():
             w.destroy()
+        
+        #Cancel if there are no objections
+        if len(list(self.master.objections.keys()))<1:
+            return
         l=[]
         for i in range(len(list(self.master.objections.keys()))):
             l.append(i)

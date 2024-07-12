@@ -26,7 +26,7 @@ class Request:
         self.RFP_option="Available"
         self.RFP_text=""
         self.RFA_option="Admit"
-        self.RFA_text="(a) "+str(no+1)+". Responding Party reasserts any and all objections to this request and incorporates them here by reference.\n(b) Facts supporting response\n(c) People with knowledge of facts supporting response\n(d) Documents supporting repsonse"
+        self.RFA_text="(a) "+str(no+1)+". Responding Party reasserts any and all objections to this request and incorporates them here by reference.\n(b) Facts supporting response\n(c) People with knowledge of facts supporting response\n(d) Documents supporting respsonse"
 
         self.auto_obj()
         self.req_type=req_type
@@ -62,7 +62,11 @@ class Request:
             opts2.append(new_obj)
         self.opts=opts2
         opts2=[]
-        self.current_objection=self.opts[0]
+        #If NO objections then set an empty string
+        if len(self.opts)>0:
+            self.current_objection=self.opts[0]
+        else:
+            self.current_objection = ""
 
     #Fill objections automatically using saved answers
     def auto_obj(self):

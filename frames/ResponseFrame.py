@@ -47,10 +47,10 @@ class Response_Frame(tk.CTkFrame):
 
         #FRA Frame
         self.RFA_frame.response_label=tk.CTkLabel(master=self.RFA_frame,text="RESPONSE:",font=label_font)
-        self.RFA_frame.response_text=tk.CTkTextbox(master=self.RFA_frame,wrap="word",state="disabled",height=60)
+        self.RFA_frame.response_text=SmartTextbox(main_master=self.master,master=self.RFA_frame,wrap="word",state="disabled",height=60)
         self.RFA_frame.RFA_option = tk.CTkSegmentedButton(master=self.RFA_frame,values=["Admit","Deny","Lack Info","Custom"],border_width=0,command=master.setRFA)
         self.RFA_frame.RFA_label=tk.CTkLabel(master=self.RFA_frame,text="17.1 RESPONSE:",font=label_font)
-        self.RFA_frame.RFA_text=tk.CTkTextbox(master=self.RFA_frame,wrap="word",state="normal",height=60)
+        self.RFA_frame.RFA_text=SmartTextbox(main_master=self.master,master=self.RFA_frame,wrap="word",state="normal",height=60)
         self.RFA_frame.RFA_option.set("Admit")
         #pack
         self.RFA_frame.response_label.pack(padx=20,anchor="w",pady=(10,0))
@@ -64,7 +64,7 @@ class Response_Frame(tk.CTkFrame):
         #FRP Frame
         location_frame=tk.CTkFrame(master=self.RFP_frame)
         self.RFP_frame.response_label=tk.CTkLabel(master=self.RFP_frame,text="RESPONSE:",font=label_font)
-        self.RFP_frame.response_text=tk.CTkTextbox(master=self.RFP_frame,wrap="word",state="normal")
+        self.RFP_frame.response_text=SmartTextbox(main_master=self.master,master=self.RFP_frame,wrap="word",state="disabled")
         self.RFP_frame.RFP_label = tk.CTkLabel(master=location_frame,text="Documents Location: ")
         self.RFP_frame.RFP_text = tk.CTkEntry(master=location_frame,state="normal")
         self.RFP_frame.RFP_option = tk.CTkSegmentedButton(master=self.RFP_frame,values=["Available","Not Exist","Not Possessed","Lost","Custom"],border_width=0,command=master.setRFP)

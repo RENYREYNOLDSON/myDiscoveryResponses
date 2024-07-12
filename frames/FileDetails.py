@@ -39,7 +39,7 @@ class File_Details_Frame(tk.CTkFrame):
         self.file_name_frame.pack(fill="both",pady=5,expand=True)
         name = tk.CTkLabel(master=self.file_name_frame,text="File Name:",anchor="nw",width=120)
         name.pack(side="left",padx=20)
-        self.name = tk.CTkTextbox(master=self.file_name_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.name = SmartTextbox(main_master=self.master,undo=False,master=self.file_name_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.name.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.name.insert("0.0",self.master.current_client.current_file.name)
 
@@ -48,7 +48,7 @@ class File_Details_Frame(tk.CTkFrame):
         self.document_frame.pack(fill="both",pady=5,expand=True)
         document = tk.CTkLabel(master=self.document_frame,text="Document Name:",anchor="nw",width=120)
         document.pack(side="left",padx=20)
-        self.document = tk.CTkTextbox(master=self.document_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.document = SmartTextbox(main_master=self.master,undo=False,master=self.document_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.document.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.document.insert("0.0",details["document"])
 
@@ -59,7 +59,7 @@ class File_Details_Frame(tk.CTkFrame):
         self.county_frame.pack(fill="both",pady=5,expand=True)
         county = tk.CTkLabel(master=self.county_frame,text="County:",anchor="nw",width=120)
         county.pack(side="left",padx=20)
-        self.county = tk.CTkTextbox(master=self.county_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.county = SmartTextbox(main_master=self.master,undo=False,master=self.county_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.county.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.county.insert("0.0",details["county"])
 
@@ -72,7 +72,7 @@ class File_Details_Frame(tk.CTkFrame):
         self.plaintiff_frame.pack(fill="both",pady=5,expand=True)
         plaintiff = tk.CTkLabel(master=self.plaintiff_frame,text="Plaintiff(s):",anchor="nw",width=120)
         plaintiff.pack(side="left",padx=20)
-        self.plaintiff = tk.CTkTextbox(master=self.plaintiff_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.plaintiff = SmartTextbox(main_master=self.master,undo=False,master=self.plaintiff_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.plaintiff.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.plaintiff.insert("0.0",details["plaintiff"])
 
@@ -81,7 +81,7 @@ class File_Details_Frame(tk.CTkFrame):
         self.defendant_frame.pack(fill="both",pady=5,expand=True)
         defendant = tk.CTkLabel(master=self.defendant_frame,text="Defendant(s):",anchor="nw",width=120)
         defendant.pack(side="left",padx=20)
-        self.defendant = tk.CTkTextbox(master=self.defendant_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.defendant = SmartTextbox(main_master=self.master,undo=False,master=self.defendant_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.defendant.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.defendant.insert("0.0",details["defendant"])
 
@@ -90,7 +90,7 @@ class File_Details_Frame(tk.CTkFrame):
         self.propounding_frame.pack(fill="both",pady=5,expand=True)
         propounding_party = tk.CTkLabel(master=self.propounding_frame,text="Propounding Party:",anchor="nw",width=120)
         propounding_party.pack(side="left",padx=20)
-        self.propounding_party = tk.CTkTextbox(master=self.propounding_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.propounding_party = SmartTextbox(main_master=self.master,undo=False,master=self.propounding_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.propounding_party.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.propounding_party.insert("0.0",details["propounding_party"])
 
@@ -99,7 +99,7 @@ class File_Details_Frame(tk.CTkFrame):
         self.responding_frame.pack(fill="both",pady=5,expand=True)
         responding_party = tk.CTkLabel(master=self.responding_frame,text="Responding Party:",anchor="nw",width=120)
         responding_party.pack(side="left",padx=20)
-        self.responding_party = tk.CTkTextbox(master=self.responding_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.responding_party = SmartTextbox(main_master=self.master,undo=False,master=self.responding_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.responding_party.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.responding_party.insert("0.0",details["responding_party"])
 
@@ -108,7 +108,7 @@ class File_Details_Frame(tk.CTkFrame):
         self.case_frame.pack(fill="both",pady=5,expand=True)
         case = tk.CTkLabel(master=self.case_frame,text="Case Number:",anchor="nw",width=120)
         case.pack(side="left",padx=20)
-        self.case = tk.CTkTextbox(master=self.case_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.case = SmartTextbox(main_master=self.master,undo=False,master=self.case_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.case.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.case.insert("0.0",details["case_number"])
 
@@ -117,7 +117,7 @@ class File_Details_Frame(tk.CTkFrame):
         self.date_frame.pack(fill="both",pady=5,expand=True)
         date = tk.CTkLabel(master=self.date_frame,text="Date:",anchor="nw",width=120)
         date.pack(side="left",padx=20)
-        self.date = tk.CTkTextbox(master=self.date_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.date = SmartTextbox(main_master=self.master,undo=False,master=self.date_frame,height=40,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.date.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.date.insert("0.0",details["date"])
 

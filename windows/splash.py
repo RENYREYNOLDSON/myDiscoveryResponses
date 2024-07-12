@@ -1,6 +1,9 @@
 # Bare Minimum imports as this opens at the start
 from functions import *
 from tkinter import *
+#This ensures that screen size recognized correctly, won't work on windows 7
+import ctypes
+ctypes.windll.shcore.SetProcessDpiAwareness(2) # your windows version should >= 8.1,it will raise exception.
 
 class Splash(tk.CTk):
     #Constructor
@@ -8,27 +11,15 @@ class Splash(tk.CTk):
         #CREATING THE CUSTOM TKINTER WINDOW
         super().__init__()
         self.title("Splash Screen Title")
-
-        width = 600
-        height = 200
-
-        x = (self.winfo_screenwidth()//2)+(width//4)
-        y = (self.winfo_screenheight()//2)+(height)
-
-        self.geometry("{}x{}+{}+{}".format(width,height,x,y))
-
+        
         self.overrideredirect(True)
+        
+        self.wm_attributes("-topmost", True)
+        self.wm_attributes("-disabled", True)
+        self.wm_attributes("-transparentcolor", "black")
 
-        title_frame = tk.CTkFrame(master=self,fg_color="transparent")
-        title_frame.place(relx=0.05,rely=0.25,anchor="nw")
-        # Title
-        font = ("Segoe UI",50,"bold")
-        title = tk.CTkLabel(master=title_frame,text="myDiscoveryResponses",font=font,anchor="w")
-        title.pack(fill="x")
-        # Sub Title
-        font = ("Segoe UI",20,"bold")
-        title = tk.CTkLabel(master=title_frame,text="  Software for the creation of Discovery Responses",font=font,anchor="w")
-        title.pack(fill="x")
+        self.image = PhotoImage(file='assets/splash_image.png')
+        label = Label(self, image=self.image, bg='black')
+        label.pack()
+        self.eval('tk::PlaceWindow . center')
 
-        loading =tk.CTkLabel(master=self,text="Loading...",text_color="grey")
-        loading.place(relx=0.02,rely=0.85)

@@ -28,7 +28,7 @@ class Client:
             file.reload_objections()
 
         #Update the selected objection here! Only for the open request
-        if self.master.current_req!=0:
+        if self.master.current_req!=0 and len(self.master.objections)>0:
             self.master.toggle_selected_objection(str(self.master.current_req.current_objection.key),None)
 
 

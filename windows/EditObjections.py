@@ -1,5 +1,6 @@
 # Main Imports
 from windows.__modules__ import *
+from objects.SmartTextBox import *
 
 # EDIT OBJECTIONS WINDOW
 ############################################################################################################
@@ -75,12 +76,12 @@ class EditObjections(tk.CTkToplevel):
         #Objection
         objection_label=tk.CTkLabel(master=self.edit_frame,text="OBJECTION BODY:",font=label_font,anchor="w")
         objection_label.pack(fill="x",padx=10,pady=(5,5))
-        self.objection_entry = tk.CTkTextbox(master=self.edit_frame,wrap="word",height=100,font=font,text_color=text_color,fg_color=bg_color)
+        self.objection_entry = SmartTextbox(main_master=self.master,master=self.edit_frame,wrap="word",height=100,font=font,text_color=text_color,fg_color=bg_color)
         self.objection_entry.pack(padx=20,fill="both",expand=True)
         #End Text
         additional_label=tk.CTkLabel(master=self.edit_frame,text="ADDITIONAL TEXT:",font=label_font,anchor="w")
         additional_label.pack(fill="x",padx=10,pady=(5,5))
-        self.additional_entry = tk.CTkTextbox(master=self.edit_frame,wrap="word",height=50,font=font,text_color=text_color,fg_color=bg_color)
+        self.additional_entry = SmartTextbox(main_master=self.master,master=self.edit_frame,wrap="word",height=50,font=font,text_color=text_color,fg_color=bg_color)
         self.additional_entry.pack(padx=20,pady=(0,10),fill="both",expand=True)
         #Autofill Text
         autofill_label=tk.CTkLabel(master=self.edit_frame,text="AUTO FILLS:",font=label_font,anchor="w")

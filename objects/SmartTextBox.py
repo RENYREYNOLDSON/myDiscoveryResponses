@@ -6,11 +6,12 @@ from functions import *
 # CUSTOM SMART TEXT BOX CLASS, BUILT IN SPELL CHECKER
 class SmartTextbox(tk.CTkTextbox):
     #Constructor 
-    def __init__(self,master,main_master,**kwargs):
+    def __init__(self,master,main_master,undo=True,**kwargs):
         #FRAME SETUP
-        super().__init__(master,undo=True,maxundo=100,autoseparators=False, **kwargs)
+        super().__init__(master,undo=undo,maxundo=100,autoseparators=False, **kwargs)
 
         self.main_master = main_master
+        self.undo_enabled = undo#Name undo taken
         #This is the previous text in the box
         self.previous_text=""
         self.issues=[]
@@ -19,47 +20,47 @@ class SmartTextbox(tk.CTkTextbox):
         self.bind("<Button-3>",self.popup)
         self.after(int(self.main_master.CONFIG["spelling"]["spellcheck_interval"]),self.spellcheck)
 
-        #Bind a function for when this is modified
-        autoseparator_bindings = ["<BackSpace>","<Delete>","<Return>","<<Cut>>","<<Paste>>","<<Clear>>",
-                                  "<<PasteSelection>>","<space>"]
-        for bind in autoseparator_bindings:
-            self.bind(bind,self.modified)
+        if self.undo_enabled:
+            #Bind a function for when this is modified
+            autoseparator_bindings = ["<BackSpace>","<Delete>","<Return>","<<Cut>>","<<Paste>>","<<Clear>>",
+                                    "<<PasteSelection>>","<space>"]
+            for bind in autoseparator_bindings:
+                self.bind(bind,self.modified)
 
-        self.bind("<KeyPress>",self.check_if_start)
+            self.bind("<KeyPress>",self.check_if_start)
 
-        #THIS UNBINDS THE UNDO AND REDO!
-        self._textbox.event_delete("<<Undo>>")
-        self._textbox.event_delete("<<Redo>>")
-
+            #THIS UNBINDS THE UNDO AND REDO!
+            self._textbox.event_delete("<<Undo>>")
+            self._textbox.event_delete("<<Redo>>")
 
     #Runs when text is inserted or deleted
     def modified(self,e):
-        #ADD AN AUTOSEPERATOR:
-        self.edit_separator()
-        #Add this onto undo stack -> Then access the box when an undo is needed
-        self.main_master.add_action_to_stack(ActionTextBox(self.main_master,self))
+        if self.undo_enabled:
+            #ADD AN AUTOSEPERATOR:
+            self.edit_separator()
+            #Add this onto undo stack -> Then access the box when an undo is needed
+            self.main_master.add_action_to_stack(ActionTextBox(self.main_master,self))
 
     #If the text is empty then add a separator
     def check_if_start(self,e):
         if self.get(0.0,"end-1c") == "":
             self.modified(None)
 
-
-    
-
     def spellcheck(self):
-        #DO SPELLCHECKING!
-        if self.main_master.CONFIG["spelling"]["use_spellcheck"]:
-            self.current_text = self.get(0.0,"end-1c")
-            #Only spellcheck if text has changed
-            if self.current_text!=self.previous_text:
-                #Highlight them
-                self.issues = spellcheck(self," "+self.get("0.0","end-1c"))# [message,start,width,replacements array]
-        else:
-            #CLEAR SPELLCHECK HERE!
-            pass
+        if self.winfo_manager()!=None:#Only check if text box placed
+            #DO SPELLCHECKING!
+            if self.main_master.CONFIG["spelling"]["use_spellcheck"]:
+                self.current_text = self.get(0.0,"end-1c")
+                #Only spellcheck if text has changed
+                if self.current_text!=self.previous_text:
+                    #Highlight them
+                    self.issues = spellcheck(self," "+self.get("0.0","end-1c"))# [message,start,width,replacements array]
+            else:
+                #CLEAR SPELLCHECK HERE!
+                pass
 
-        self.previous_text = self.current_text
+            self.previous_text = self.current_text
+
         self.after(int(self.main_master.CONFIG["spelling"]["spellcheck_interval"]),self.spellcheck)
 
     def insert_spelling(self,v):

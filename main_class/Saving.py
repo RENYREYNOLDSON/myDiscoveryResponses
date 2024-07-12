@@ -456,6 +456,8 @@ class Saving:
         self.current_req=0
         self.clients=[]
         self.current_client=""
+        # Reset Undo and Redo stacks
+        self.reset_undo_stacks()
         # Reset Clients
         self.requests_frame.show_clients([])
         # Reset Files

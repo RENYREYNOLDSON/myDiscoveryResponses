@@ -148,12 +148,16 @@ class Bar_Frame(tk.CTkFrame):
             self.copy_tooltip.enable()
             self.preview_tooltip.enable()
             self.save_tooltip.enable()
+            self.undo_tooltip.enable()
+            self.redo_tooltip.enable()
         else:
             self.details_tooltip.disable()
             self.clear_tooltip.disable()
             self.copy_tooltip.disable()
             self.preview_tooltip.disable()
             self.save_tooltip.disable() 
+            self.undo_tooltip.disable()
+            self.redo_tooltip.disable()
 
     #Enable and disable the undo button
     def disable_undo(self):

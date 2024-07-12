@@ -7,11 +7,11 @@ class SmartToolTip(CustomTooltipLabel):
     #Constructor 
     def __init__(self,wraplength=400,**kwargs):
         #FRAME SETUP
-        super().__init__(background="#141414",
+        super().__init__(background="black",
                          foreground="white", 
                          wraplength=wraplength,
                          justify="left",
-                         font=("Arial",20),
+                         font=("Arial",10),
                          border=10,
                          hover_delay=600,
                          **kwargs)

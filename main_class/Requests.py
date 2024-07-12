@@ -181,6 +181,8 @@ class Requests:
         if value=="Custom":
             self.response_frame.current_frame.response_text.configure(state="normal")
             self.response_frame.current_frame.response_text.delete("0.0","end")
+        else:
+            self.response_frame.current_frame.response_text.configure(state="disabled")
 
     #Allow for custom response when 'Custom' selected RFA
     def setRFA(self,value,undo_command=False):
@@ -191,6 +193,8 @@ class Requests:
         if value=="Custom":
             self.response_frame.current_frame.response_text.configure(state="normal")
             self.response_frame.current_frame.response_text.delete("0.0","end")
+        else:
+            self.response_frame.current_frame.response_text.configure(state="disabled")
 
 
     #UPDATE THIS FOR NEW METHOD!

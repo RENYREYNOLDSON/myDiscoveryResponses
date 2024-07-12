@@ -1,5 +1,12 @@
 ![Example Screenshot](./Images/TITLE_IMAGE.PNG)
 <br />
+
+<div align="center">
+<h3>
+Official website: https://myDiscoveryResponses.com
+</h3>
+</div>
+
 The bespoke software, myDiscoveryResponses, is designed for the production and editing of discovery responses. Using the software, you can load discovery request pdf's of type: 
 > Requests for Admissions (RFA)
 > <br />

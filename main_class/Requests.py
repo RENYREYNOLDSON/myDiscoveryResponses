@@ -352,8 +352,8 @@ class Requests:
 
             ### ADD NEW FILE TO CLIENT, IF NONE THEN CREATE NEW CLIENT!
             new_file = File("FROGFROG",doc_details,self.req_type,self.reqs,self)
-            if self.current_client!="":
-                self.current_client.files.append(new_file)
+
+            self.current_client.files.append(new_file)
 
             self.title("myDiscoveryResponses   |   "+str("FROG"))
             self.open_file("FROG")
@@ -365,7 +365,7 @@ class Requests:
             self.requests_frame.show_list(self.reqs)
             self.set_request(self.reqs[0])
             self.requests_frame.scroll_to(True)
-            self.update()
+            self.add_action_to_stack(ActionReadFile(master=self,obj=new_file))
     ### USER ACTIVITY
     ########################################################################################################
 

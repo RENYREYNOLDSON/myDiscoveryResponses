@@ -135,10 +135,6 @@ class ActionReadFile(Action):
 
 
 
-################################ UNFINISHED / UNTESTED METHODS 
-
-
-
 
 
 class ActionClear(Action):
@@ -196,6 +192,14 @@ class ActionCopyPrevious(Action):
     
     def redo_function(self):
         self.master.copy_previous(undo_command=True)
+
+################################ UNFINISHED / UNTESTED METHODS 
+
+
+
+
+
+
 
 
 

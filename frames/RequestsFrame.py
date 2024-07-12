@@ -23,9 +23,9 @@ class Requests_Frame(tk.CTkFrame):
         text = tk.CTkLabel(master=client_title_frame,text="CLIENTS",anchor="w")
         text.pack(side="left",fill="both",padx=10)
         #Client Button
-        add_button = tk.CTkButton(master=client_title_frame,width=20,height=10,font=("arial",20),text="+",fg_color="transparent",text_color=("black","white"),hover=False,command=master.new_client)
-        add_button.pack(side="left")
-        add_tooltip(add_button,"Create a blank client document")
+        self.add_client_button = tk.CTkButton(master=client_title_frame,width=20,height=10,font=("arial",20),text="+",fg_color="transparent",text_color=("black","white"),hover=False,command=master.new_client)
+        self.add_client_button.pack(side="left")
+        self.add_client_tooltip = add_tooltip(self.add_client_button,"Create a blank client document")
         self.unsaved_text = tk.CTkLabel(master=client_title_frame,text="",anchor="w")
         self.unsaved_text.pack(side="left",fill="both",padx=10)
         self.clients_frame = tk.CTkScrollableFrame(master=self,corner_radius=0,fg_color="transparent")
@@ -37,9 +37,9 @@ class Requests_Frame(tk.CTkFrame):
         file_title_frame.pack(fill="both")
         text = tk.CTkLabel(master=file_title_frame,text="FILES",anchor="w")
         text.pack(side="left",fill="both",padx=10)
-        add_button = tk.CTkButton(master=file_title_frame,width=20,height=10,font=("arial",20),text="+",fg_color="transparent",text_color=("black","white"),hover=False,command=master.select_file)
-        add_button.pack(side="left")
-        add_tooltip(add_button,"Load a PDF file")
+        self.add_file_button = tk.CTkButton(master=file_title_frame,width=20,height=10,font=("arial",20),text="+",fg_color="transparent",text_color=("black","white"),hover=False,command=master.select_file)
+        self.add_file_button.pack(side="left")
+        self.add_file_tooltip = add_tooltip(self.add_file_button,"Load a PDF file")
         self.file_frame = tk.CTkScrollableFrame(master=self,corner_radius=0,fg_color="transparent")
         self.file_frame.pack(padx=0,pady=0,fill="x")
 
@@ -201,3 +201,11 @@ class Requests_Frame(tk.CTkFrame):
             else:
                 self.request_buttons[c].configure(fg_color="transparent",text_color=color)
             c+=1
+
+    def set_tooltips(self):
+        if self.master.CONFIG["general"]["hover_tooltips"]:
+            self.add_client_tooltip.enable()
+            self.add_file_tooltip.enable()
+        else:
+            self.add_client_tooltip.disable()
+            self.add_file_tooltip.disable()

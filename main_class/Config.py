@@ -173,3 +173,4 @@ class Config:
         #RESET THE landing frame AND bar frame
         self.landing_frame.set_tooltips()
         self.bar_frame.set_tooltips()
+        self.requests_frame.set_tooltips()

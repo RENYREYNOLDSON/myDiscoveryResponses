@@ -24,7 +24,7 @@ Once loaded, you can move between each request and check off objections; in addi
 
 ![Example Screenshot](./Images/USER_GUIDE_IMAGE.png)
 
-## Python Env Setup
+## Python Environment Setup
 1. Ensure that you have Python 3.11 or higher installed
 2. Clone this git repository
 3. Install the required Python packages using:
@@ -36,8 +36,5 @@ pip install -r requirements.txt
 python __main__.py
 ```
 
-## Website
-Available documentation at:
-  https://github.com/RENYREYNOLDSON/myDiscoveryResponses-site.git
 
 

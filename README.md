@@ -24,18 +24,7 @@ Once loaded, you can move between each request and check off objections; in addi
 
 ![Example Screenshot](./Images/USER_GUIDE_IMAGE.png)
 
-## Installation
-### Using Windows Installer
-1. Download the ```setup.exe```
-2. Run the setup.exe, this will install myDiscoveryResponses in your Local Program Files
-3. Run the program from the windows start menu or by using the Desktop Shortcut
-
-### Downloading Windows EXE directly
-1. Download the ```myDiscoveryResponses.zip``` file
-2. Unzip the file
-3. Run ```myDiscoveryResponses.exe``` directly from this folder
-
-### Downloading raw Python Files
+## Python Env Setup
 1. Ensure that you have Python 3.11 or higher installed
 2. Download all of the relevant project files
 3. Install the required Python packages using:

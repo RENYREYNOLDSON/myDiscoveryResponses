@@ -1,6 +1,6 @@
 ![Example Screenshot](./Images/TITLE_IMAGE.PNG)
 <br />
-Software for the creation of Discovery Responses. Load discovery request pdf's of type:
+The bespoke software, myDiscoveryResponses, is designed for the production and editing of discovery responses. Using the software, you can load discovery request pdf's of type: 
 > Requests for Admissions (RFA)
 > <br />
 > Demands for Production (RFP)
@@ -9,8 +9,9 @@ Software for the creation of Discovery Responses. Load discovery request pdf's o
 > <br />
 > Form Interrogatories (FROG)
 
-- Once loaded you can move between each request and apply set objections in addition to custom responses. When these responses have been created, the file can then be exported as a response word document (DOCX).
-- The software uses Natural Language Processing and Computer vision to read the discovery requests, so if a file will not load correctly please get in contact so that it can be fixed.
+These are loaded using natural language processing and OCR techniques, in order to extract the correct requests and file details from the pdf files.
+Once loaded, you can move between each request and check off objections; in addition to adding custom responses. When these responses have been created, the file can then be exported as a response word document (DOCX), or saved for future editing as a .discovery file.
+
 ## Installation
 ### Using Windows Installer
 1. Download the ```setup.exe```

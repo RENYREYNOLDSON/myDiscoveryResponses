@@ -26,7 +26,7 @@ Once loaded, you can move between each request and check off objections; in addi
 
 ## Python Env Setup
 1. Ensure that you have Python 3.11 or higher installed
-2. Download all of the relevant project files
+2. Clone this git repository
 3. Install the required Python packages using:
 ```
 pip install -r requirements.txt

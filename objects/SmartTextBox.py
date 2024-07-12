@@ -14,12 +14,15 @@ class SmartTextbox(tk.CTkTextbox):
         self.undo_enabled = undo#Name undo taken
         #This is the previous text in the box
         self.previous_text=""
+        self.current_text=""
         self.issues=[]
         self.istart,self.iend=0,0#Start and end of selected spellings
         self.pop = DropdownMenu(self,values=["init"])
         self.bind("<Button-3>",self.popup)
         self.after(int(self.main_master.CONFIG["spelling"]["spellcheck_interval"]),self.spellcheck)
 
+        #When space pressed, check if a shortcut is present
+        self.bind("<space>",self.check_shortcuts)
         if self.undo_enabled:
             #Bind a function for when this is modified
             autoseparator_bindings = ["<Delete>","<Return>","<<Cut>>","<<Paste>>","<<Clear>>",
@@ -34,7 +37,6 @@ class SmartTextbox(tk.CTkTextbox):
             self._textbox.event_delete("<<Redo>>")
 
     def backspace(self,e):
-        print("Skip backspace")
         return
         if self.previous_text[-1]==" ":
             #ADD AN AUTOSEPERATOR:
@@ -54,6 +56,43 @@ class SmartTextbox(tk.CTkTextbox):
     def check_if_start(self,e):
         if self.get(0.0,"end-1c") == "":
             self.modified(None)
+
+    def check_shortcuts(self,e):
+        #DO HOTKEYS HERE
+        insert_index = self.index(tk.INSERT)#Current index
+        resp = self.get(0.0,"end-1c")
+        use_fill=None
+        use_pos=0
+        start=False
+        for fill in self.main_master.HOTKEYS:# Replace all autofill phrases
+            position = -1
+            trigger = " "+fill
+            position = resp.find(trigger)#Pos of index
+            if position<0:
+                position = resp.find("\n"+trigger[1:])# Try new line instances
+                if position>=0:
+                    start=1
+            if position>=0:
+                use_fill = fill# Set this to fill
+                use_pos = position
+            #If first word
+            if resp==fill:
+                use_fill = fill
+                use_pos = 0
+                start = True
+        if use_fill!=None:# IF AN AUTOFILL USED
+            # Update index if grown in length, must add suffic n + chars
+            text_index="0.0 + "+str(use_pos)+" chars"
+            text_end_index="0.0 + "+str(use_pos+len(use_fill+" "))+" chars"
+            # Put the text here 
+            self.delete(text_index,text_end_index)
+            if start:
+                self.insert(text_index,(self.main_master.HOTKEYS[use_fill]))
+            else:
+                self.insert(text_index,(" "+self.main_master.HOTKEYS[use_fill]))
+            # Reset index
+            insert_index+=" + "+str(len(self.main_master.HOTKEYS[use_fill]+" ")-len(use_fill)-1)+" chars"
+            self.mark_set("insert",insert_index)
 
     def spellcheck(self):
         if self.winfo_manager()!=None:#Only check if text box placed
@@ -142,6 +181,6 @@ class SmartTextbox(tk.CTkTextbox):
         return 
     
     def edit_separator(self):
-        print("Text seperator added")
+        #print("Text seperator added")
         return super().edit_separator()
         

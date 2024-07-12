@@ -74,48 +74,14 @@ class WindowUtility:
                 self.response_frame.set_objection(text)
                 self.set_client_unsaved(self.current_client)
 
-
             self.previous_objection_text = text # Save for next time
 
             # 2. UPDATE RESPONSE TEXTBOX
             if self.req_type=="RFA":
                 option = self.response_frame.get_RFA()
-
-                #Do Hotkeys for the 17.1 Response
-
-                ###COPIED FROM BELOW: REPLACE!!! CREATE A FUNCTION FOR THIS
-
-                #Do HOTKEYS HERE
                 insert_index = self.response_frame.current_frame.RFA_text.index(tk.INSERT)#Current index
                 resp = " "+self.response_frame.get_RFA_text()#Current response text
-                use_fill=None
-                use_pos=0
-                start=0
-                for fill in self.HOTKEYS:# Replace all autofill phrases
-                    position = -1
-                    trigger = " "+fill+" "
-                    position = resp.find(trigger)#Pos of index
-                    if position<0:
-                        position = resp.find("\n"+trigger[1:])# Try new line instances
-                        if position>=0:
-                            start=1
-                    if position>=0:
-                        use_fill = fill# Set this to fill
-                        use_pos = position
-                if use_fill!=None:# IF AN AUTOFILL USED
-                    text = resp[1:]#Remove space
-                    # Update index if grown in length, must add suffic n + chars
-                    text_index="0.0 + "+str(use_pos)+" chars"
-                    text_end_index="0.0 + "+str(use_pos+len(use_fill+" "))+" chars"
-                    # Put the text here 
-                    self.response_frame.current_frame.RFA_text.delete(text_index,text_end_index)
-                    self.response_frame.current_frame.RFA_text.insert(text_index,(self.HOTKEYS[use_fill]+" "))
-                    # Reset index
-                    insert_index+=" + "+str(len(self.HOTKEYS[use_fill]+" ")-len(use_fill)-1)+" chars"
-                    self.response_frame.current_frame.RFA_text.mark_set("insert",insert_index)
-
-
-
+ 
             else:
                 option = self.response_frame.get_RFP()
             
@@ -148,45 +114,15 @@ class WindowUtility:
                     self.requests_frame.update_files(self.current_client.files)
 
             # NORMAL
-            else:#If NOT RFP
-
-                
+            else:#If NOT RFP               
                 insert_index = self.response_frame.current_frame.response_text.index(tk.INSERT)#Current index
                 resp = " "+self.response_frame.get_response()#Current response text
-
                 #DO CURCLY QUOTES HERE!
                 if '"' in resp or "'" in resp:
                     resp = curly_convert(resp)
                     # Put the text here 
                     self.response_frame.current_frame.response_text.delete("0.0","end-1c")
                     self.response_frame.current_frame.response_text.insert("0.0",resp[1:])
-                    self.response_frame.current_frame.response_text.mark_set("insert",insert_index)
-
-                #DO HOTKEYS HERE
-                use_fill=None
-                use_pos=0
-                start=0
-                for fill in self.HOTKEYS:# Replace all autofill phrases
-                    position = -1
-                    trigger = " "+fill+" "
-                    position = resp.find(trigger)#Pos of index
-                    if position<0:
-                        position = resp.find("\n"+trigger[1:])# Try new line instances
-                        if position>=0:
-                            start=1
-                    if position>=0:
-                        use_fill = fill# Set this to fill
-                        use_pos = position
-                if use_fill!=None:# IF AN AUTOFILL USED
-                    text = resp[1:]#Remove space
-                    # Update index if grown in length, must add suffic n + chars
-                    text_index="0.0 + "+str(use_pos)+" chars"
-                    text_end_index="0.0 + "+str(use_pos+len(use_fill+" "))+" chars"
-                    # Put the text here 
-                    self.response_frame.current_frame.response_text.delete(text_index,text_end_index)
-                    self.response_frame.current_frame.response_text.insert(text_index,(self.HOTKEYS[use_fill]+" "))
-                    # Reset index
-                    insert_index+=" + "+str(len(self.HOTKEYS[use_fill]+" ")-len(use_fill)-1)+" chars"
                     self.response_frame.current_frame.response_text.mark_set("insert",insert_index)
 
                 if resp[1:].replace("\n","")!=self.current_req.resp.replace("\n",""):# Change colour back if edited

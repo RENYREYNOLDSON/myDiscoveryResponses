@@ -18,7 +18,7 @@ class Splash(tk.CTk):
         self.wm_attributes("-disabled", True)
         self.wm_attributes("-transparentcolor", "black")
 
-        self.image = PhotoImage(file='assets/splash_image.png')
+        self.image = open_splash_image()
         label = Label(self, image=self.image, bg='black')
         label.pack()
         self.eval('tk::PlaceWindow . center')

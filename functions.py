@@ -14,7 +14,7 @@ import customtkinter as tk
 import json,os,pickle,webbrowser,re,subprocess
 from objects.SmartToolTip import *
 import urllib.request
-
+from tkinter import PhotoImage
 
 # CONSTANTS 
 ############################################################################################################
@@ -171,6 +171,9 @@ def valid_file_path(filename):
     if os.path.exists(filename):
         return True
     return False
+
+def open_splash_image():
+    return PhotoImage(file=os.path.join(os.path.dirname(__file__),"assets/splash_image.png"))
 
 
 # SOFTWARE LOCAL FILES

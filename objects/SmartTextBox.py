@@ -108,7 +108,9 @@ class SmartTextbox(tk.CTkTextbox):
                     self.issues = spellcheck(self," "+self.get("0.0","end-1c"))# [message,start,width,replacements array]
             else:
                 #CLEAR SPELLCHECK HERE!
-                pass
+                #Remove all spelling tags
+                for tag in self.tag_names():
+                    self.tag_delete(tag)
 
             self.previous_text = self.current_text
 
@@ -125,6 +127,7 @@ class SmartTextbox(tk.CTkTextbox):
             self.delete(self.istart,self.iend)
             self.insert(self.istart,v)
             self.modified(None)
+            self.issues = spellcheck(self," "+self.get("0.0","end-1c"))# [message,start,width,replacements array]
 
     def popup(self,event):
         try:

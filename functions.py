@@ -24,6 +24,9 @@ HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage
 # FILE READING AND WRITING 
 ############################################################################################################
 
+def get_main_path():
+    return os.path.dirname(__file__)
+
 #GETTERS AND SETTERS FOR RECENT FILES
 def get_recents():
     #Open the recent files list
@@ -183,7 +186,12 @@ def open_splash_image():
 def uninstall():
     try:
         uninstall_exe = os.path.join(os.path.dirname(__file__),"unins000.exe")
-        subprocess.run(uninstall_exe)
+        subprocess.Popen(["cmd","/c","start","",uninstall_exe],
+                                stdout=subprocess.DEVNULL,  # Redirect output to avoid hanging on pipes
+                                stderr=subprocess.DEVNULL,
+                                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_BREAKAWAY_FROM_JOB,
+                                close_fds=True)
+
     except Exception as e:
         print(e)
     

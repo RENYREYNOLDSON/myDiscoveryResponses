@@ -2,6 +2,7 @@
 from main_class.__modules__ import *
 from urllib.request import urlretrieve
 import requests
+import zipfile
 
 class Config:
     #Check for updates of software
@@ -33,10 +34,18 @@ class Config:
 
                 filename = "myDiscoveryResponsesInstaller.zip"
 
-                dir_path,headers = urlretrieve(url, filename)
+                path,headers = urlretrieve(url, filename)
+
+                dir_path = os.path.join(get_main_path(),path)
+
+                #Need to extract exe file
+                with zipfile.ZipFile(dir_path, 'r') as zip_ref:
+                    zip_ref.extractall(get_main_path())
+
+                exe_path = os.path.join(get_main_path(),"myDiscoveryResponsesInstaller.exe")
 
                 #Open installer
-                subprocess.Popen(["cmd","/c","start","",dir_path],
+                subprocess.Popen(["cmd","/c","start","",exe_path],
                                         stdout=subprocess.DEVNULL,  # Redirect output to avoid hanging on pipes
                                         stderr=subprocess.DEVNULL,
                                         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_BREAKAWAY_FROM_JOB,

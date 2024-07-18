@@ -133,12 +133,14 @@ class SmartTextbox(tk.CTkTextbox):
         try:
             #Get index position
             index = self.index(f"@{event.x},{event.y}")
-
             #Check most recent spell check, these should be held by each text box!
             vals=[]
             for i in self.issues:
                 #if clicked where the issue is:
-                chars = self._textbox.count("0.0", index, "chars")[0]
+                if index=="1.0":
+                    chars=0
+                else:
+                    chars = self._textbox.count("0.0", index, "chars")[0]
                 if chars>=int(i[3])-1 and chars<=int(i[3]+i[4]) and vals==[]:#If in issue range, only pick 1!
                     added = 0
                     for r in i[5]:

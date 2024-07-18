@@ -1,16 +1,25 @@
 # Main Imports
 from main_class.__modules__ import *
+from urllib.request import urlretrieve
+import requests
 
 class Config:
     #Check for updates of software
     def check_for_update(self):
-        #Use test function for now
-        #urllib.request.urlretrieve("https://mydiscoveryresponses.com/myDiscoveryResponsesInstaller.zip","myDiscoveryResponsesInstaller.zip")
-        update_available = True
+        update_available = False
+        #Make GET request for the version number from myDiscoveryResponses.com
+        version_url = "https://myDiscoveryResponses.com/version.txt"
+        response = requests.get(version_url)
+        version_number = response.text.strip()
+        #Compare version numbers to see if we are behind
+        if version_number.replace(".","")>self.version.replace(".",""):
+            update_available = True
+
+        #If our version is behind then offer to update
         if update_available:
             #Check that they are sure
             update_check = CTkMessagebox(title="Update myDiscoveryResponses?",
-                                       message="A new version is available! Would you like to update now?", 
+                                       message="Version "+str(version_number)+" is available! Would you like to update now?", 
                                        icon="info",
                                        option_1="No", 
                                        option_3="Yes",
@@ -20,17 +29,11 @@ class Config:
             
             if update_check.get()=="Yes":
                 #Download new file
-                #Ask if they want to update and show version number
+                url = "https://www.myDiscoveryResponses.com/myDiscoveryResponsesInstaller.zip"
 
-                #THIS SHOULD BE A PATH TO DOWNLOADED FILE!!!
-                
-                #
-                #
-                #
-                dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"myDiscoveryResponses_Installer.exe")
-                #
-                #
-                #
+                filename = "myDiscoveryResponsesInstaller.zip"
+
+                dir_path,headers = urlretrieve(url, filename)
 
                 #Open installer
                 subprocess.Popen(["cmd","/c","start","",dir_path],
@@ -38,10 +41,18 @@ class Config:
                                         stderr=subprocess.DEVNULL,
                                         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_BREAKAWAY_FROM_JOB,
                                         close_fds=True)
-
                 #Destroy this application
                 self.destroy()
                 self.root.destroy()
+            
+        else:
+            update_check = CTkMessagebox(title="Update myDiscoveryResponses?",
+                                    message="You are already using the most recent version: "+str(version_number), 
+                                    icon="info",
+                                    option_1="Okay",
+                                    corner_radius=0,
+                                    sound=True,
+                                    master=self)
 
     #RESET COMMANDS
     #Reset the config.json

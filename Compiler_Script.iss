@@ -2,14 +2,14 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "myDiscoveryResponses"
-#define MyAppVersion "1.0.7"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "Jurisprudence Analytics"
 #define MyAppURL "mydiscoveryresponses.com"
 #define MyAppExeName "myDiscoveryResponses.exe"
 #define MyAppAssocName "Discovery File"
 #define MyAppAssocExt ".discovery"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
-#define MyAppCompileName "myDiscoveryResponsesInstaller"
+#define MyAppCompileName "myDiscoveryResponses Installer"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.

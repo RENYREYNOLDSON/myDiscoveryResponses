@@ -381,9 +381,12 @@ def get_objection_text(req,objections,remove_end=False):
                             text = text.replace("[VAR]"," "+obj.param)# Replace [VAR]
                     full_text = full_text+str(text)+". "#Add new text!
 
+        """
         # 3. ADD FINAL OBJECTION IF REQUESTED AND VALID
         if full_text!="" and remove_end==False:#Response and not RFP. Resp and RFP
             add_extra_objection_text(full_text,objs)
+        """
+        
         return full_text
     return ""
 
@@ -402,7 +405,7 @@ def get_objection_text2(req,objections,remove_end=False):
         full_text = req.custom_objection_text+" "
         # 3. ADD FINAL OBJECTION IF REQUESTED AND VALID
         if full_text!="" and remove_end==False:#Response and not RFP. Resp and RFP
-            add_extra_objection_text(full_text,objs)
+            full_text=add_extra_objection_text(full_text,objs)
         return full_text
     return ""
 

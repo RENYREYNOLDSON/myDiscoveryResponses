@@ -244,6 +244,22 @@ class WindowUtility:
             self.details_frame = Firm_Details_Frame(master=self)
             self.details_frame.pack(fill="both",expand=True,padx=20,pady=20)
 
+    def view_updater(self):
+        self.cancel_win()
+        self.win = Update(self)
+        self.win.protocol("WM_DELETE_WINDOW", self.cancel_win)
+        self.win.mainloop()
+
+    # The update failed so we show the issue and close it
+    def update_failed(self,error):
+        self.cancel_win()
+        msg = CTkMessagebox(title="Error Updating", 
+                    message="Error Downloading Update: "+str(error),
+                    icon="warning",
+                    option_1="Okay", 
+                    corner_radius=0,
+                    sound=True,
+                    master=self)
 
     # View and edit the OBJECTIONS JSON
     def view_objections(self):

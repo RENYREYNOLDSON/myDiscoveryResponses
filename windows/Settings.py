@@ -312,15 +312,15 @@ class About(tk.CTkFrame):
         title = tk.CTkLabel(master=self,text="About",font=heading_font,anchor="w")
         title.pack(fill="x",padx=10,pady=5)
 
-        #Last updated
-        text = tk.CTkLabel(master=self,text="Last Updated:",anchor="w")
-        text.pack(fill="x",padx=10,pady=(5,0))
         #Version number
         text = tk.CTkLabel(master=self,text="Current version:  "+str(self.master.master.master.version),anchor="w")
         text.pack(fill="x",padx=10,pady=(5,0))
         #Report an issue
         text = tk.CTkLabel(master=self,text="Report any issues to:  reynoldson2002@gmail.com",anchor="w")
         text.pack(fill="x",padx=10,pady=(5,0))
+
+        check_button = tk.CTkButton(master=self,text="Check for Updates",command=master.master.master.check_for_update)
+        check_button.pack(anchor="w",padx=10,pady=(5,0))
 
         #Go to file location
         reset_shortcuts_text = tk.CTkLabel(master=self,text="Open myDiscoveryResponses install location",anchor="w")
@@ -463,10 +463,11 @@ class Settings(tk.CTkToplevel):
 
 
         #UPDATE
+        """
         self.update_button = tk.CTkButton(master=self.menu_frame,text=" ⏏  Update",corner_radius=0,width=200,fg_color="transparent",hover=False,anchor="w",command=self.set_update,text_color=("black","white"))
         self.update_button.pack()
         self.update_frame = Update(master=self.main_frame,fg_color="transparent")
-
+        """
 
         #BUTTONS!
         self.button_frame = tk.CTkFrame(master=self,fg_color="transparent")

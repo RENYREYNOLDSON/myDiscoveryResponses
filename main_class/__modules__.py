@@ -23,6 +23,7 @@ from windows.Hotkeys import *
 from windows.Preview import *
 from windows.PreviewText import *
 from windows.Settings import Settings
+from windows.Update import Update
 # Object Imports
 from objects.Client import *
 from objects.File import *

@@ -3,6 +3,7 @@ from main_class.__modules__ import *
 from urllib.request import urlretrieve
 import requests
 import zipfile
+import tqdm
 
 class Config:
     #Check for updates of software
@@ -29,30 +30,8 @@ class Config:
                                        master=self)
             
             if update_check.get()=="Yes":
-                #Download new file
-                url = "https://www.myDiscoveryResponses.com/myDiscoveryResponsesInstaller.zip"
+                self.view_updater()
 
-                filename = "myDiscoveryResponsesInstaller.zip"
-
-                path,headers = urlretrieve(url, filename)
-
-                dir_path = os.path.join(get_main_path(),path)
-
-                #Need to extract exe file
-                with zipfile.ZipFile(dir_path, 'r') as zip_ref:
-                    zip_ref.extractall(get_main_path())
-
-                exe_path = os.path.join(get_main_path(),"myDiscoveryResponsesInstaller.exe")
-
-                #Open installer
-                subprocess.Popen(["cmd","/c","start","",exe_path],
-                                        stdout=subprocess.DEVNULL,  # Redirect output to avoid hanging on pipes
-                                        stderr=subprocess.DEVNULL,
-                                        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_BREAKAWAY_FROM_JOB,
-                                        close_fds=True)
-                #Destroy this application
-                self.destroy()
-                self.root.destroy()
             
         else:
             update_check = CTkMessagebox(title="Update myDiscoveryResponses?",

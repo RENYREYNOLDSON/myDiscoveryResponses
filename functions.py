@@ -296,7 +296,7 @@ def get_nth_key(dictionary, n=0):
 
 # Open the user guide pdf
 def open_user_guide():
-    webbrowser.open("https://github.com/RENYREYNOLDSON/myDiscoveryResponses")
+    webbrowser.open("https://mydiscoveryresponses.com/documentation.html")
 
 
 # Get a name with ... if needed

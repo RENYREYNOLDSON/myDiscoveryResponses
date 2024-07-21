@@ -70,6 +70,7 @@ class App(tk.CTkToplevel,Saving,WindowUtility,Config,Undo,Export,Requests):
         #Repairs the config file if new items have been added
         #Loads the config file (software settings)
         validate_integrity_of_config_file()
+        remove_installers()
         self.set_config()
         #Initialises the spell checker with the current language
         self.SPELL_CHECKER = SpellChecker(self.CONFIG["spelling"]["language"])

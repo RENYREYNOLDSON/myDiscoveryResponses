@@ -352,7 +352,7 @@ class About(tk.CTkFrame):
         #Uninstall
         reset_shortcuts_text = tk.CTkLabel(master=self,text="Uninstall myDiscoveryResponses",anchor="w")
         reset_shortcuts_text.pack(fill="x",padx=10,pady=(5,0))
-        reset_shortcuts = tk.CTkButton(master=self,text="Uninstall",fg_color="red",command=uninstall)
+        reset_shortcuts = tk.CTkButton(master=self,text="Uninstall",fg_color="red",command=master.master.master.uninstall)
         reset_shortcuts.pack(anchor="w",padx=10,pady=(5,0))
 
 class Update(tk.CTkFrame):

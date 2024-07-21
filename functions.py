@@ -179,21 +179,23 @@ def open_splash_image():
     return PhotoImage(file=os.path.join(os.path.dirname(__file__),"assets/splash_image.png"))
 
 
+
 # SOFTWARE LOCAL FILES
 ############################################################################################################
 
-#Uninstalls myDiscoveryResponses from computer
-def uninstall():
-    try:
-        uninstall_exe = os.path.join(os.path.dirname(__file__),"unins000.exe")
-        subprocess.Popen(["cmd","/c","start","",uninstall_exe],
-                                stdout=subprocess.DEVNULL,  # Redirect output to avoid hanging on pipes
-                                stderr=subprocess.DEVNULL,
-                                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_BREAKAWAY_FROM_JOB,
-                                close_fds=True)
+def remove_installers():
+    #Remove any zips
+    zip_path = os.path.join(os.path.dirname(__file__),"myDiscoveryResponses Installer.zip")
+    if os.path.exists(zip_path):
+        os.remove(zip_path)
+    #Remove any exe's
+    exe_path = os.path.join(os.path.dirname(__file__),"myDiscoveryResponses Installer.exe")
+    if os.path.exists(exe_path):
+        os.remove(exe_path)
 
-    except Exception as e:
-        print(e)
+    return
+
+
     
 #Open the software install location
 def open_install_location():

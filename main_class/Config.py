@@ -31,8 +31,6 @@ class Config:
             
             if update_check.get()=="Yes":
                 self.view_updater()
-
-            
         else:
             update_check = CTkMessagebox(title="Update myDiscoveryResponses?",
                                     message="You are already using the most recent version: "+str(version_number), 
@@ -41,6 +39,31 @@ class Config:
                                     corner_radius=0,
                                     sound=True,
                                     master=self)
+            
+    #Uninstalls myDiscoveryResponses from computer
+    def uninstall(self):
+        #Check that they are sure
+        uninstall_check = CTkMessagebox(title="Uninstall myDiscoveryResponses?",
+                                    message="Are you sure you want to uninstall?", 
+                                    icon="warning",
+                                    option_1="No", 
+                                    option_3="Yes",
+                                    corner_radius=0,
+                                    sound=True,
+                                    master=self)
+        if uninstall_check.get()=="Yes":
+            try:
+                uninstall_exe = os.path.join(get_main_path(),"unins000.exe")
+                subprocess.Popen(["cmd","/c","start","",uninstall_exe],
+                                        stdout=subprocess.DEVNULL,  # Redirect output to avoid hanging on pipes
+                                        stderr=subprocess.DEVNULL,
+                                        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_BREAKAWAY_FROM_JOB,
+                                        close_fds=True)
+                self.destroy()
+                self.root.destroy()
+
+            except Exception as e:
+                print(e)
 
     #RESET COMMANDS
     #Reset the config.json

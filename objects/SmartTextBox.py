@@ -173,22 +173,28 @@ class SmartTextbox(tk.CTkTextbox):
 
     def undo(self):#THIS FUNCTION IS NOT USED!
         self._textbox.edit_undo()
+        print("TEXT UNDO")
 
     def redo(self):#THIS FUNCTION IS NOT USED!
         self._textbox.edit_redo()
 
-    def delete(self, index1, index2=None):
+    def delete(self, index1, index2=None,remove_separator=False):
+        if remove_separator:#Remove the separator when on an undo operation!
+            print("w"+self.get("0.0","end-1c")+"w")
+            if self.get("0.0","end-1c")!="":
+                self.undo()#ONLY DO THIS IF NOT EMPTY!!!
         super().delete(index1, index2)
         return
     
     def insert(self, index, text,remove_separator=False,tags=None):
         #self.modified(None)#Modify the autoseparators when inserted to
         super().insert(index, text, tags)
-        if remove_separator:
-            pass#self.undo()
+        if remove_separator:#Remove the separator when on an undo operation!
+            if text!="":
+                self.undo()#ONLY DO THIS IF NOT EMPTY!!!
         return 
     
     def edit_separator(self):
-        #print("Text seperator added")
+        print("Text seperator added")
         return super().edit_separator()
         

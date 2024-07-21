@@ -43,9 +43,13 @@ class Undo:
     def undo_action(self):
         if len(self.ACTION_STACK)>0:
             action = self.ACTION_STACK.pop()
-            ## UNDO ACTION HERE
-            action.undo()
-            ## 
+
+            try:
+                ## UNDO ACTION HERE
+                action.undo()
+                ## 
+            except Exception as e: 
+                print(e)
 
             self.REDO_ACTION_STACK.append(action)
             #IF EMPTY then disable the undo button
@@ -66,9 +70,12 @@ class Undo:
         if len(self.REDO_ACTION_STACK)>0:
             action = self.REDO_ACTION_STACK.pop()
 
-            ## REDO ACTION HERE
-            action.redo()
-            ## 
+            try:
+                ## REDO ACTION HERE
+                action.redo()
+                ## 
+            except Exception as e:
+                print(e)
             
             self.ACTION_STACK.append(action)
             #IF EMPTY then disable the redo button

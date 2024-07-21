@@ -16,10 +16,10 @@ class Action:#Action base class
     def navigate_to_request(self):
         #Navigate to client
         if self.master.current_client!=self.client:#ALTER THIS TO ONLY DO WHAT IS NEEDED, SAVE AS BASE CLASS!
-            self.master.set_client(self.client)
+            self.master.set_client(self.client,skip_set_request=True)
         #Navigate to file
         if self.master.current_client.current_file!=self.file:
-            self.master.set_file(self.file)
+            self.master.set_file(self.file,skip_set_request=True)
         #Navigate to request
         if self.master.current_req!=self.req:
             self.master.set_request(self.req)

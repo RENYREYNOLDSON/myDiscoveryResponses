@@ -217,7 +217,7 @@ class Requests:
         self.req_type = req_type 
 
     # Set the current client
-    def set_client(self,client):
+    def set_client(self,client,skip_set_request=False):
         self.bar_frame.reset_autosave_time()
         self.close_details()
         self.current_client = client
@@ -228,7 +228,8 @@ class Requests:
 
             self.requests_frame.show_files(self.current_client.files)
             self.requests_frame.show_list(self.current_client.current_file.reqs)
-            self.set_request(self.current_client.current_file.current_req)
+            if not skip_set_request:
+                self.set_request(self.current_client.current_file.current_req)
             self.requests_frame.scroll_to(True)
             self.title("myDiscoveryResponses   |   "+str(self.current_client.current_file.name.split("/")[-1]))
         else:
@@ -249,7 +250,7 @@ class Requests:
 
 
     # Set the current file
-    def set_file(self,file):
+    def set_file(self,file,skip_set_request=False):
         #NEED TO CHANGE THINGS HERE TOO!!!
         self.current_client.current_file = file
         self.reqs = file.reqs
@@ -259,7 +260,8 @@ class Requests:
         self.set_type(file.req_type)# Set first so refresher doesn't overwrite
         self.requests_frame.update_files(self.current_client.files)
         self.requests_frame.show_list(self.current_client.current_file.reqs)
-        self.set_request(file.current_req)
+        if not skip_set_request:
+            self.set_request(file.current_req)
         self.requests_frame.scroll_to(True)
         self.title("myDiscoveryResponses   |   "+str(file.name.split("/")[-1]))
 
@@ -313,7 +315,7 @@ class Requests:
         self.response_frame.request_label.configure(text=self.req_type+" NO. "+str(text)+":")
         #Set the response textbox
         remove_separator = not save_current
-        self.response_frame.set_response(req.resp,remove_separator = remove_separator)
+        self.response_frame.set_response(req.resp,remove_separator = False)
         #RFP & RFA Options and labels
         if self.req_type=="RFP":
             self.response_frame.set_RFP(req.RFP_option)
@@ -461,7 +463,7 @@ class Requests:
                     else:
                         return
 
-    # Clear a full request
+    # Clear a full request#
     def clear(self,undo_command=False):
         if self.current_req!=0:
             if not undo_command:

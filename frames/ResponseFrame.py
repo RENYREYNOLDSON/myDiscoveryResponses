@@ -171,9 +171,10 @@ class Response_Frame(tk.CTkFrame):
         return self.current_frame.response_text.get("0.0","end-1c")
     
     def set_response(self,text,remove_separator=False):#STOP THIS FROM ADDING INVISIBLE SEPARATORS!
+        print("Set Response")
         state=self.current_frame.response_text._textbox.cget("state")
         self.current_frame.response_text.configure(state="normal")
-        self.current_frame.response_text.delete("0.0","end")
+        self.current_frame.response_text.delete("0.0","end",remove_separator=remove_separator)
         self.current_frame.response_text.insert("0.0",text,remove_separator=remove_separator)
         self.current_frame.response_text.configure(state=state)
 

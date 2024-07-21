@@ -36,11 +36,11 @@ pip install -r requirements.txt
 python __main__.py
 ```
 ## Creating Installer
-1. From within the project folder, run the command
+1. From within the project folder, run the command:
 ```
 pyinstaller __main__.spec
 ```
-2. Open INNO Compiler Setup and run
+2. Open INNO Compiler Setup and run:
 ```
 Compiler_Script.iss
 ```

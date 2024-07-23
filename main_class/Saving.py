@@ -134,7 +134,10 @@ class Saving:
                     self.requests_frame.show_list(self.reqs)
                     self.set_request(self.reqs[0])
                     self.requests_frame.scroll_to(True)
-                    self.update()
+
+                    #Open the file details here!
+                    self.view_details()
+                    #self.update()
                 elif filename[-10:]==".discovery":#OBJ
                     self.load(filename)
 
@@ -183,6 +186,8 @@ class Saving:
             else:
                 self.clients.append(Client(doc_details["defendant"],[new_file],self))
                 self.set_client(self.clients[-1])
+
+
 
 
 
@@ -425,6 +430,7 @@ class Saving:
                                     option_3="Yes",
                                     corner_radius=0,
                                     sound=True,
+                                    wraplength=500,
                                     master=self)
                 
                 if msg.get()!="Yes":

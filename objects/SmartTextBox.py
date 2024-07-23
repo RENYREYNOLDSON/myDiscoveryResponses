@@ -31,6 +31,7 @@ class SmartTextbox(tk.CTkTextbox):
                 self.bind(bind,self.modified)
 
             self.bind("<KeyPress>",self.check_if_start)
+            self.bind("<KeyRelease>",self.curly_convert)
             self.bind("<BackSpace>",self.backspace)#Get's its own function
             #THIS UNBINDS THE UNDO AND REDO!
             self._textbox.event_delete("<<Undo>>")
@@ -59,6 +60,18 @@ class SmartTextbox(tk.CTkTextbox):
     def check_if_start(self,e):
         if self.get(0.0,"end-1c") == "":
             self.modified(None)
+
+    #DO CURLY QUOTES HERE!
+    def curly_convert(self,e):
+        insert_index = self.index(tk.INSERT)#Current index
+        resp = " "+self.get(0.0,"end-1c")#Current response text
+        if '"' in resp or "'" in resp:
+            resp = curly_convert(resp)
+            # Put the text here 
+            self.delete("0.0","end-1c")
+            self.insert("0.0",resp[1:])
+            self.mark_set("insert",insert_index)
+
 
     def check_shortcuts(self,e):
         #DO HOTKEYS HERE

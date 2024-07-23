@@ -53,89 +53,6 @@ class WindowUtility:
         #Additional frame used for editing file and firm details
         self.details_frame = None
         
-    # REFRESH WINDOW PERIODICALLY, (MUST BE EFFICIENT FOR PERFORMANCE)
-    def refresher(self):
-        if self.current_req!=0:
-
-            # 1. UPDATE OBJECTION TEXTBOX
-            ###################################################################
-
-            #Set the current objection parameters
-            if self.current_req.current_objection!="":
-                self.current_req.current_objection.param = self.objections_frame.objection_input.get()
-                self.current_req.current_objection.additional_param = self.objections_frame.additional_input.get()
-
-            #The custom text is the text typed into the box
-            self.current_req.custom_objection_text = self.response_frame.get_objection()#Get prev text from box
-
-            remove_end=False
-            if not ((self.req_type!="RFP" and len(self.response_frame.get_response())>0) or (self.req_type=="RFP" and len(self.response_frame.get_RFP())>0)):
-                remove_end = True
-            text = get_objection_text(self.current_req,self.objections,remove_end)#Get objections with no end if text in response
-            #Check if any of the objections or params have changed
-            if text!=self.previous_objection_text:#If the text has changed REDRAW
-                self.response_frame.set_objection(text)
-                self.set_client_unsaved(self.current_client)
-
-            self.previous_objection_text = text # Save for next time
-
-            # 2. UPDATE RESPONSE TEXTBOX
-            ###################################################################
-
-            if self.req_type=="RFA":
-                option = self.response_frame.get_RFA()
-            else:
-                option = self.response_frame.get_RFP()
-            
-            # RFP
-            if self.req_type=="RFP" and option!="Custom":
-                temp = self.response_frame.get_response()#Get prev text from box
-                resp = self.response_frame.get_RFP_text()
-                text = RFP_responses[option].replace("[VAR]",resp)
-                if option!="Available" and resp!="":
-                    text = (text+RFP_EXTRA).replace("[VAR]",resp)
-                if text!=temp.replace("\n",""):#If the text has changed REDRAW
-                    self.set_client_unsaved(self.current_client)
-                    #Change response text
-                    self.response_frame.set_response(text)
-                    #Change color of request
-                    self.current_req.color="grey"
-                    self.current_client.current_file.color=("black","white")
-                    self.requests_frame.update_files(self.current_client.files)
-            # RFA
-            elif self.req_type=="RFA" and option!="Custom":
-                resp = " "+self.response_frame.get_RFA_text()#Current response text
-                temp = self.response_frame.get_response()#Get prev text from box
-                text = RFA_responses[option]
-                if text!=temp.replace("\n",""):#If the text has changed REDRAW
-                    self.set_client_unsaved(self.current_client)
-                    #Change response text
-                    self.response_frame.set_response(text)
-                    #Change color of request
-                    self.current_req.color="grey"
-                    self.current_client.current_file.color=("black","white")
-                    self.requests_frame.update_files(self.current_client.files)
-            # NORMAL
-            else:#If NOT RFP or RFA custom      
-                insert_index = self.response_frame.current_frame.response_text.index(tk.INSERT)#Current index
-                resp = " "+self.response_frame.get_response()#Current response text
-                #DO CURCLY QUOTES HERE!
-                if '"' in resp or "'" in resp:
-                    resp = curly_convert(resp)
-                    # Put the text here 
-                    self.response_frame.current_frame.response_text.delete("0.0","end-1c")
-                    self.response_frame.current_frame.response_text.insert("0.0",resp[1:])
-                    self.response_frame.current_frame.response_text.mark_set("insert",insert_index)
-
-                if resp[1:].replace("\n","")!=self.current_req.resp.replace("\n",""):# Change colour back if edited
-                    self.current_req.color="grey"
-                    self.current_req.resp=resp[1:]
-                    self.current_client.current_file.color=("black","white")
-                    self.requests_frame.update_files(self.current_client.files)
-                    self.set_client_unsaved(self.current_client)
-
-
-        self.after(100, self.refresher)#REFRESH AGAIN
 
     #Toggles whether the program is in fullscreen or not
     def toggle_fullscreen(self):
@@ -325,6 +242,7 @@ class WindowUtility:
                                 option_3="Yes",
                                 corner_radius=0,
                                 sound=True,
+                                wraplength=400,
                                 master=self)
             if msg.get()!="Yes":
                 return

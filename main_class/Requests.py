@@ -74,6 +74,19 @@ FROGS = {"1.1":"State the name, ADDRESS, telephone number, and relationship to y
         "20.11":"State the name, ADDRESS, and telephone number of each owner and each PERSON who has had possession since the INCIDENT of each vehicle involved in the INCIDENT."
         }
 
+RFP_responses={"Available":"Responding Party will comply with this demand. Please see “[VAR]” produced concurrently herewith.",
+                "Not Exist":"After a diligent search and reasonable inquiry, Responding Party finds no responsive documents in their possession, custody, or control, because no such documents are known to exist.",
+                "Not Possessed":"After a diligent search and reasonable inquiry, Responding Party finds no responsive documents in their possession, custody, or control, because no such documents have ever been in the possession, custody, or control of Responding Party.",
+                "Lost":"After a diligent search and reasonable inquiry, Responding Party finds no responsive documents in their possession, custody, or control, any such documents have been destroyed, lost, misplaced or stolen."}
+
+RFA_responses={"Admit":"Admit. ",
+                "Deny":"Deny. ",
+                "Lack Info":"A reasonable inquiry concerning the matter in this particular request has been made, and the information known or readily obtainable is insufficient to enable Responding Party to admit the matter."}
+
+RFP_EXTRA = " Any responsive documents are believed to be in the possession, custody, or control of [VAR]."
+
+
+
 class Requests:
 
     ### SETTING AND GETTING OBJECTS
@@ -160,6 +173,7 @@ class Requests:
             # Update buttons
             self.objections_frame.toggle_button(obj)#TOGGLE THE COLOUR OF THIS BUTTON!
             # Update objection special menu
+            self.update_objection_textbox()
 
     #Change the currently selected objection
     def toggle_selected_objection(self,obj,event):
@@ -174,7 +188,6 @@ class Requests:
     #Allow for custom response when 'Custom' selected RFP
     def setRFP(self,value,undo_command=False):
         #Add an undo option here!
-        print(value)
         if not undo_command:
             self.add_action_to_stack(ActionRFPEntry(master=self,obj=(self.response_frame.previous_option,value)))#Pass current and new 
         self.response_frame.set_previous_option(value)
@@ -183,6 +196,8 @@ class Requests:
             self.response_frame.current_frame.response_text.delete("0.0","end")
         else:
             self.response_frame.current_frame.response_text.configure(state="disabled")
+
+        self.update_response_textbox()
 
     #Allow for custom response when 'Custom' selected RFA
     def setRFA(self,value,undo_command=False):
@@ -195,6 +210,8 @@ class Requests:
             self.response_frame.current_frame.response_text.delete("0.0","end")
         else:
             self.response_frame.current_frame.response_text.configure(state="disabled")
+
+        self.update_response_textbox()
 
 
     #UPDATE THIS FOR NEW METHOD!
@@ -273,7 +290,10 @@ class Requests:
         if self.current_req!=0:
             # Saving
             if save_current:
+                #Save current response
                 self.current_req.resp = self.response_frame.get_response()
+                #Save current request
+                self.current_req.req = self.response_frame.get_request()
                 #GET RFP data
                 if self.prev_type=="RFP":
                     self.current_req.RFP_option=self.response_frame.get_RFP()
@@ -324,6 +344,11 @@ class Requests:
             self.response_frame.set_RFA(req.RFA_option)
             self.response_frame.set_RFA_text(req.RFA_text)
 
+        #Set objection text
+        #self.response_frame.set_objection(req.custom_objection_text)
+        self.update_objection_textbox()
+        self.update_response_textbox()
+
         #Set the request type to itself
         self.set_type(self.req_type)    
 
@@ -368,6 +393,91 @@ class Requests:
             self.set_request(self.reqs[0])
             self.requests_frame.scroll_to(True)
             self.add_action_to_stack(ActionReadFile(master=self,obj=new_file))
+
+
+
+    #UPDATE OBJECTION TEXTBOX ON CHANGE
+    #Triggers: Changing request, toggle obj, change objections, edit [VAR] text
+    def update_objection_textbox(self,event=None):
+        if self.current_req!=0:
+            #1. Set the current objection parameters from inputs
+            if self.current_req.current_objection!="":
+                self.current_req.current_objection.param = self.objections_frame.objection_input.get()
+                self.current_req.current_objection.additional_param = self.objections_frame.additional_input.get()
+
+            #2. Set the custom text to the current box contents
+            self.current_req.custom_objection_text = self.response_frame.get_objection()#Get prev text from box
+
+            #3. Get the objection text - just from objections
+            remove_end=False
+            if not ((self.req_type!="RFP" and len(self.response_frame.get_response())>0) or (self.req_type=="RFP" and len(self.response_frame.get_RFP())>0)):
+                remove_end = True
+            text = get_objection_text(self.current_req,self.objections,remove_end)#Get objections with no end if text in response
+            
+            #4. If new objections or params then set the objection textbox to this
+            if text!=self.previous_objection_text:#If the text has changed REDRAW
+                self.response_frame.set_objection(text)
+                self.set_client_unsaved(self.current_client)
+
+            self.previous_objection_text = text # Save for next time
+
+
+    #UPDATE RESPONSE TEXTBOX ON CHANGE
+    #Triggers: Changing option, changing request, typing into RFP
+    def update_response_textbox(self,event=None):
+        if self.current_req!=0:
+            #1. Get current selected RFA/RFP option
+            if self.req_type=="RFA":
+                option = self.response_frame.get_RFA()
+            else:
+                option = self.response_frame.get_RFP()
+            
+            #2. Set the response depending on current option chosen
+            # RFP
+            if self.req_type=="RFP" and option!="Custom":
+                temp = self.response_frame.get_response()#Get prev text from box
+                resp = self.response_frame.get_RFP_text()
+                text = RFP_responses[option].replace("[VAR]",resp)
+                if option!="Available" and resp!="":
+                    text = (text+RFP_EXTRA).replace("[VAR]",resp)
+                if text!=temp.replace("\n",""):#If the text has changed REDRAW
+                    self.set_client_unsaved(self.current_client)
+                    #Change response text
+                    self.response_frame.set_response(text)
+                    #Change color of request
+                    self.current_req.color="grey"
+                    self.current_client.current_file.color=("black","white")
+                    self.requests_frame.update_files(self.current_client.files)
+            # RFA
+            elif self.req_type=="RFA" and option!="Custom":
+                resp = " "+self.response_frame.get_RFA_text()#Current response text
+                temp = self.response_frame.get_response()#Get prev text from box
+                text = RFA_responses[option]
+                if text!=temp.replace("\n",""):#If the text has changed REDRAW
+                    self.set_client_unsaved(self.current_client)
+                    #Change response text
+                    self.response_frame.set_response(text)
+                    #Change color of request
+                    self.current_req.color="grey"
+                    self.current_client.current_file.color=("black","white")
+                    self.requests_frame.update_files(self.current_client.files)
+            # NORMAL
+            else:#If NOT RFP or RFA custom      
+                if resp[1:].replace("\n","")!=self.current_req.resp.replace("\n",""):# Change colour back if edited
+                    self.current_req.color="grey"
+                    self.current_req.resp=resp[1:]
+                    self.current_client.current_file.color=("black","white")
+                    self.requests_frame.update_files(self.current_client.files)
+                    self.set_client_unsaved(self.current_client)
+
+
+
+
+
+
+
+
+
     ### USER ACTIVITY
     ########################################################################################################
 

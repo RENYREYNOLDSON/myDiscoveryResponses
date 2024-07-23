@@ -28,7 +28,7 @@ class Response_Frame(tk.CTkFrame):
         # Request Body
         self.request_label=tk.CTkLabel(master=self,text="REQUEST:",font=label_font)
         self.request_label.grid(row=0,column=0,sticky="w",columnspan=2,padx=20)
-        self.request_text=tk.CTkTextbox(master=self,wrap="word",state="disabled",height=40)
+        self.request_text=tk.CTkTextbox(master=self,wrap="word",state="normal",height=40)
         self.request_text.grid(row=1,column=0,padx=30,stick="nsew",columnspan=2,rowspan=3)
         # Objections Body
         self.objection_label=tk.CTkLabel(master=self,text="OBJECTIONS:",font=label_font)
@@ -67,6 +67,7 @@ class Response_Frame(tk.CTkFrame):
         self.RFP_frame.response_text=SmartTextbox(main_master=self.master,master=self.RFP_frame,wrap="word",state="disabled")
         self.RFP_frame.RFP_label = tk.CTkLabel(master=location_frame,text="Documents Location: ")
         self.RFP_frame.RFP_text = tk.CTkEntry(master=location_frame,state="normal")
+        self.RFP_frame.RFP_text.bind("<KeyRelease>",self.master.update_response_textbox)
         self.RFP_frame.RFP_option = tk.CTkSegmentedButton(master=self.RFP_frame,values=["Available","Not Exist","Not Possessed","Lost","Custom"],border_width=0,command=master.setRFP)
         self.RFP_frame.RFP_option.set("Available")
         #pack
@@ -153,10 +154,10 @@ class Response_Frame(tk.CTkFrame):
     def get_request(self):
         return self.request_text.get("0.0","end-1c")
     def set_request(self,text):
-        self.request_text.configure(state="normal")
+        #self.request_text.configure(state="normal")
         self.request_text.delete("0.0","end")
         self.request_text.insert("0.0",text)
-        self.request_text.configure(state="disabled")
+        #self.request_text.configure(state="disabled")
     #Objection
     def get_objection(self):
         return self.objection_text.get("0.0","end-1c")

@@ -89,7 +89,7 @@ class App(tk.CTkToplevel,Saving,WindowUtility,Config,Undo,Export,Requests):
 
         ##### BEGIN REGULAR INTERVAL FUNCTIONS
         #Refresher updates text and software as the user interacts
-        self.after(100, self.refresher)
+        #self.after(100, self.refresher)
         #Autosave will trigger the save function at regular intervals
         self.after(int(self.CONFIG["general"]["autosave_interval"]),self.autosave)
         

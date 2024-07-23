@@ -200,6 +200,8 @@ class EditObjections(tk.CTkToplevel):
         self.master.objections = open_objections()
         #Reload objections into files
         self.master.reload_objections()
+        #Update current objection text
+        self.master.update_objection_textbox()
         #Close window
         self.master.objections_frame.redraw_all()
         if self.master.current_req!=0:#Reset all selected objections

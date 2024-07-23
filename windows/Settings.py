@@ -17,61 +17,71 @@ class General(tk.CTkFrame):
     def __init__(self,master, **kwargs):
         #FRAME SETUP
         super().__init__(master, **kwargs)
+
+        self.scroll_frame = tk.CTkScrollableFrame(master=self,fg_color="transparent")
+        self.scroll_frame.pack(expand=True,fill="both")
         #Title
-        title = tk.CTkLabel(master=self,text="General",font=heading_font,anchor="w")
+        title = tk.CTkLabel(master=self.scroll_frame,text="General",font=heading_font,anchor="w")
         title.pack(fill="x",padx=10,pady=5)
 
         #Tooltips?
-        tooltips = tk.CTkLabel(master=self,text="Show tooltips on hover",anchor="w")
+        tooltips = tk.CTkLabel(master=self.scroll_frame,text="Show tooltips on hover",anchor="w")
         tooltips.pack(fill="x",padx=10,pady=(0,0))
-        self.tooltips_switch = tk.CTkSwitch(master=self,text="")
+        self.tooltips_switch = tk.CTkSwitch(master=self.scroll_frame,text="")
         set_switch(self.tooltips_switch,self.master.master.CONFIG["general"]["hover_tooltips"])
         self.tooltips_switch.pack(fill="x",padx=10,pady=(0,0))
 
         #17.1 automatically?
-        seventeen_label = tk.CTkLabel(master=self,text="Automatically add FROG 17.1 responses",anchor="w")
+        seventeen_label = tk.CTkLabel(master=self.scroll_frame,text="Automatically add FROG 17.1 responses",anchor="w")
         seventeen_label.pack(fill="x",padx=10,pady=(5,0))
-        self.seventeen_switch = tk.CTkSwitch(master=self,text="")
+        self.seventeen_switch = tk.CTkSwitch(master=self.scroll_frame,text="")
         set_switch(self.seventeen_switch,self.master.master.CONFIG["general"]["auto_FROGS"])
         self.seventeen_switch.pack(fill="x",padx=10,pady=(0,0))
 
         #Undo Stack
         value = int(self.master.master.CONFIG["general"]["undo_stack"])
-        self.undo_label = tk.CTkLabel(master=self,text="Maximum actions in the Undo list ("+str(value)+")",anchor="w")
+        self.undo_label = tk.CTkLabel(master=self.scroll_frame,text="Maximum actions in the Undo list ("+str(value)+")",anchor="w")
         self.undo_label.pack(fill="x",padx=10,pady=(5,0))
-        self.undo_stack = tk.CTkSlider(master=self,from_= 5,to=100,command=self.update_undo_stack_label,number_of_steps=94)
+        self.undo_stack = tk.CTkSlider(master=self.scroll_frame,from_= 5,to=100,command=self.update_undo_stack_label,number_of_steps=94)
         self.undo_stack.set(self.master.master.CONFIG["general"]["undo_stack"])
         self.undo_stack.pack(fill="x",padx=(10,300),pady=(0,5))
 
-        title = tk.CTkLabel(master=self,text="Saving",font=heading_font,anchor="w")
+        #Objections Order
+        order_label = tk.CTkLabel(master=self.scroll_frame,text="Objections display order",anchor="w")
+        order_label.pack(fill="x",padx=10,pady=(5,0))
+        self.objections_order = tk.CTkOptionMenu(master=self.scroll_frame,values=["Saved Order","Alphabetical"])
+        self.objections_order.set(self.master.master.CONFIG["general"]["objections_order"])
+        self.objections_order.pack(fill="x",padx=(10,300),pady=(0,5))
+
+        title = tk.CTkLabel(master=self.scroll_frame,text="Saving",font=heading_font,anchor="w")
         title.pack(fill="x",padx=10,pady=(20,5))
 
         #Autosaving?
-        autosave_label = tk.CTkLabel(master=self,text="Use autosaving",anchor="w")
+        autosave_label = tk.CTkLabel(master=self.scroll_frame,text="Use autosaving",anchor="w")
         autosave_label.pack(fill="x",padx=10,pady=(0,0))
-        self.autosave_checkbox = tk.CTkSwitch(master=self,text="")
+        self.autosave_checkbox = tk.CTkSwitch(master=self.scroll_frame,text="")
         set_switch(self.autosave_checkbox,self.master.master.CONFIG["general"]["autosaving"])
         self.autosave_checkbox.pack(fill="x",padx=10,pady=(0,5))
 
         #Autosave Interval
         value = int(self.master.master.CONFIG["general"]["autosave_interval"]//1000)
-        self.autosave_label = tk.CTkLabel(master=self,text="Autosave interval in seconds ("+str(value)+"s)",anchor="w")
+        self.autosave_label = tk.CTkLabel(master=self.scroll_frame,text="Autosave interval in seconds ("+str(value)+"s)",anchor="w")
         self.autosave_label.pack(fill="x",padx=10,pady=(5,0))
-        self.autosave_interval = tk.CTkSlider(master=self,from_= 10000,to=500000,command=self.update_autosave_label,number_of_steps=49)
+        self.autosave_interval = tk.CTkSlider(master=self.scroll_frame,from_= 10000,to=500000,command=self.update_autosave_label,number_of_steps=49)
         self.autosave_interval.set(self.master.master.CONFIG["general"]["autosave_interval"])
         self.autosave_interval.pack(fill="x",padx=(10,300),pady=(0,5))
 
         #Export include
-        export_label = tk.CTkLabel(master=self,text="Only include submitted requests in the export",anchor="w")
+        export_label = tk.CTkLabel(master=self.scroll_frame,text="Only include submitted requests in the export",anchor="w")
         export_label.pack(fill="x",padx=10,pady=(5,0))
-        self.export_switch = tk.CTkSwitch(master=self,text="")
+        self.export_switch = tk.CTkSwitch(master=self.scroll_frame,text="")
         set_switch(self.export_switch,self.master.master.CONFIG["general"]["submitted_only"])
         self.export_switch.pack(fill="x",padx=10,pady=(0,5))
 
         #Open Export
-        export_label = tk.CTkLabel(master=self,text="Open exported file",anchor="w")
+        export_label = tk.CTkLabel(master=self.scroll_frame,text="Open exported file",anchor="w")
         export_label.pack(fill="x",padx=10,pady=(5,0))
-        self.open_export_switch = tk.CTkSwitch(master=self,text="")
+        self.open_export_switch = tk.CTkSwitch(master=self.scroll_frame,text="")
         set_switch(self.open_export_switch,self.master.master.CONFIG["general"]["open_export"])
         self.open_export_switch.pack(fill="x",padx=10,pady=(0,5))
 
@@ -522,7 +532,8 @@ class Settings(tk.CTkToplevel):
             "autosave_interval":self.general_frame.autosave_interval.get(),
             "submitted_only":self.general_frame.export_switch.get(),
             "open_export":self.general_frame.open_export_switch.get(),
-            "undo_stack":self.general_frame.undo_stack.get()}
+            "undo_stack":self.general_frame.undo_stack.get(),
+            "objections_order":self.general_frame.objections_order.get()}
         return general
     
     def get_appearance(self):

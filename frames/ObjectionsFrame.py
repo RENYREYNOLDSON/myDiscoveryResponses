@@ -25,9 +25,13 @@ class Objections_Frame(tk.CTkFrame):
         #Objection Input
         self.objection_input = tk.CTkEntry(master=self.info_frame,placeholder_text="Objection Input",text_color="black")
         self.objection_input.pack(padx=15,fill="x")
+        #Bind an update for when these are typed into
+        self.objection_input.bind("<KeyRelease>",self.master.update_objection_textbox)
+
         #Additional Text Input
         self.additional_input = tk.CTkEntry(master=self.info_frame,placeholder_text="Additional Input",text_color="black")
         self.additional_input.pack(padx=15,fill="x",pady=(5,0))
+        self.additional_input.bind("<KeyRelease>",self.master.update_objection_textbox)
 
         self.redraw_all()#Draw all of the objection buttons
 
@@ -39,6 +43,7 @@ class Objections_Frame(tk.CTkFrame):
         #Cancel if there are no objections
         if len(list(self.master.objections.keys()))<1:
             return
+        
         l=[]
         for i in range(len(list(self.master.objections.keys()))):
             l.append(i)
@@ -46,6 +51,10 @@ class Objections_Frame(tk.CTkFrame):
         self.list_frame.columnconfigure((0,1),weight=1)
         # Objections (from file)
         self.options = list(self.master.objections.keys())
+
+        #Change order depending on config
+        if self.master.CONFIG["general"]["objections_order"]=="Alphabetical":
+            self.options = sorted(self.options)
 
         #Move ones with entries to the front
         c=0

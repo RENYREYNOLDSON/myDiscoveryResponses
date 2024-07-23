@@ -235,22 +235,32 @@ class Requests:
 
     # Set the current client
     def set_client(self,client,skip_set_request=False):
+        #1.Reset the autosave time
         self.bar_frame.reset_autosave_time()
+        #2. Close the file details window if needed
         self.close_details()
+        #3. Set the current client
         self.current_client = client
+        #4. Update the clients list
         self.requests_frame.show_clients(self.clients)
+        #5. If the client is not empty then set the file and request, otherwise blank
         if self.current_client.current_file!="":
+            #5.1. Set the request type
             self.set_type(self.current_client.current_file.req_type)
+            #5.2. Get the current requests
             self.reqs = self.current_client.current_file.reqs
-
+            #5.3. Show the files list
             self.requests_frame.show_files(self.current_client.files)
+            #5.4. Show the requests list
             self.requests_frame.show_list(self.current_client.current_file.reqs)
+            #5.5 Set the current request
             if not skip_set_request:
                 self.set_request(self.current_client.current_file.current_req)
+            #5.6. Scroll to the current request
             self.requests_frame.scroll_to(True)
+            #5.7. Set the window title
             self.title("myDiscoveryResponses   |   "+str(self.current_client.current_file.name.split("/")[-1]))
         else:
-            #RESET THE REQUESTS HERE
             # Reset Files
             self.requests_frame.show_files([])
             # Reset Requests
@@ -268,75 +278,77 @@ class Requests:
 
     # Set the current file
     def set_file(self,file,skip_set_request=False):
-        #NEED TO CHANGE THINGS HERE TOO!!!
+        #1. Set the current file
         self.current_client.current_file = file
+        #2. Get the current requests
         self.reqs = file.reqs
-        #Close the details menu
+        #3. Close the details window if needed
         self.close_details()
-        # Set is built for a single request type, need to change for files
-        self.set_type(file.req_type)# Set first so refresher doesn't overwrite
+        #4. Set the request type
+        self.set_type(file.req_type)
+        #5. Update the files list
         self.requests_frame.update_files(self.current_client.files)
+        #6. Show the requests list
         self.requests_frame.show_list(self.current_client.current_file.reqs)
+        #7. Set the current request
         if not skip_set_request:
             self.set_request(file.current_req)
+        #8. Scroll to the current request
         self.requests_frame.scroll_to(True)
+        #9. Set the window title
         self.title("myDiscoveryResponses   |   "+str(file.name.split("/")[-1]))
 
     # Save request and open a different one
     def set_request(self,req,save_current=True):
-        #Close details menu
+        #1. Close the details window if needed
         self.close_details()
-        # 1. SAVING PREVIOUS RESPONSE
+        #2. Save current request
         if self.current_req!=0:
-            # Saving
             if save_current:
-                #Save current response
+                #2.1. Save current response
                 self.current_req.resp = self.response_frame.get_response()
-                #Save current request
+                #2.2. Save current request
                 self.current_req.req = self.response_frame.get_request()
-                #GET RFP data
+                #2.3. Save the RFP and RFA options
                 if self.prev_type=="RFP":
                     self.current_req.RFP_option=self.response_frame.get_RFP()
                     self.current_req.RFP_text=self.response_frame.get_RFP_text()
                 elif self.prev_type=="RFA":
                     self.current_req.RFA_option=self.response_frame.get_RFA()
                     self.current_req.RFA_text=self.response_frame.get_RFA_text()
-                #COLOR#########################################
+                #2.4. Set the colour of the request
                 grey=False
                 if self.current_req.resp.replace("\n","")!="" and self.req_type!="RFP":
                     grey=True
                 elif (self.current_req.RFP_option!="Available" or len(self.current_req.RFP_text)>0):
                     grey=True
-
                 if self.current_req.color!="#FF0000" and self.current_req.color!="#50C878":
                     if grey:
                         self.current_req.color="grey" 
                     else:
                         self.current_req.color=("black","white")
-                ################################################
             
-        # 2. ENTERING NEW RESPONSE INTO FRAME
+        #3. Format response frame for new response type
         self.response_frame.redraw(req.req_type)
-        #If set to itself then return
+        #4. Return if setting to the current request
         if self.current_req==req and save_current:
             return
-        #SET THE NEW REQ
+        #5. Set the current request
         self.current_req=req
-        self.current_client.current_file.current_req=req# Set the current req of the file
-
-        #UPDATING THE RESPONSE FRAME
-        #Set the request textbox
+        #6. Set the files current request
+        self.current_client.current_file.current_req=req
+        #7. Set the request in the textbox
         self.response_frame.set_request(req.req)
-        #Set the response number label
-        if req.custom_key!="":
+        #8. Set the request number label
+        if req.custom_key!="":### MOVE THIS INTO FUNCTION IN REQUEST
             text = req.custom_key
         else:
             text = req.no+1
         self.response_frame.request_label.configure(text=self.req_type+" NO. "+str(text)+":")
-        #Set the response textbox
+        #9. Set the current response textbox
         remove_separator = not save_current
         self.response_frame.set_response(req.resp,remove_separator = False)
-        #RFP & RFA Options and labels
+        #10. Set RFP & RFA Options and labels
         if self.req_type=="RFP":
             self.response_frame.set_RFP(req.RFP_option)
             self.response_frame.set_RFP_text(req.RFP_text)
@@ -344,21 +356,20 @@ class Requests:
             self.response_frame.set_RFA(req.RFA_option)
             self.response_frame.set_RFA_text(req.RFA_text)
 
-        #Set objection text
-        #self.response_frame.set_objection(req.custom_objection_text)
+        #11. Set the objection textbox
         self.update_objection_textbox()
+        #12. Set the response textbox
         self.update_response_textbox()
-
-        #Set the request type to itself
+        #13. Set the current request type
         self.set_type(self.req_type)    
-
-        #Update Objections List
+        #14. Redraw the objections list
         self.objections_frame.redraw(req)
-        #Redraw the request buttons
+        #15. Redraw the requests list
         self.requests_frame.update_list(self.reqs)
-        #Update the objection special input
+        #16. Set the objection [VAR] inputs
         self.objections_frame.update_current(self.current_req.current_objection)
 
+        return
 
 
     def add_blank_frog(self):

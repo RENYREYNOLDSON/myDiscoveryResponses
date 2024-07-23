@@ -196,3 +196,24 @@ class Config:
         self.landing_frame.set_tooltips()
         self.bar_frame.set_tooltips()
         self.requests_frame.set_tooltips()
+
+    
+    #Check if it is the first time using myDiscoveryResponses / firm details are default values
+    def check_for_new_user(self):
+        backup_data = open_firm_details_backup()
+        current_data = get_firm_details()
+        #If these are equal then the software is new/reset
+        if backup_data==current_data:
+            #Open a popup to take to firm details
+            open_firm = CTkMessagebox(title="Welcome",
+                message="Welcome to myDiscoveryResponses! Would you like to enter your firm details?", 
+                icon="info",
+                option_1="Skip",
+                option_3="Yes",
+                corner_radius=0,
+                sound=True,
+                wraplength=500,
+                master=self)
+            if open_firm.get()=="Yes":
+                self.view_firm_details()
+            return

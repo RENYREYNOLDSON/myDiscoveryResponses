@@ -98,6 +98,9 @@ class App(tk.CTkToplevel,Saving,WindowUtility,Config,Undo,Export,Requests):
 
         ##### POPULATE WINDOW WITH OBJECTS
         self.populate_window()
+
+        ##### CHECK IF FIRM DETAILS ARE DEFAULTS
+        self.check_for_new_user()
         
     # Create a new MAIN window, must be here
     def create_window(self):

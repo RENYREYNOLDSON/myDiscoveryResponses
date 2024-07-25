@@ -394,7 +394,7 @@ def get_objection_text(req,objections,remove_end=False):
 
 
 
-def get_objection_text2(req,objections,remove_end=False):
+def get_objection_text2(req,remove_end=False):
     # 1. GET ALL SELECTED OBJECTIONS
     objs=[]
     opts = req.opts
@@ -403,7 +403,7 @@ def get_objection_text2(req,objections,remove_end=False):
             objs.append(obj)
 
     # 2. USE CURRENT TEXT ATTRIBUTE
-    if len(objs)>0:
+    if len(req.custom_objection_text)>0:
         full_text = req.custom_objection_text+" "
         # 3. ADD FINAL OBJECTION IF REQUESTED AND VALID
         if full_text!="" and remove_end==False:#Response and not RFP. Resp and RFP

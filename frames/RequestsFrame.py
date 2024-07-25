@@ -171,7 +171,7 @@ class Requests_Frame(tk.CTkFrame):
                 self.list_frame._parent_canvas.yview_moveto(new)
 
     #Show all the open request buttons
-    def show_list(self,reqs):
+    def show_list(self,reqs,req_type="RFA"):
         for w in self.list_frame.winfo_children():
             w.destroy()
         self.request_buttons=[]
@@ -181,7 +181,6 @@ class Requests_Frame(tk.CTkFrame):
             if i==self.master.current_req:
                 fg_color='#144870'
             color=i.color
-            req_type=self.master.req_type
             if i.custom_key=="":
                 text = c
             else:

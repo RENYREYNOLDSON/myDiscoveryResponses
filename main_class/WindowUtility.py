@@ -139,6 +139,7 @@ class WindowUtility:
             self.response_frame.pack_forget()
             self.objections_frame.pack_forget()
             self.details_frame.pack(fill="both",expand=True,padx=20,pady=20)
+            self.reset_undo_stacks()
 
     def close_details(self):
         if self.details_frame!=None:
@@ -149,6 +150,8 @@ class WindowUtility:
             else:
                 self.objections_frame.pack(padx=0,pady=0,expand=False,side="right",fill="both")
                 self.response_frame.pack(padx=20,pady=20,expand=True,side="left",fill="both")
+            #Reset the undos
+            self.reset_undo_stacks()
 
 
     def view_firm_details(self):
@@ -160,6 +163,7 @@ class WindowUtility:
 
             self.details_frame = Firm_Details_Frame(master=self)
             self.details_frame.pack(fill="both",expand=True,padx=20,pady=20)
+            self.reset_undo_stacks()
 
     def view_updater(self):
         self.cancel_win()

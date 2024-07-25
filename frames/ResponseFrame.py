@@ -15,9 +15,13 @@ class Response_Frame(tk.CTkFrame):
         #Set Custom Label Font
         label_font = tk.CTkFont("Arial",16,underline=True,weight="bold")
 
-        self.default_frame=tk.CTkFrame(master=self,fg_color="transparent")
-        self.RFA_frame=tk.CTkFrame(master=self,fg_color="transparent")
-        self.RFP_frame=tk.CTkFrame(master=self,fg_color="transparent")
+        self.grid_response_frame = tk.CTkFrame(master=self,fg_color="transparent")
+
+        self.default_frame=tk.CTkFrame(master=self.grid_response_frame,fg_color="transparent")
+        self.RFA_frame=tk.CTkFrame(master=self.grid_response_frame,fg_color="transparent")
+        self.RFP_frame=tk.CTkFrame(master=self.grid_response_frame,fg_color="transparent")
+
+
 
         self.current_frame=self.default_frame#This keeps track of current open frame
 
@@ -28,19 +32,20 @@ class Response_Frame(tk.CTkFrame):
         # Request Body
         self.request_label=tk.CTkLabel(master=self,text="REQUEST:",font=label_font)
         self.request_label.grid(row=0,column=0,sticky="w",columnspan=2,padx=20)
-        self.request_text=tk.CTkTextbox(master=self,wrap="word",state="normal",height=40)
+        self.request_text=SmartTextbox(main_master=self.master,master=self,wrap="word",state="normal",height=40)
         self.request_text.grid(row=1,column=0,padx=30,stick="nsew",columnspan=2,rowspan=3)
         # Objections Body
         self.objection_label=tk.CTkLabel(master=self,text="OBJECTIONS:",font=label_font)
         self.objection_label.grid(row=4,column=0,sticky="w",columnspan=2,padx=20)
-        self.objection_text=tk.CTkTextbox(master=self,wrap="word",state="normal",height=40)
+        self.objection_text=SmartTextbox(main_master=self.master,master=self,wrap="word",state="normal",height=40)
         self.objection_text.grid(row=5,column=0,padx=30,stick="nsew",columnspan=2,rowspan=3)
+
 
 
         #2. CUSTOM RESPONSE FRAMES
         #Default Frame
         self.default_frame.response_label = tk.CTkLabel(master=self.default_frame,text="RESPONSE:",font=label_font)
-        self.default_frame.response_text = SmartTextbox(master=self.default_frame,main_master=self.master,wrap="word",state="normal")
+        self.default_frame.response_text = SmartTextbox(master=self.default_frame,main_master=self.master,wrap="word",state="normal",undo=True)
         #pack
         self.default_frame.response_label.pack(padx=20,anchor="w",pady=10)
         self.default_frame.response_text.pack(padx=30,fill="both",expand=True,anchor="center")
@@ -82,7 +87,8 @@ class Response_Frame(tk.CTkFrame):
 
 
         #PLACE THE RESPONSE FRAME
-        self.current_frame.grid(row=8,column=0,sticky="nsew",columnspan=2,rowspan=5)
+        self.grid_response_frame.grid(row=8,column=0,sticky="nsew",columnspan=2,rowspan=5)
+        self.current_frame.place(relw=1,relh=1)
         #3. NORMAL BUTTONS
         #Clear
         self.clear_button = tk.CTkButton(master=self,text="Check With Client",command=self.master.check)
@@ -95,24 +101,26 @@ class Response_Frame(tk.CTkFrame):
     def redraw(self,req_type):
         if req_type=="RFP":
             if self.prev!="RFP":
-                self.current_frame.grid_forget()
+                self.RFP_frame.place(relw=1,relh=1)
+                self.current_frame.place_forget()
                 self.current_frame = self.RFP_frame
-                self.current_frame.grid(row=8,column=0,sticky="nsew",columnspan=2,rowspan=5)
         elif req_type=="RFA":
             if self.prev!="RFA":
-                self.current_frame.grid_forget()
+                self.RFA_frame.place(relw=1,relh=1)
+                self.current_frame.place_forget()
                 self.current_frame = self.RFA_frame
-                self.current_frame.grid(row=8,column=0,sticky="nsew",columnspan=2,rowspan=5)
         else:
-            self.current_frame.grid_forget()
-            self.current_frame = self.default_frame
-            self.current_frame.grid(row=8,column=0,sticky="nsew",columnspan=2,rowspan=5)
+            if self.current_frame!=self.default_frame:
+                self.default_frame.place(relw=1,relh=1)
+                self.current_frame.place_forget()
+                self.current_frame = self.default_frame
         self.prev = req_type
 
     #Resets this frame to being empty
     def reset(self):
         #Reset Request Number
         self.request_label.configure(text="REQUEST:")
+        self.redraw("clear")
         #Reset Respnse
         self.set_response("")
         #Reset Objection
@@ -125,7 +133,7 @@ class Response_Frame(tk.CTkFrame):
         self.set_RFA_text("")
         #Reset Request
         self.set_request("")
-        self.redraw("clear")
+
 
        
     def set_theme(self,font,text_col,fg_col):
@@ -172,7 +180,6 @@ class Response_Frame(tk.CTkFrame):
         return self.current_frame.response_text.get("0.0","end-1c")
     
     def set_response(self,text,remove_separator=False):#STOP THIS FROM ADDING INVISIBLE SEPARATORS!
-        print("Set Response")
         state=self.current_frame.response_text._textbox.cget("state")
         self.current_frame.response_text.configure(state="normal")
         self.current_frame.response_text.delete("0.0","end",remove_separator=remove_separator)
@@ -207,3 +214,9 @@ class Response_Frame(tk.CTkFrame):
         return self.previous_option
     def set_previous_option(self,val):
         self.previous_option = val
+
+    def set_textbox_state(self,value):
+        if value=="Custom":
+            self.current_frame.response_text.configure(state="normal")
+        else:
+            self.current_frame.response_text.configure(state="disabled")

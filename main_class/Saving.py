@@ -180,7 +180,7 @@ class Saving:
             ### ADD NEW FILE TO CLIENT, IF NONE THEN CREATE NEW CLIENT!
             new_file = File(filename,doc_details,self.req_type,self.reqs,self)
             #Add this file to undo queue
-            self.add_action_to_stack(ActionReadFile(master=self,obj=new_file))
+            #self.add_action_to_stack(ActionReadFile(master=self,obj=new_file))
             if self.current_client!="":
                 self.current_client.files.append(new_file)
             else:
@@ -298,6 +298,7 @@ class Saving:
 
     #Actually save the client file
     def save_client(self,filename):
+        self.save_request()
         # Remove master from the save
         self.current_client.set_master(None)
         # Create save object
@@ -387,7 +388,8 @@ class Saving:
     def delete_file(self,undo_command=False):
         index = self.current_client.files.index(self.current_client.current_file)
         if not undo_command:
-            self.add_action_to_stack(ActionDeleteFile(master=self,obj=index))
+            #self.add_action_to_stack(ActionDeleteFile(master=self,obj=index))
+            pass
         #Get the index of the current file
         if index==0:
             new_index=1

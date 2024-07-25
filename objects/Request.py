@@ -99,7 +99,7 @@ class Request:
                 return
     #Get the full response text
     def get_full_resp(self):
-        full_text = get_objection_text2(self,self.master.objections,False)
+        full_text = get_objection_text2(self,False)
         #Add response to the end
         if self.req_type == "RFP":
             option = self.RFP_option
@@ -116,3 +116,10 @@ class Request:
             full_text = full_text + "\n"
         full_text = full_text + end
         return full_text#################
+    
+    def get_number(self):
+        if self.custom_key!="":
+            text = self.custom_key
+        else:
+            text = self.no+1
+        return text

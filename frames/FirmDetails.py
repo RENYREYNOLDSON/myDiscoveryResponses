@@ -49,7 +49,7 @@ class Firm_Details_Frame(tk.CTkFrame):
         self.name_frame.pack(fill="both",pady=5,expand=True)
         name = tk.CTkLabel(master=self.name_frame ,text="Firm Name:",anchor="nw",width=120)
         name.pack(side="left",padx=20)
-        self.name = SmartTextbox(master=self.name_frame ,undo=False,main_master=self.master,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.name = SmartTextbox(master=self.name_frame ,main_master=self.master,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.name.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.name.insert("0.0",firm_details["firm_name"])
 
@@ -58,7 +58,7 @@ class Firm_Details_Frame(tk.CTkFrame):
         self.address_1.pack(fill="both",pady=5,expand=True)
         address_line_1 = tk.CTkLabel(master=self.address_1 ,text="Address Line 1:",anchor="nw",width=120)
         address_line_1.pack(side="left",padx=20)
-        self.address_line_1 = SmartTextbox(main_master=self.master,undo=False,master=self.address_1 ,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.address_line_1 = SmartTextbox(main_master=self.master,master=self.address_1 ,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.address_line_1.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.address_line_1.insert("0.0",firm_details["address_line_1"])
 
@@ -67,7 +67,7 @@ class Firm_Details_Frame(tk.CTkFrame):
         self.address_2.pack(fill="both",pady=5,expand=True)
         address_line_2 = tk.CTkLabel(master=self.address_2,text="Address Line 2:",anchor="nw",width=120)
         address_line_2.pack(side="left",padx=20)
-        self.address_line_2 = SmartTextbox(main_master=self.master,undo=False,master=self.address_2,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.address_line_2 = SmartTextbox(main_master=self.master,master=self.address_2,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.address_line_2.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.address_line_2.insert("0.0",firm_details["address_line_2"])
 
@@ -76,7 +76,7 @@ class Firm_Details_Frame(tk.CTkFrame):
         self.telephone_frame.pack(fill="both",pady=5,expand=True)
         telephone = tk.CTkLabel(master=self.telephone_frame,text="Telephone:",anchor="nw",width=120)
         telephone.pack(side="left",padx=20)
-        self.telephone = SmartTextbox(main_master=self.master,undo=False,master=self.telephone_frame,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.telephone = SmartTextbox(main_master=self.master,master=self.telephone_frame,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.telephone.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.telephone.insert("0.0",firm_details["telephone"])
 
@@ -85,7 +85,7 @@ class Firm_Details_Frame(tk.CTkFrame):
         self.facsimile_frame.pack(fill="both",pady=5,expand=True)
         facsimile = tk.CTkLabel(master=self.facsimile_frame,text="Facsimile:",anchor="nw",width=120)
         facsimile.pack(side="left",padx=20)
-        self.facsimile = SmartTextbox(main_master=self.master,undo=False,master=self.facsimile_frame,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.facsimile = SmartTextbox(main_master=self.master,master=self.facsimile_frame,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.facsimile.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.facsimile.insert("0.0",firm_details["facsimile"])
 
@@ -94,7 +94,7 @@ class Firm_Details_Frame(tk.CTkFrame):
         self.email_frame.pack(fill="both",pady=5,expand=True)
         email = tk.CTkLabel(master=self.email_frame,text="Email:",anchor="nw",width=120)
         email.pack(side="left",padx=20)
-        self.email = SmartTextbox(main_master=self.master,undo=False,master=self.email_frame,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.email = SmartTextbox(main_master=self.master,master=self.email_frame,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.email.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.email.insert("0.0",firm_details["email"])
 
@@ -103,7 +103,7 @@ class Firm_Details_Frame(tk.CTkFrame):
         self.attorneys_frame.pack(fill="both",pady=5,expand=True)
         attorneys = tk.CTkLabel(master=self.attorneys_frame ,text="Attorneys:",anchor="nw",width=120)
         attorneys.pack(side="left",padx=20)
-        self.attorneys = SmartTextbox(main_master=self.master,undo=False,master=self.attorneys_frame ,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
+        self.attorneys = SmartTextbox(main_master=self.master,master=self.attorneys_frame ,height=60,wrap="word",font=font,text_color=text_col,fg_color=bg_col,corner_radius=r)
         self.attorneys.pack(side="left",fill="both",expand=True,padx=(0,20))
         self.attorneys.insert("0.0",firm_details["attorneys"])
 

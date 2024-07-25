@@ -16,13 +16,19 @@ class Action:#Action base class
     def navigate_to_request(self):
         #Navigate to client
         if self.master.current_client!=self.client:#ALTER THIS TO ONLY DO WHAT IS NEEDED, SAVE AS BASE CLASS!
-            self.master.set_client(self.client,skip_set_request=True)
+            self.client.current_file = self.file
+            self.file.current_req = self.req
+            self.master.set_client(self.client)
+            print("Set client")
         #Navigate to file
-        if self.master.current_client.current_file!=self.file:
-            self.master.set_file(self.file,skip_set_request=True)
+        elif self.master.current_client.current_file!=self.file:
+            self.file.current_req = self.req
+            self.master.set_file(self.file)
+            print("Set file")
         #Navigate to request
-        if self.master.current_req!=self.req:
+        elif self.master.current_req!=self.req:
             self.master.set_request(self.req)
+            print("Set request")
 
     def undo_function(self):
         return
@@ -38,12 +44,18 @@ class Action:#Action base class
         self.navigate_to_request()
         self.redo_function()
 
+
 class ActionToggleObjection(Action):
     def undo_function(self):
         self.master.toggle_objection(self.obj,undo_command=True)
 
     def redo_function(self):
         self.undo()
+
+
+
+################################ UNFINISHED / UNTESTED METHODS 
+
 
 class ActionSubmit(Action):
     def __init__(self, master, obj):
@@ -58,6 +70,7 @@ class ActionSubmit(Action):
     def redo_function(self):
         self.master.submit(undo_command=True)#Always submit
 
+
 class ActionCheck(Action):
     def __init__(self, master, obj):
         super().__init__(master, obj)
@@ -71,14 +84,6 @@ class ActionCheck(Action):
     def redo_function(self):
         self.master.check(undo_command=True)#Always check
 
-class ActionTextBox(Action):
-    def undo_function(self):
-        #Access the relevant smart textbox and trigger undo command
-        self.obj.undo()
-    
-    def redo_function(self):
-        #Access the relevant smart textbox and trigger redo command
-        self.obj.redo()
 
 #Sets the RFA entry button
 class ActionRFAEntry(Action):
@@ -104,6 +109,107 @@ class ActionRFPEntry(Action):
         self.master.setRFP(self.obj[1],undo_command=True)
 
 
+
+
+class ActionClear(Action):
+    def __init__(self, master, obj):
+        super().__init__(master, obj)
+        self.master.save_request()
+        self.req.set_master(None)
+        self.deep_req = copy.deepcopy(self.req)#NEEDS SAVING BEFORE IT IS COPIED!!!!!!
+        self.req.set_master(self.master)
+        
+    def undo_function(self):
+        #Set the current request to this stored one
+        self.req.opts = copy.deepcopy(self.deep_req.opts)
+        self.req.RFP_option = self.deep_req.RFP_option
+        self.req.RFP_text = self.deep_req.RFP_text
+        self.req.RFA_option = self.deep_req.RFA_option
+        self.req.RFA_text = self.deep_req.RFA_text
+        self.req.resp = self.deep_req.resp
+        self.req.custom_objection_text = self.deep_req.custom_objection_text
+        self.req.set_master(self.master)
+
+        self.master.update_request()
+        self.master.toggle_selected_objection(str(self.req.opts[0].key),None)
+
+        #Maybe revert here
+    
+    
+    def redo_function(self):
+        self.master.clear(undo_command=True)
+
+
+class ActionCopyPrevious(Action):
+    def __init__(self, master, obj):
+        super().__init__(master, obj)
+        self.master.save_request()
+        self.req.set_master(None)
+        self.deep_req = copy.deepcopy(self.req)#NEEDS SAVING BEFORE IT IS COPIED!!!!!!
+        self.req.set_master(self.master)
+        
+    def undo_function(self):
+        #Set the current request to this stored one
+        self.req.opts = copy.deepcopy(self.deep_req.opts)
+        self.req.RFP_option = self.deep_req.RFP_option
+        self.req.RFP_text = self.deep_req.RFP_text
+        self.req.RFA_option = self.deep_req.RFA_option
+        self.req.RFA_text = self.deep_req.RFA_text
+        self.req.resp = self.deep_req.resp
+        self.req.custom_objection_text = self.deep_req.custom_objection_text
+        self.req.set_master(self.master)
+
+        self.master.update_request()
+        self.master.toggle_selected_objection(str(self.req.opts[0].key),None)
+
+    
+    def redo_function(self):
+        self.master.copy_previous(undo_command=True)
+
+
+class ActionTextBox(Action):
+    #Save the previous text
+    #Save the new text
+    #Save the object
+    def __init__(self, master, obj, previous_text, new_text):
+        if master.file_open():
+            super().__init__(master, obj)
+        else:#For editing firm details!
+            self.master = master
+            self.obj = obj
+        self.previous_text = previous_text
+        self.new_text = new_text
+
+    def undo_function(self):
+        #Access the relevant smart textbox and trigger undo command
+        if self.obj.get("0.0","end-1c") != self.new_text:#If not at top of textbox (current text)
+            #Add this undo to stack
+            self.master.ACTION_STACK.append(ActionTextBox(self.master,self.obj,self.previous_text,self.new_text))
+            #Change this undo to the new one
+            self.previous_text = self.new_text
+            self.new_text = self.obj.get("0.0","end-1c")
+
+        self.obj.set_text(self.previous_text)
+        print("Text undo")
+
+    def redo_function(self):
+        #Access the relevant smart textbox and trigger redo command
+        self.obj.set_text(self.new_text)
+        print("Text redo")
+
+
+    def undo(self):#Undo function, goes to request and then calls
+        if self.master.file_open():
+            self.navigate_to_request()
+        self.undo_function()
+
+    def redo(self):#Redo function, goes to request and then calls
+        if self.master.file_open():
+            self.navigate_to_request()
+        self.redo_function()
+
+
+"""
 #Action of deleting a file from a client
 class ActionDeleteFile(Action):
     #The obj is a index to be revived to - no need for deepcopy as it stays stored
@@ -135,70 +241,9 @@ class ActionReadFile(Action):
 
 
 
-
-
-class ActionClear(Action):
-    def __init__(self, master, obj):
-        super().__init__(master, obj)
-        self.master.set_request(self.req)
-        self.req.set_master(None)
-        self.deep_req = copy.deepcopy(self.req)#NEEDS SAVING BEFORE IT IS COPIED!!!!!!
-        self.req.set_master(self.master)
-        
-    def undo_function(self):
-        #Set the current request to this stored one
-        self.req.opts = copy.deepcopy(self.deep_req.opts)
-        self.req.RFP_option = self.deep_req.RFP_option
-        self.req.RFP_text = self.deep_req.RFP_text
-        self.req.RFA_option = self.deep_req.RFA_option
-        self.req.RFA_text = self.deep_req.RFA_text
-        self.req.resp = self.deep_req.resp
-        self.req.custom_objection_text = self.deep_req.custom_objection_text
-        self.req.set_master(self.master)
-
-        self.master.set_request(self.req,save_current=False)
-        self.master.toggle_selected_objection(str(self.req.opts[0].key),None)
-
-        #Maybe revert here
         
 
-    
-    def redo_function(self):
-        self.master.clear(undo_command=True)
-
-
-class ActionCopyPrevious(Action):
-    def __init__(self, master, obj):
-        super().__init__(master, obj)
-        self.master.set_request(self.req)
-        self.req.set_master(None)
-        self.deep_req = copy.deepcopy(self.req)#NEEDS SAVING BEFORE IT IS COPIED!!!!!!
-        self.req.set_master(self.master)
-        
-    def undo_function(self):
-        #Set the current request to this stored one
-        self.req.opts = copy.deepcopy(self.deep_req.opts)
-        self.req.RFP_option = self.deep_req.RFP_option
-        self.req.RFP_text = self.deep_req.RFP_text
-        self.req.RFA_option = self.deep_req.RFA_option
-        self.req.RFA_text = self.deep_req.RFA_text
-        self.req.resp = self.deep_req.resp
-        self.req.custom_objection_text = self.deep_req.custom_objection_text
-        self.req.set_master(self.master)
-
-        self.master.set_request(self.req,save_current=False)
-        self.master.toggle_selected_objection(str(self.req.opts[0].key),None)
-
-    
-    def redo_function(self):
-        self.master.copy_previous(undo_command=True)
-
-################################ UNFINISHED / UNTESTED METHODS 
-
-
-
-
-
+"""
 
 
 

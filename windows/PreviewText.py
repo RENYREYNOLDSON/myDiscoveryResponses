@@ -19,8 +19,8 @@ class PreviewText(tk.CTkToplevel):
         self.attributes("-topmost", True)
         self.grab_set()
 
-        #SET THE TEXT HERE
-        master.set_request(master.current_req)
+        #SAVE THE TEXT HERE
+        master.save_request()
 
         #Box formatted like other text 
         label_font = tk.CTkFont("Arial",16,underline=True,weight="bold")
@@ -30,7 +30,9 @@ class PreviewText(tk.CTkToplevel):
         font = (master.CONFIG["appearance"]["text_font"],int(master.CONFIG["appearance"]["text_size"]))
         self.text = tk.CTkTextbox(master=self,wrap="word",font=font,text_color=master.CONFIG["appearance"]["text_color"],fg_color=master.CONFIG["appearance"]["text_bg"])
         self.text.pack(fill="both",expand=True,padx=20,pady=10)
-        self.text.insert("0.0",master.current_req.get_full_resp())
+
+        full_response = master.current_req.get_full_resp()
+        self.text.insert("0.0",full_response)
         self.text.configure(state="disabled")
         #OK button
         self.ok_button = tk.CTkButton(master=self,text="Ok",command=master.cancel_win)

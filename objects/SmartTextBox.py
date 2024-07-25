@@ -8,12 +8,13 @@ class SmartTextbox(tk.CTkTextbox):
     #Constructor 
     def __init__(self,master,main_master,undo=True,**kwargs):
         #FRAME SETUP
-        super().__init__(master,undo=undo,maxundo=100,autoseparators=False, **kwargs)
+        super().__init__(master,undo=False,maxundo=100,autoseparators=False, **kwargs)
 
         self.main_master = main_master
         self.undo_enabled = undo#Name undo taken
         #This is the previous text in the box
         self.previous_text=""
+        self.previous_modified_text=""
         self.current_text=""
         self.issues=[]
         self.istart,self.iend=0,0#Start and end of selected spellings
@@ -38,23 +39,21 @@ class SmartTextbox(tk.CTkTextbox):
             self._textbox.event_delete("<<Redo>>")
 
     def backspace(self,e):
-        try:
-            #If final letter space, then add a separator
-            if self.get(0.0,"end-1c")[-1]==" ":
-                #ADD AN AUTOSEPERATOR:
-                self.edit_separator()
-                #Add this onto undo stack -> Then access the box when an undo is needed
-                self.main_master.add_action_to_stack(ActionTextBox(self.main_master,self))
-        except:
-            pass
+        self.modified(None)
+
 
     #Runs when text is inserted or deleted
     def modified(self,e):
         if self.undo_enabled:
-            #ADD AN AUTOSEPERATOR:
-            self.edit_separator()
             #Add this onto undo stack -> Then access the box when an undo is needed
-            self.main_master.add_action_to_stack(ActionTextBox(self.main_master,self))
+            #Pass master, textbox, previous_modified_text, new text
+            #Only add if actually changed
+            print(self.previous_modified_text)
+            print(self.get("0.0","end-1c"))
+            new_action = ActionTextBox(self.main_master,self,self.previous_modified_text,self.get("0.0","end-1c"))
+            self.main_master.add_action_to_stack(new_action)
+            self.previous_modified_text = self.get("0.0","end-1c")
+            print("Added text undo to stack")
 
     #If the text is empty then add a separator
     def check_if_start(self,e):
@@ -110,7 +109,7 @@ class SmartTextbox(tk.CTkTextbox):
             insert_index+=" + "+str(len(self.main_master.HOTKEYS[use_fill]+" ")-len(use_fill)-1)+" chars"
             self.mark_set("insert",insert_index)
 
-    def spellcheck(self):
+    def spellcheck(self,loop=True):
         if self.winfo_manager()!=None:#Only check if text box placed
             #DO SPELLCHECKING!
             if self.main_master.CONFIG["spelling"]["use_spellcheck"]:
@@ -127,7 +126,8 @@ class SmartTextbox(tk.CTkTextbox):
 
             self.previous_text = self.current_text
 
-        self.after(int(self.main_master.CONFIG["spelling"]["spellcheck_interval"]),self.spellcheck)
+        if loop:
+            self.after(int(self.main_master.CONFIG["spelling"]["spellcheck_interval"]),self.spellcheck)
 
     def insert_spelling(self,v):
         if v=="Spelling Issue":#Only add if a valid fix, not the title
@@ -137,8 +137,11 @@ class SmartTextbox(tk.CTkTextbox):
             self.issues = spellcheck(self," "+self.get("0.0","end-1c"))# [message,start,width,replacements array]
             return
         else:
+            #Save the previous text
+            temp = self.get("0.0","end-1c")
             self.delete(self.istart,self.iend)
             self.insert(self.istart,v)
+            self.previous_modified_text = temp
             self.modified(None)
             self.issues = spellcheck(self," "+self.get("0.0","end-1c"))# [message,start,width,replacements array]
 
@@ -184,30 +187,22 @@ class SmartTextbox(tk.CTkTextbox):
         except:
             print("Popup failed")
 
-    def undo(self):#THIS FUNCTION IS NOT USED!
-        self._textbox.edit_undo()
-        print("TEXT UNDO")
-
-    def redo(self):#THIS FUNCTION IS NOT USED!
-        self._textbox.edit_redo()
+    def set_text(self,text):
+        self.delete("0.0","end")
+        self.insert("0.0",text)
 
     def delete(self, index1, index2=None,remove_separator=False):
-        if remove_separator:#Remove the separator when on an undo operation!
-            print("w"+self.get("0.0","end-1c")+"w")
-            if self.get("0.0","end-1c")!="":
-                self.undo()#ONLY DO THIS IF NOT EMPTY!!!
         super().delete(index1, index2)
+        self.previous_modified_text=self.get("0.0","end-1c")
         return
     
     def insert(self, index, text,remove_separator=False,tags=None):
         #self.modified(None)#Modify the autoseparators when inserted to
         super().insert(index, text, tags)
-        if remove_separator:#Remove the separator when on an undo operation!
-            if text!="":
-                self.undo()#ONLY DO THIS IF NOT EMPTY!!!
+        self.previous_modified_text=self.get("0.0","end-1c")
+        self.spellcheck(loop=False)
         return 
     
     def edit_separator(self):
-        print("Text seperator added")
         return super().edit_separator()
         

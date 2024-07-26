@@ -45,13 +45,15 @@ class Undo:
             action = self.ACTION_STACK.pop()
 
             try:
-                ## UNDO ACTION HERE
-                action.undo()
-                ## 
+                ## Undo if the client and file still exists
+                if action.client in self.clients:
+                    if action.file in action.client.files:
+                        action.undo()
+                        self.REDO_ACTION_STACK.append(action)
             except Exception as e: 
                 print(e)
 
-            self.REDO_ACTION_STACK.append(action)
+            
             #IF EMPTY then disable the undo button
             if len(self.ACTION_STACK)==0:
                 self.bar_frame.disable_undo()
@@ -71,13 +73,15 @@ class Undo:
             action = self.REDO_ACTION_STACK.pop()
 
             try:
-                ## REDO ACTION HERE
-                action.redo()
-                ## 
+                ## Redo if the client and file still exists
+                if action.client in self.clients:
+                    if action.file in action.client.files:
+                        action.redo()
+                        self.ACTION_STACK.append(action)
             except Exception as e:
                 print(e)
             
-            self.ACTION_STACK.append(action)
+            
             #IF EMPTY then disable the redo button
             if len(self.REDO_ACTION_STACK)==0:
                 self.bar_frame.disable_redo()

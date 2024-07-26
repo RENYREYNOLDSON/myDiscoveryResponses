@@ -283,9 +283,25 @@ def spellcheck(obj,text):
 # OTHER FUNCTIONS
 ############################################################################################################
 
+#Get warnings from a file detail
+def get_file_details_warning(text):
+    warning = False
+    if len(text)>150:
+        warning = "Text longer than expected"
+    elif len(text)==0:
+        warning = "No text found"
+
+    return warning
+
+
+
 #Add a tooltip to an object
 def add_tooltip(obj,text,wraplength=400):
     return SmartToolTip(anchor_widget = obj,text = text,wraplength=wraplength)
+
+#Add a warning tooltip to an object
+def add_warning_tooltip(obj,text,wraplength=400):
+    return SmartToolTipWarning(anchor_widget = obj,text = text,wraplength=wraplength)
 
 def get_nth_key(dictionary, n=0):
     if n < 0:

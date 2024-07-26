@@ -11,7 +11,18 @@ class Config:
         update_available = False
         #Make GET request for the version number from myDiscoveryResponses.com
         version_url = "https://myDiscoveryResponses.com/version.txt"
-        response = requests.get(version_url)
+        try:
+            response = requests.get(version_url)
+        except:
+            update_check = CTkMessagebox(title="No Connection",
+                                       message="Could not establish a connection with the server!", 
+                                       icon="warning",
+                                       corner_radius=0,
+                                       sound=True,
+                                       wraplength=400,
+                                       master=self)
+            return
+            
         version_number = response.text.strip()
         #Compare version numbers to see if we are behind
         if version_number.replace(".","")>self.version.replace(".",""):
@@ -27,6 +38,7 @@ class Config:
                                        option_3="Yes",
                                        corner_radius=0,
                                        sound=True,
+                                       wraplength=400,
                                        master=self)
             
             if update_check.get()=="Yes":
@@ -38,6 +50,7 @@ class Config:
                                     option_1="Okay",
                                     corner_radius=0,
                                     sound=True,
+                                    wraplength=400,
                                     master=self)
             
     #Uninstalls myDiscoveryResponses from computer
@@ -50,6 +63,7 @@ class Config:
                                     option_3="Yes",
                                     corner_radius=0,
                                     sound=True,
+                                    wraplength=400,
                                     master=self)
         if uninstall_check.get()=="Yes":
             try:
@@ -75,6 +89,7 @@ class Config:
                                 option_3="Yes",
                                 corner_radius=0,
                                 sound=True,
+                                wraplength=400,
                                 master=self)
         if request.get()=="Yes":
             #Reset Settings
@@ -93,6 +108,7 @@ class Config:
                                 option_3="Yes",
                                 corner_radius=0,
                                 sound=True,
+                                wraplength=400,
                                 master=self)
         
         if request.get()=="Yes":

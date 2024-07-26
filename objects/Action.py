@@ -19,16 +19,13 @@ class Action:#Action base class
             self.client.current_file = self.file
             self.file.current_req = self.req
             self.master.set_client(self.client)
-            print("Set client")
         #Navigate to file
         elif self.master.current_client.current_file!=self.file:
             self.file.current_req = self.req
             self.master.set_file(self.file)
-            print("Set file")
         #Navigate to request
         elif self.master.current_req!=self.req:
             self.master.set_request(self.req)
-            print("Set request")
 
     def undo_function(self):
         return

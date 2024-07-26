@@ -121,6 +121,7 @@ class Saving:
                                        icon="cancel",
                                        corner_radius=0,
                                        sound=True,
+                                       wraplength=400,
                                        master=self)
                         return
                     self.title("myDiscoveryResponses   |   "+str(filename.split("/")[-1]))
@@ -155,6 +156,7 @@ class Saving:
                                     corner_radius=0,
                                     width=800,
                                     sound=True,
+                                    wraplength=400,
                                     master=self)
                 return
             self.set_type(req_type)# Sets the current type
@@ -208,6 +210,7 @@ class Saving:
                                 option_1="Okay",
                                 corner_radius=0,
                                 sound=True,
+                                wraplength=400,
                                 master=self)
             return
         file.close()
@@ -317,6 +320,7 @@ class Saving:
                                 icon="warning", 
                                 option_1="Okay",
                                 corner_radius=0,
+                                wraplength=400,
                                 sound=True,master=self)
             return 
         file.close()
@@ -336,6 +340,7 @@ class Saving:
                                 option_1="Okay",
                                 corner_radius=0,
                                 sound=True,
+                                wraplength=400,
                                 master=self)
             return 
            
@@ -379,6 +384,7 @@ class Saving:
                                 option_3="Yes",
                                 corner_radius=0,
                                 sound=True,
+                                wraplength=400,
                                 master=self)
             
             if msg.get()=="Yes":

@@ -37,11 +37,21 @@ class Update(tk.CTkToplevel):
     def download_update(self):
         try:
             #Download new file
-            url = "https://www.myDiscoveryResponses.com/myDiscoveryResponsesInstaller.zip"
+            url = "https://www.myDiscoveryResponses.com/myDiscoveryResponses Installer.exe"
 
-            filename = "myDiscoveryResponsesInstaller.zip"
+            filename = "myDiscoveryResponses Installer.exe"
 
-            response = requests.get(url, stream=True)
+            try:
+                response = requests.get(url, stream=True)
+            except:
+                update_check = CTkMessagebox(title="No Connection",
+                                        message="Could not establish a connection with the server!", 
+                                        icon="warning",
+                                        corner_radius=0,
+                                        sound=True,
+                                        wraplength=400,
+                                        master=self)
+                return
             total_size = int(response.headers.get('content-length', 0))
 
             block_size = 1024  # 1 Kilobyte
@@ -55,13 +65,15 @@ class Update(tk.CTkToplevel):
                     if total%1024000==0:#At each MB
                         self.title.configure(text="Downloading Update "+str(int(total/1024000))+"/"+str(int(total_size/1024000))+"MB")
 
-            dir_path = os.path.join(get_main_path(),filename)
+            exe_path = os.path.join(get_main_path(),filename)
 
+            """
             #Need to extract exe file
             with zipfile.ZipFile(dir_path, 'r') as zip_ref:
                 zip_ref.extractall(get_main_path())
+            """
 
-            exe_path = os.path.join(get_main_path(),"myDiscoveryResponsesInstaller.exe")
+            #exe_path = os.path.join(get_main_path(),"myDiscoveryResponsesInstaller.exe")
 
             #Open installer
             subprocess.Popen(["cmd","/c","start","",exe_path],

@@ -118,6 +118,7 @@ class WindowUtility:
                                icon="cancel",
                                corner_radius=0,
                                sound=True,
+                               wraplength=400,
                                master=self)
                 #Return 
                 return True
@@ -173,6 +174,9 @@ class WindowUtility:
 
     # The update failed so we show the issue and close it
     def update_failed(self,error):
+        #Set error if closed by user
+        if "ctkcanvas" in str(error):
+            error = "Updater closed by user"
         self.cancel_win()
         msg = CTkMessagebox(title="Error Updating", 
                     message="Error Downloading Update: "+str(error),
@@ -180,6 +184,7 @@ class WindowUtility:
                     option_1="Okay", 
                     corner_radius=0,
                     sound=True,
+                    wraplength=600,
                     master=self)
 
     # View and edit the OBJECTIONS JSON

@@ -235,7 +235,7 @@ def readFormThreaded(file):
 
         if len(results)!=len(FORM_VALUES):#IF THE NUMBER OF DETECTED BOXES IS NOT CORRECT
             msg = CTkMessagebox(title="Could not load FROG", message="An incorrect number of FROG's was detected. Defaulted to using all discovery requests.",
-                                icon="warning", option_1="Okay",corner_radius=0)
+                                icon="warning", option_1="Okay",corner_radius=0,wraplength=400)
             output = FORM_VALUES.copy()
             return output
         
@@ -247,7 +247,7 @@ def readFormThreaded(file):
     except Exception as e:
         print(e)
         msg = CTkMessagebox(title="Could not load FROG", message="The FROG file could not be read correctly. Defaulted to using all discovery requests.",
-                            icon="warning", option_1="Okay",corner_radius=0)
+                            icon="warning", option_1="Okay",corner_radius=0,wraplength=400)
         output = FORM_VALUES.copy()
 
     #6. RETURN THE OUTPUT VALUE!

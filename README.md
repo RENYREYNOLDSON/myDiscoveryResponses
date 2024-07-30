@@ -9,7 +9,7 @@
 Official website: https://myDiscoveryResponses.com
 </h3>
 </div>
-
+![Example Screenshot](./Images/USER_GUIDE_IMAGE.png)
 The bespoke software, myDiscoveryResponses, is designed for the production and editing of discovery responses. Using the software, you can load discovery request pdf's of type: 
 > Requests for Admissions (RFA)
 > <br />
@@ -22,7 +22,7 @@ The bespoke software, myDiscoveryResponses, is designed for the production and e
 These are loaded using natural language processing and OCR techniques, in order to extract the correct requests and file details from the pdf files.
 Once loaded, you can move between each request and check off objections; in addition to adding custom responses. When these responses have been created, the file can then be exported as a response word document (DOCX), or saved for future editing as a .discovery file.
 
-![Example Screenshot](./Images/USER_GUIDE_IMAGE.png)
+
 
 ## Python Environment Setup
 1. Ensure that you have Python 3.11 or higher installed

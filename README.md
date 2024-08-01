@@ -4,7 +4,7 @@
     </picture>
 <br />
 
-![Static Badge](https://img.shields.io/badge/Version-1.1.0)
+![Static Badge](https://img.shields.io/badge/Version_1.1.0)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/RENYREYNOLDSON/myDiscoveryResponses)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/RENYREYNOLDSON/myDiscoveryResponses)
 

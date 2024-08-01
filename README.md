@@ -4,7 +4,7 @@
     </picture>
 <br />
 
-![GitHub commit activity](https://img.shields.io/github/commit-activity/:interval/RENYREYNOLDSON/myDiscoveryResponses)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/t/RENYREYNOLDSON/myDiscoveryResponses)
 
 
 

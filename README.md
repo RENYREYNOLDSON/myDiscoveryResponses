@@ -7,7 +7,7 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/RENYREYNOLDSON/myDiscoveryResponses)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/RENYREYNOLDSON/myDiscoveryResponses)
 
-The current version is [1.1.0](https://mydiscoveryresponses.com/version.txt).
+The current version is (https://mydiscoveryresponses.com/version.txt).
 
 
 <h3>

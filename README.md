@@ -4,6 +4,9 @@
     </picture>
 <br />
 
+![GitHub commit activity](https://img.shields.io/github/commit-activity/:interval/RENYREYNOLDSON/myDiscoveryResponses)
+
+
 
 <h3>
 Official website: https://myDiscoveryResponses.com

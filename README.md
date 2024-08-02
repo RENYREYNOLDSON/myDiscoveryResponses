@@ -5,6 +5,7 @@
 <br />
 
 ![Static Badge](https://img.shields.io/badge/Version-text_more)
+![Static Badge](https://img.shields.io/badge/any%20text-you%20like-blue)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/RENYREYNOLDSON/myDiscoveryResponses)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/RENYREYNOLDSON/myDiscoveryResponses)
 

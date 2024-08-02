@@ -54,4 +54,8 @@ pyinstaller __main__.spec
 Compiler_Script.iss
 ```
 3. You will now be left with myDiscoveryResponsesInstaller.exe
+4. Update the websites version.txt
+5. Git pull to the website using cpanel
+6. Upload the installer to the website
+7. Create a new github release
 

@@ -5,7 +5,6 @@
 <br />
 
 ![GitHub Release](https://img.shields.io/github/v/release/RENYREYNOLDSON/myDiscoveryResponses?include_prereleases&display_name=tag)
-
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/RENYREYNOLDSON/myDiscoveryResponses)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/RENYREYNOLDSON/myDiscoveryResponses)
 

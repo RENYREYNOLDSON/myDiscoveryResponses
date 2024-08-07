@@ -33,9 +33,11 @@ class File:
     def on_drop(self,event):
         x,y = event.widget.winfo_pointerxy()
         try:
+            print("try")
             target = event.widget.winfo_containing(x,y).master
             client_name = target.cget("text")
             self.master.move_file(self,client_name)
+            print("Done")
         except:
             return
         #If a button see if the name is in clients

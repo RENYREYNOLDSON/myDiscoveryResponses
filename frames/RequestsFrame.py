@@ -115,7 +115,7 @@ class Requests_Frame(tk.CTkFrame):
             button.pack(fill="x",side="top")
             if self.master.CONFIG["general"]["hover_tooltips"]:
                 add_tooltip(button,i.name,wraplength=2000)
-            button.bind("<ButtonRelease-1>", i.on_drop)
+            #button.bind("<ButtonRelease-1>", i.on_drop)
             #button.bind("<B1-Motion>",i.on_drag)
             self.file_buttons.append(button)
             c+=1

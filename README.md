@@ -45,17 +45,18 @@ pip install -r requirements.txt
 python __main__.py
 ```
 ## Creating Installer
-1. From within the project folder, run the command:
+1. Ensure that the version number in __main__.py is correct
+2. From within the project folder, run the command:
 ```
 pyinstaller __main__.spec
 ```
-2. Open INNO Compiler Setup and run:
+3. Open INNO Compiler Setup and run:
 ```
 Compiler_Script.iss
 ```
-3. You will now be left with myDiscoveryResponsesInstaller.exe
-4. Update the websites version.txt
-5. Git pull to the website using cpanel
-6. Upload the installer to the website
-7. Create a new github release
+4. You will now be left with myDiscoveryResponsesInstaller.exe
+5. Update the websites version.txt
+6. Git pull to the website using cpanel
+7. Upload the installer to the website
+8. Create a new github release
 

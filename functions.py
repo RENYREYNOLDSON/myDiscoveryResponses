@@ -15,6 +15,7 @@ import json,os,pickle,webbrowser,re,subprocess
 from objects.SmartToolTip import *
 import urllib.request
 from tkinter import PhotoImage
+from dotenv import load_dotenv
 
 # CONSTANTS 
 ############################################################################################################
@@ -23,6 +24,12 @@ HIGHLIGHT_WORDS=["photograph","videotape","document","evidence","property damage
 
 # FILE READING AND WRITING 
 ############################################################################################################
+
+def get_openai_key():
+    load_dotenv()
+    print(os.getenv("AI_KEY"))
+    return os.getenv("AI_KEY")
+
 
 def get_main_path():
     return os.path.dirname(__file__)

@@ -623,7 +623,7 @@ class Requests:
 
     def generate_AI_response(self):
         #Generate AI text and then use it here
-        openai.api_key = ""
+        openai.api_key = get_openai_key()
         failed=0
         while failed<3:
             chat=None

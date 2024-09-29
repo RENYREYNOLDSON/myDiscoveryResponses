@@ -2,8 +2,6 @@
 ###### PROGRAM WRITTEN BY - Adam Reynoldson reynoldson2002@gmail.com FOR Darren Reid via UpWork 2024
 ###### TESTS PDF FILES THROUGH THE CONVERTER PROGRAM
 
-import os
-
 from converter import *
 
 LOCATION = r"C:\Users\reyno\Desktop\Freelancing\myDiscoveryResponses TESTS"

@@ -187,6 +187,14 @@ class SmartTextbox(tk.CTkTextbox):
         except:
             print("Popup failed")
 
+    def animate_typing(self,text):
+        if text == "":#Finished
+            return
+        #Add letter then go
+        super().insert("end-1c", text[0], None)
+
+        self.after(30,lambda: self.animate_typing(text[1:]))
+
     def set_text(self,text):
         self.delete("0.0","end")
         self.insert("0.0",text)

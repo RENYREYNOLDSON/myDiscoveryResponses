@@ -31,7 +31,20 @@ class Response_Frame(tk.CTkFrame):
         #1. STANDARD REQUEST AND OBJECTION
         # Request Body
         self.request_label=tk.CTkLabel(master=self,text="REQUEST:",font=label_font)
-        self.request_label.grid(row=0,column=0,sticky="w",columnspan=2,padx=20)
+        self.request_label.grid(row=0,column=0,sticky="w",columnspan=1,padx=20)
+
+        self.special_options_frame = tk.CTkFrame(master=self,height=10,fg_color="transparent")
+        self.special_options_frame.grid(row=0,column=1,sticky="ew",padx=20)
+
+        # Buttons for AI recommendation and smart preview
+        self.preview_label = tk.CTkButton(master=self.special_options_frame,text="👁️",font=tk.CTkFont("Arial",16,underline=False,weight="bold"),width=20,fg_color="transparent",hover=False)
+        self.preview_label.pack(side="right")
+        self.ai_label = tk.CTkButton(master=self.special_options_frame,text="✨",font=tk.CTkFont("Arial",16,underline=False,weight="bold"),width=20,fg_color="transparent",hover=False,
+                                     command=self.master.generate_AI_response)
+        self.ai_label.pack(side="right")
+        self.ai_tooltip = add_tooltip(self.ai_label,"Ask AI...")
+
+
         self.request_text=SmartTextbox(main_master=self.master,master=self,wrap="word",state="normal",height=40)
         self.request_text.grid(row=1,column=0,padx=30,stick="nsew",columnspan=2,rowspan=3)
         # Objections Body

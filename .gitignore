@@ -12759,3 +12759,4 @@ dist/myDiscoveryResponses/assets/hotkeys_backup.json
 dist/myDiscoveryResponses/assets/splash_image.png
 dist/myDiscoveryResponses/docx/templates/default-docx-template/[Content_Types].xml
 dist/myDiscoveryResponses/docx/templates/default-docx-template/[Content_Types].xml
+.env

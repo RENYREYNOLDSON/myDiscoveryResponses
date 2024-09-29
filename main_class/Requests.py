@@ -1,5 +1,6 @@
 # Main Imports
 from main_class.__modules__ import *
+import openai
 
 FROGS = {"1.1":"State the name, ADDRESS, telephone number, and relationship to you of each PERSON who prepared or assisted in the preparation of the responses to these interrogatories. (Do not identify anyone who simply typed or reproduced the responses.)",
         "2.1":"State:\n(a) your name;\n(b) every name you have used in the past; and\n(c) the dates you used each name.",
@@ -617,3 +618,27 @@ class Requests:
 
             self.update_response_textbox()
             self.update_objection_textbox()
+
+
+
+    def generate_AI_response(self):
+        #Generate AI text and then use it here
+        openai.api_key = get_openai_key()
+        failed=0
+        while failed<3:
+            chat=None
+            messages = [{"role": "user", "content": "You are a lawyer in LA california. You need to write a response to a discovery request of the type "+str(self.req_type)+".\n The request is: "+str(self.current_req.req)+"\n The objections are: "+str(self.current_req.custom_objection_text)+"\n Now give a response: "}]
+            try:
+                chat = openai.chat.completions.create(
+                    model="gpt-3.5-turbo", messages=messages
+                )
+            except Exception as e:
+                failed+=1
+                print(e)
+            if chat!=None:
+                reply = chat.model_dump_json(indent=2)
+                reply = chat.choices[0].message.content
+                failed=5
+
+
+        self.response_frame.current_frame.response_text.animate_typing(reply)
